@@ -1,15 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { settings } from '../../../../settings';
-import { InjectRepository } from '@nestjs/typeorm';
 import { PgJwtRepository } from '../infrastructure/pg-jwt.repository';
-import { TokenBlackList } from '../infrastructure/entity/tokenBlackList';
 import {TokenPayloadModel} from "../../../../global-model/token-payload.model";
-import { IJwtRepository } from "../infrastructure/jwt.repo";
 
 @Injectable()
 export class JwtService {
-  constructor(protected jwtRepository: IJwtRepository) {}
+  constructor(protected jwtRepository: PgJwtRepository) {}
 
   async getTokenPayload(token: string): Promise<TokenPayloadModel> {
     try {

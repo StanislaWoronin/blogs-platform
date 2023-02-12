@@ -56,7 +56,6 @@ import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
-import { IJwtRepository } from "./modules/public/auth/infrastructure/jwt.repo";
 
 const controllers = [
   AuthController,
@@ -86,10 +85,6 @@ const entity = [
   UserBanInfo,
 ];
 
-const interfaces = [
-  IJwtRepository
-]
-
 const repositories = [
   PgBanInfoRepository,
   PgBlogsRepository,
@@ -106,7 +101,6 @@ const repositories = [
   PgQuerySecurityRepository,
   PgUsersRepository,
   PgQueryUsersRepository,
-
 ];
 
 const services = [
@@ -151,7 +145,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
     // }),
   ],
   controllers: [...controllers],
-  providers: [...repositories, ...interfaces, ...services, ...validators, ...useCases],
+  providers: [...repositories, ...services, ...validators, ...useCases],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {}
