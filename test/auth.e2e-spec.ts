@@ -456,16 +456,20 @@ describe('e2e tests', () => {
       })
 
       it('Should logout from sistem', async () => {
-        const {newRefreshToken} = expect.getState()
-        console.log(newRefreshToken)
+        const newRefreshToken = await request(server)
+          .post(endpoints.authController.login)
+          .send(preparedUser.login1withNewPassword)
+          .set({ 'user-agent': 'chrome/0.1' })
+          .expect(200)
+
         await request(server)
-            .post(endpoints.authController.login)
-            .set('Cookie', `refreshToken=${newRefreshToken}`)
-            .expect(204) // TODO креате токен возвращает токетпротухший еще в 1970
+            .post(endpoints.authController.logout)
+            .set('Cookie', `refreshToken=${newRefreshToken.body.accessToken}`)
+            .expect(204)
 
         await request(server)
             .post(endpoints.authController.login)
-            .set('Cookie', `refreshToken=${newRefreshToken}`)
+            .set('Cookie', `refreshToken=${newRefreshToken.body.accessToken}`)
             .expect(401)
       })
     })

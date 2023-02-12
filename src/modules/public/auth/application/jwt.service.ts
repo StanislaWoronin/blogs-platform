@@ -5,22 +5,29 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PgJwtRepository } from '../infrastructure/pg-jwt.repository';
 import { TokenBlackList } from '../infrastructure/entity/tokenBlackList';
 import {TokenPayloadModel} from "../../../../global-model/token-payload.model";
+import { IJwtRepository } from "../infrastructure/jwt.repo";
 
 @Injectable()
 export class JwtService {
-  constructor(protected jwtRepository: PgJwtRepository) {}
+  constructor(protected jwtRepository: IJwtRepository) {}
 
   async getTokenPayload(token: string): Promise<TokenPayloadModel> {
     try {
       const result: any = await jwt.verify(token, settings.JWT_SECRET);
-      return result;
+
+      return {
+        userId: result.userId,
+        deviceId: result.deviceId,
+        iat: result.iat * 1000,
+        exp: result.exp * 1000
+      };
     } catch (error) {
       return null;
     }
   }
 
   async checkTokenInBlackList(refreshToken: string): Promise<boolean> {
-    const token = await this.jwtRepository.getToken(refreshToken);
+    const token = await this.jwtRepository.checkTokenInBlackList(refreshToken);
     if (!token) {
       return false;
     }

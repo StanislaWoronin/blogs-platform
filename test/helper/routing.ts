@@ -10,6 +10,7 @@ const testingController = `/testing`;
 export const endpoints = {
     authController: {
         login: `${authController}/login`,
+        logout: `${authController}/logout`,
         me: `${authController}/me`,
         newPassword: `${authController}/new-password`,
         passwordRecovery: `${authController}/password-recovery`,

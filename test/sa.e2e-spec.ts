@@ -80,7 +80,7 @@ describe('e2e tests', () => {
 
         expect(response.body).toEqual({
           id: expect.any(String),
-          login1: preparedUser.valid1.login,
+          login: preparedUser.valid1.login,
           email: preparedUser.valid1.email,
           createdAt: expect.any(String),
           banInfo: {
@@ -102,7 +102,7 @@ describe('e2e tests', () => {
       it('Create five users and ban even users', async() => {
         const user1 = await request(server)
           .post(endpoints.sa.users)
-          .send({login1: 'User5',
+          .send({login: 'User5',
             password: 'qwerty',
             email: 'somemail1@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -111,7 +111,7 @@ describe('e2e tests', () => {
         const user2 = await request(server)
           .post(endpoints.sa.users)
           .send({
-            login1: 'User4',
+            login: 'User4',
             password: 'qwerty',
             email: 'somemail2@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -120,7 +120,7 @@ describe('e2e tests', () => {
         const user3 = await request(server)
           .post(`/sa/users`)
           .send({
-            login1: 'User3',
+            login: 'User3',
             password: 'qwerty',
             email: 'somemail3@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -129,7 +129,7 @@ describe('e2e tests', () => {
         const user4 = await request(server)
           .post(endpoints.sa.users)
           .send({
-            login1: 'User2',
+            login: 'User2',
             password: 'qwerty',
             email: 'somemail4@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -138,7 +138,7 @@ describe('e2e tests', () => {
         const user5 = await request(server)
           .post(endpoints.sa.users)
           .send({
-            login1: 'User1',
+            login: 'User1',
             password: 'qwerty',
             email: 'somemail5@gmail.com'})
           .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
@@ -506,7 +506,7 @@ describe('e2e tests', () => {
 
         const response = await request(server)
           .get(`/blogs/${blogId}`)
-          .expect(200)
+          .expect(404)
 
         console.log(response.body, 'blog');
       })

@@ -56,6 +56,7 @@ import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
+import { IJwtRepository } from "./modules/public/auth/infrastructure/jwt.repo";
 
 const controllers = [
   AuthController,
@@ -84,6 +85,10 @@ const entity = [
   Users,
   UserBanInfo,
 ];
+
+const interfaces = [
+  IJwtRepository
+]
 
 const repositories = [
   PgBanInfoRepository,
@@ -130,30 +135,23 @@ const validators = [
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
 
-export const options: TypeOrmModuleOptions = {
-  type: 'postgres',
-  url: process.env.POSTGRES_URI,
-  // host: 'localhost',
-  // port: Number(settings.postgres.PORT),
-  // username: settings.postgres.USERNAME,
-  // password: settings.postgres.PASSWORD,
-  // database: settings.postgres.DATABASE_NAME,
-  entities: [...entity],
-  autoLoadEntities: true,
-  synchronize: true,
-}
-
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot(options),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.POSTGRES_URI,
+      entities: [...entity],
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
     // ThrottlerModule.forRoot({
     //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
     //   limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
     // }),
   ],
   controllers: [...controllers],
-  providers: [...repositories, ...services, ...validators, ...useCases],
+  providers: [...repositories, ...interfaces, ...services, ...validators, ...useCases],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {}

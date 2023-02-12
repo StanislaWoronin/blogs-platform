@@ -46,6 +46,7 @@ export class SecurityService {
   ): Promise<{ refreshToken: string; accessToken: string }> {
     const deviceId = uuidv4();
     const token = await this.jwtService.createToken(userId, deviceId);
+
     const tokenPayload = await this.jwtService.getTokenPayload(
       token.refreshToken,
     );
@@ -74,7 +75,7 @@ export class SecurityService {
     );
     const iat = new Date(newTokenPayload.iat).toISOString()
     const exp = new Date(newTokenPayload.exp).toISOString()
-    console.log(exp)
+
     await this.securityRepository.updateCurrentActiveSessions(
       newTokenPayload.deviceId,
       iat,

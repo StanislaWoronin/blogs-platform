@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 export class PgJwtRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getToken(refreshToken: string): Promise<string | null> {
+  async checkTokenInBlackList(refreshToken: string): Promise<string | null> {
     const query = `
       SELECT token
         FROM public.token_black_list

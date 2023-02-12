@@ -248,8 +248,6 @@ describe('e2e tests', () => {
               .get(`/blogger/blogs`)
               .auth(accessToken1, {type: 'bearer'})
               .expect(200)
-
-            console.log(response.body);
         })
     })
 

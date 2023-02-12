@@ -42,7 +42,6 @@ export class BloggerBlogsController {
     @Query() query: QueryParametersDto,
     @User() user: UserDBModel,
   ): Promise<ContentPageModel> {
-    console.log('getBlogs');
     const blogs = await this.queryBlogsRepository.getBlogs(query, user.id);
 
     return blogs

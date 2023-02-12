@@ -5,7 +5,6 @@ import {
 } from "../../src/modules/public/comments/infrastructure/entity/db_comment.model";
 
 export const getCreatedComment = (user: UserViewModelWithBanInfo, comment?: DbCommentWithUserAndLikesInfoModel) =>{
-    console.log(comment);
     if (!comment) {
         return {
             id: expect.any(String),

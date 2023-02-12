@@ -252,9 +252,6 @@ describe('e2e tests', () => {
       it('Return comments with sorting and pagination', async () => {
         const {post2, comment1, comment2, comment3} = expect.getState()
         const url = getUrlForComment(endpoints.postController, post2.id)
-        console.log(comment1)
-        console.log(comment2)
-        console.log(comment3)
 
         const response1 = await request(server)
             .get(`${url}?sortDirection=asc&pageNumber=2&pageSize=2`)
