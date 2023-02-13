@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Like, ObjectLiteral, Repository } from "typeorm";
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
@@ -9,13 +9,17 @@ import {
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
-import { BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
+import { BlogViewModel, BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
 import {exists} from "fs";
 import {BannedBlog} from "../../../super-admin/infrastructure/entity/banned_blog.entity";
+import { Blogs } from "./entity/blogs.entity";
 
 @Injectable()
 export class PgQueryBlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(Blogs) private blogsRepository: Repository<Blogs>
+  ) {
   }
 
   async getBlogs(
@@ -24,69 +28,75 @@ export class PgQueryBlogsRepository {
   ): Promise<ContentPageModel> {
     const filter = this.getFilter(userId, queryDto);
 
-    const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
-              FROM public.blogs
-             WHERE ${filter} AND (NOT EXISTS (SELECT "blogId"
-                                                FROM public.banned_blog
-                                               WHERE banned_blog."blogId" = blogs.id))
-             ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-             LIMIT $1 OFFSET ${giveSkipNumber(
-               queryDto.pageNumber,
-               queryDto.pageSize,
-             )};
-        `;
-    const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
+    // const query = `
+    //         SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
+    //           FROM public.blogs
+    //          WHERE ${filter} AND (NOT EXISTS (SELECT "blogId"
+    //                                             FROM public.banned_blog
+    //                                            WHERE banned_blog."blogId" = blogs.id))
+    //          ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+    //          LIMIT $1 OFFSET ${giveSkipNumber(
+    //            queryDto.pageNumber,
+    //            queryDto.pageSize,
+    //          )};
+    //     `;
+    //const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
     const searchNameFilter = this.searchNameFilter(queryDto)
     const userIdFilter = this.userIdFilter(userId)
 
-    let searchf = ''
-    if (queryDto.searchNameTerm) {
-      searchf = "b.name like :name", {name: `%${queryDto.searchNameTerm}%`}
-    }
-    let userf = ''
-    if (userId) {
-      userf = "b.userId = :userId", {userId: userId}
-    }
-    const result = await this.dataSource.getRepository("blogs")
-        .createQueryBuilder("b")
-        .select("b.id, b.name, b.description, b.\"websiteUrl\", b.\"createdAt\", b.\"isMembership\"")
-        .where([
-          searchNameFilter,
-          userIdFilter
-        ])
-        .andWhere((qb) =>
-          `result.id IN ${qb
-              .subQuery()
-              .select("banned_blog.blogId")
-              .from(BannedBlog)
-              .where()
-        }`
-        )
-        .getMany()
-    console.log('resived', result)
-    const countResult = await this.dataSource.getRepository("blogs")
-        .createQueryBuilder("b")
-        .select("b.id")
-        .where("", {})
-        .andWhere("", {})
-        .getCount()
+    const arrayFilters = [{ name: 'Ivan'}, { user: { id: userId}}]
+    const filters: ObjectLiteral = {}
+    if (queryDto.searchNameTerm) filters.name = Like(`${queryDto.searchNameTerm}`)
+    if (userId) filters.user = { id: userId }
+
+    const [blogs, count] = await this.blogsRepository.findAndCount({
+      where: arrayFilters,
+      relations: {
+        user: true
+      },
+    })
+
+    // // if (queryDto.searchNameTerm) ("b.name like :name", { name: `%${queryDto.searchNameTerm}%` })
+    //
+    // const result = await this.dataSource.getRepository("blogs")
+    //     .createQueryBuilder("b")
+    //     .select("b.id, b.name, b.description, b.\"websiteUrl\", b.\"createdAt\", b.\"isMembership\"")
+    //   .where(filters)
+    //     // .where([
+    //     //   searchNameFilter,
+    //     //   userIdFilter
+    //     // ])
+    //     // .andWhere((qb) =>
+    //     //   `result.id IN ${qb
+    //     //       .subQuery()
+    //     //       .select("banned_blog.blogId")
+    //     //       .from(BannedBlog)
+    //     //       .where()
+    //     // }`
+    //     // )
+    //     .getMany()
+    // console.log('resived', result)
+    // const countResult = await this.dataSource.getRepository("blogs")
+    //     .createQueryBuilder("b")
+    //     .select("b.id")
+    //     .where("", {})
+    //     .andWhere("", {})
+    //     .getCount()
 
     console.log(countResult)
 
-    const totalCountQuery = `
-          SELECT COUNT(id)
-            FROM public.blogs
-           WHERE ${filter}
-        `;
-    const totalCount = await this.dataSource.query(totalCountQuery);
-    console.log('expect', blogs)
-    console.log(totalCount)
+    // const totalCountQuery = `
+    //       SELECT COUNT(id)
+    //         FROM public.blogs
+    //        WHERE ${filter}
+    //     `;
+    // const totalCount = await this.dataSource.query(totalCountQuery);
+
     return paginationContentPage(
         queryDto.pageNumber,
         queryDto.pageSize,
-        blogs,
-        Number(totalCount[0].count),
+        result as BlogViewModel[],
+        Number(countResult),
     );
   }
 
@@ -189,7 +199,7 @@ export class PgQueryBlogsRepository {
       return ["b.name like :name", { name: `%${searchNameTerm}%` }]
     }
 
-    return ['','']
+    return ['', {}]
   }
 
   private userIdFilter(userId: string | null) {

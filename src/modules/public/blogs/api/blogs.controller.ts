@@ -21,7 +21,12 @@ export class BlogsController {
     @Query()
     query: QueryParametersDto,
   ) {
-    return this.queryBlogsRepository.getBlogs(query);
+    console.log('controller');
+    try {
+      return await this.queryBlogsRepository.getBlogs(query);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   @Get(':id')
