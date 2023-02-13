@@ -10,15 +10,15 @@ import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
 import { BlogViewModel, BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
-import {exists} from "fs";
-import {BannedBlog} from "../../../super-admin/infrastructure/entity/banned_blog.entity";
 import { Blogs } from "./entity/blogs.entity";
+import { BannedBlog } from "../../../super-admin/infrastructure/entity/banned_blog.entity";
 
 @Injectable()
 export class PgQueryBlogsRepository {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    @InjectRepository(Blogs) private blogsRepository: Repository<Blogs>
+    @InjectRepository(Blogs)
+    private blogsRepository: Repository<Blogs>
   ) {
   }
 
@@ -41,18 +41,25 @@ export class PgQueryBlogsRepository {
     //          )};
     //     `;
     //const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
-    const searchNameFilter = this.searchNameFilter(queryDto)
-    const userIdFilter = this.userIdFilter(userId)
 
-    const arrayFilters = [{ name: 'Ivan'}, { user: { id: userId}}]
     const filters: ObjectLiteral = {}
     if (queryDto.searchNameTerm) filters.name = Like(`${queryDto.searchNameTerm}`)
     if (userId) filters.user = { id: userId }
 
     const [blogs, count] = await this.blogsRepository.findAndCount({
-      where: arrayFilters,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        websiteUrl: true,
+        createdAt: true,
+        isMembership:true,
+        userId: false
+      },
+      where: filters,
       relations: {
-        user: true
+        isBanned: true,
+        user: true,
       },
     })
 
@@ -83,7 +90,6 @@ export class PgQueryBlogsRepository {
     //     .andWhere("", {})
     //     .getCount()
 
-    console.log(countResult)
 
     // const totalCountQuery = `
     //       SELECT COUNT(id)
@@ -95,8 +101,8 @@ export class PgQueryBlogsRepository {
     return paginationContentPage(
         queryDto.pageNumber,
         queryDto.pageSize,
-        result as BlogViewModel[],
-        Number(countResult),
+        blogs as BlogViewModel[],
+        Number(count),
     );
   }
 
@@ -107,7 +113,7 @@ export class PgQueryBlogsRepository {
             SELECT b.id, b.name, b.description, b."websiteUrl", b."createdAt", b."isMembership",
                    u.id AS "userId", u.login AS "userLogin",
                    EXISTS (SELECT "blogId" FROM public.banned_blog WHERE "blogId" = b.id) AS "isBanned",
-                   (SELECT "banDate" FROM public.banned_blog WHERE "blogId" = b.id) 
+                   (SELECT "banDate" FROM public.banned_blog WHERE "blogId" = b.id)
               FROM public.blogs b
               LEFT JOIN public.users u
                 ON b."userId" = u.id
@@ -158,7 +164,6 @@ export class PgQueryBlogsRepository {
   }
 
   async blogExist(blogId: string): Promise<string | null> {
-
     const query = `
             SELECT "userId"
               FROM public.blogs
@@ -176,7 +181,7 @@ export class PgQueryBlogsRepository {
     const query = `
       SELECT id, (EXISTS(SELECT "blogId" FROM public.banned_blog WHERE "blogId" = $1)) AS "isBanned"
         FROM public.blogs
-       WHERE id = $1; 
+       WHERE id = $1;
     `;
     const response = await this.dataSource.query(query, [blogId])
 

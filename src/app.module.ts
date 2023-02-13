@@ -56,6 +56,7 @@ import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
+import { BlogModule } from "./modules/public/blogs/blog.module";
 
 const controllers = [
   AuthController,
@@ -139,6 +140,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       autoLoadEntities: true,
       synchronize: true,
     }),
+    //BlogModule,
     // ThrottlerModule.forRoot({
     //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
     //   limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
