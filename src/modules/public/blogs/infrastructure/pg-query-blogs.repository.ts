@@ -10,14 +10,17 @@ import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
 import { BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
+import {exists} from "fs";
+import {BannedBlog} from "../../../super-admin/infrastructure/entity/banned_blog.entity";
 
 @Injectable()
 export class PgQueryBlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {
+  }
 
   async getBlogs(
-    queryDto: QueryParametersDto,
-    userId?: string,
+      queryDto: QueryParametersDto,
+      userId?: string,
   ): Promise<ContentPageModel> {
     const filter = this.getFilter(userId, queryDto);
 
@@ -34,6 +37,42 @@ export class PgQueryBlogsRepository {
              )};
         `;
     const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
+    const searchNameFilter = this.searchNameFilter(queryDto)
+    const userIdFilter = this.userIdFilter(userId)
+
+    let searchf = ''
+    if (queryDto.searchNameTerm) {
+      searchf = "b.name like :name", {name: `%${queryDto.searchNameTerm}%`}
+    }
+    let userf = ''
+    if (userId) {
+      userf = "b.userId = :userId", {userId: userId}
+    }
+    const result = await this.dataSource.getRepository("blogs")
+        .createQueryBuilder("b")
+        .select("b.id, b.name, b.description, b.\"websiteUrl\", b.\"createdAt\", b.\"isMembership\"")
+        .where([
+          searchNameFilter,
+          userIdFilter
+        ])
+        .andWhere((qb) =>
+          `result.id IN ${qb
+              .subQuery()
+              .select("banned_blog.blogId")
+              .from(BannedBlog)
+              .where()
+        }`
+        )
+        .getMany()
+    console.log('resived', result)
+    const countResult = await this.dataSource.getRepository("blogs")
+        .createQueryBuilder("b")
+        .select("b.id")
+        .where("", {})
+        .andWhere("", {})
+        .getCount()
+
+    console.log(countResult)
 
     const totalCountQuery = `
           SELECT COUNT(id)
@@ -41,12 +80,13 @@ export class PgQueryBlogsRepository {
            WHERE ${filter}
         `;
     const totalCount = await this.dataSource.query(totalCountQuery);
-
+    console.log('expect', blogs)
+    console.log(totalCount)
     return paginationContentPage(
-      queryDto.pageNumber,
-      queryDto.pageSize,
-      blogs,
-      Number(totalCount[0].count),
+        queryDto.pageNumber,
+        queryDto.pageSize,
+        blogs,
+        Number(totalCount[0].count),
     );
   }
 
@@ -69,12 +109,12 @@ export class PgQueryBlogsRepository {
              )};
         `;
     const blogsDB: dbBlogWithAdditionalInfo[] = await this.dataSource.query(
-      blogsQuery,
-      [queryDto.pageSize],
+        blogsQuery,
+        [queryDto.pageSize],
     );
 
     const blogs = blogsDB.map((b) => toBlogWithAdditionalInfoModel(b));
-    //console.log('SA get blogs:', blogs)
+
     const totalCountQuery = `
           SELECT COUNT(b.id)
             FROM public.blogs b
@@ -85,10 +125,10 @@ export class PgQueryBlogsRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-      queryDto.pageNumber,
-      queryDto.pageSize,
-      blogs,
-      Number(totalCount[0].count),
+        queryDto.pageNumber,
+        queryDto.pageSize,
+        blogs,
+        Number(totalCount[0].count),
     );
   }
 
@@ -116,7 +156,7 @@ export class PgQueryBlogsRepository {
         `;
     const result = await this.dataSource.query(query, [blogId]);
 
-    if(!result[0]) {
+    if (!result[0]) {
       return null
     }
     return result[0].userId;
@@ -142,12 +182,33 @@ export class PgQueryBlogsRepository {
     return `${nameFilter}`;
   }
 
-  private searchNameFilter(query: QueryParametersDto): string {
-    const { searchNameTerm } = query;
+  private searchNameFilter(query: QueryParametersDto) {
+    const {searchNameTerm} = query;
 
-    const name = `name ILIKE '%${searchNameTerm}%'`;
+    if (searchNameTerm) {
+      return ["b.name like :name", { name: `%${searchNameTerm}%` }]
+    }
 
-    if (name) return name;
-    return '';
+    return ['','']
+  }
+
+  private userIdFilter(userId: string | null) {
+    if (userId) {
+      return ["b.userId = :userId", { userId: userId }]
+    }
+
+    return ['','']
+  }
+
+  writeSQL = async (sql: string) => {
+    const fs = require('fs/promises');
+
+    async function example() {
+      try {
+        await  fs.writeSQL('sql.txt', sql)
+      } catch (err) {
+        console.log(err)
+      }
+    }
   }
 }

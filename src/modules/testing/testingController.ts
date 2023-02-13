@@ -1,7 +1,7 @@
-import {Body, Controller, Delete, Get, HttpCode, Param, Put} from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Param, Put } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {JwtService} from "../public/auth/application/jwt.service";
+import { JwtService } from "../public/auth/application/jwt.service";
 
 @Controller('testing')
 export class TestingController {
@@ -10,35 +10,35 @@ export class TestingController {
 
   @Get('confirmation-code/:userId')
   async getConfirmationCode(@Param('userId') userId: string) {
-    const result = await this.dataSource.query(`
-      SELECT "confirmationCode"
-        FROM public.email_confirmation
-       WHERE "userId" = '${userId}'
-    `)
+    const result = await this.dataSource.getRepository("email_confirmation")
+        .createQueryBuilder("ec")
+        .select("ec.confirmationCode")
+        .where("ec.userId = :id", {id: userId})
+        .getOne()
 
-    return result[0]
+    return result
   }
 
   @Get('is-confirmed/:userId')
   async checkUserConfirmed(@Param('userId') userId: string) {
-    const result = await this.dataSource.query(`
-      SELECT "isConfirmed"
-        FROM public.email_confirmation
-       WHERE "userId" = '${userId}'
-    `)
+    const result = await this.dataSource.getRepository("email_confirmation")
+        .createQueryBuilder("ec")
+        .select("ec.isConfirmed")
+        .where("ec.userId = :id", {id: userId})
+        .getOne()
 
-    return result[0]
+    return result
   }
 
   @Get('user-password/:userId')
   async getUserPassword(@Param('userId') userId: string) {
-    const result = await this.dataSource.query(`
-      SELECT "passwordHash"
-        FROM public.users
-       WHERE id = '${userId}'
-    `)
+    const result = await this.dataSource.getRepository("users")
+        .createQueryBuilder("u")
+        .select("u.passwordHash")
+        .where("u.id = :id", {id: userId})
+        .getOne()
 
-    return result[0]
+    return result
   }
 
   @Get('expired-token/:token')
@@ -52,13 +52,16 @@ export class TestingController {
   @HttpCode(204)
   async makeExpired(@Param('userId') userId: string) {
     const expirationDate = new Date(Date.now() - 48 * 1000).toISOString()
-    const result = await this.dataSource.query(`
-      UPDATE public.email_confirmation
-         SET "expirationDate" = '${expirationDate}'
-       WHERE "userId" = '${userId}';
-    `);
+    const result = await this.dataSource.getRepository("email_confirmation")
+        .createQueryBuilder("ec")
+        .update()
+        .set({
+          expirationDate
+        })
+        .where("userId = :id", {id: userId})
+        .execute()
 
-    if (result[1] !== 1) {
+    if (result.affected !== 1) {
       return false;
     }
     return true;
