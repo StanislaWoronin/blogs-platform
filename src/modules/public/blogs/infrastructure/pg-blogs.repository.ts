@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { BlogDto } from '../../../blogger/api/dto/blog.dto';
 import { BindBlogDto } from '../../../super-admin/api/dto/bind-blog.dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import {InjectDataSource, InjectRepository} from '@nestjs/typeorm';
+import {DataSource, Repository} from 'typeorm';
 import { BlogDBModel } from './entity/blog-db.model';
 import { CreatedBlogModel } from '../api/dto/blogView.model';
 import {Blogs} from "./entity/blogs.entity";
 
 @Injectable()
 export class PgBlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+      @InjectDataSource() private dataSource: DataSource,
+      //@InjectRepository(Blogs) private blogsRepository: Repository<Blogs>
+  ) {}
 
   async createBlog(newBlog: BlogDBModel): Promise<CreatedBlogModel | null> {
     const result = await this.dataSource.getRepository("blogs")
@@ -28,7 +31,17 @@ export class PgBlogsRepository {
         .returning("id, name, description, \"websiteUrl\", \"createdAt\", \"isMembership\"")
         .execute()
 
-    return result.raw[0]
+      return result.raw[0]
+
+    // await this.blogsRepository.create(newBlog)
+    // return {
+    //     id: newBlog.id,
+    //     name: newBlog.name,
+    //     description: newBlog.description,
+    //     websiteUrl: newBlog.websiteUrl,
+    //     createdAt: newBlog.createdAt,
+    //     isMembership: newBlog.isMembership
+    // }
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {

@@ -40,17 +40,30 @@ export class PostsService {
   }
 
   async updatePostReaction(userId, postId, likeStatus): Promise<boolean> {
+    const currentReaction = await this.likesRepository.getReaction(userId, postId)
+
+    if (!currentReaction) {
+      if (likeStatus === ReactionModel.None) {
+        return true
+      }
+
+      return await this.likesRepository.createReaction(
+          userId,
+          postId,
+          likeStatus,
+          new Date().toISOString()
+      )
+    }
+
     if (likeStatus === ReactionModel.None) {
       return await this.likesRepository.deleteReaction(userId, postId);
     }
-
-    const addedAt = new Date().toISOString();
 
     return await this.likesRepository.updatePostReaction(
       userId,
       postId,
       likeStatus,
-      addedAt,
+      new Date().toISOString()
     );
   }
 

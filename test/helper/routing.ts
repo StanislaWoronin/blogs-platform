@@ -56,6 +56,10 @@ export const getUrlPostForSpecificBlog = (url: string, blogId: string, postId: s
     return `${url}/${blogId}/posts/${postId}`
 }
 
-export const getUrlForComment = (endpoint: string, id: string): string => {
-    return `${endpoint}/${id}/comments`
+export const getUrlForComment = (url: string, id: string): string => {
+    return `${url}/${id}/comments`
+}
+
+export const getUrlForReactionStatus = (url: string, id: string): string => {
+    return `${url}/${id}/like-status`
 }

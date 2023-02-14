@@ -73,6 +73,32 @@ export class PgLikesRepository {
   //   }
   // }
 
+  async getReaction(userId: string, postId: string): Promise<string | null> {
+    const query = `
+      SELECT status
+        FROM public.post_reactions
+       WHERE "userId" = $1 AND "postId" = $2
+    `
+    const result = await this.dataSource.query(query, [userId, postId])
+
+    return result[0]
+  }
+
+  async createReaction(userId: string, postId: string, likeStatus: string, addedAt: string): Promise<boolean> {
+    const query = `
+      INSERT INTO public.post_reactions
+             (status, "addedAt", "userId", "postId")
+      VALUES ($1, $2, $3, $4)  
+             RETURNING status, "addedAt", "userId", "postId"
+    `
+    const result = await this.dataSource.query(query, [likeStatus, addedAt, userId, postId])
+
+    if (!result[0]) {
+      return false
+    }
+    return true
+  }
+
   async updatePostReaction(
     userId: string,
     postId: string,
@@ -96,15 +122,6 @@ export class PgLikesRepository {
     }
     return true;
   }
-
-  // async updateBanStatus(userId: string, isBanned: boolean): Promise<boolean> {
-  //   try {
-  //     await this.likesRepository.updateOne({ userId }, { $set: { isBanned } });
-  //     return true;
-  //   } catch (e) {
-  //     return false;
-  //   }
-  // }
 
   async deleteReaction(userId: string, postId: string): Promise<boolean> {
     const query = `

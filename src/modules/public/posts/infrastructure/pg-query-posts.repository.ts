@@ -162,7 +162,7 @@ export class PgQueryPostsRepository {
 
     let myStatus = 'None';
     if (post.myStatus) {
-      myStatus = post.myStatus;;
+      myStatus = post.myStatus;
     }
 
     return {
@@ -186,7 +186,7 @@ export class PgQueryPostsRepository {
     if (userId) {
       return `, (SELECT status AS "myStatus" 
                    FROM public.post_reactions
-                  WHERE post_reactions."postId" = posts.id AND post_reactions."userId" = $1`;
+                  WHERE post_reactions."postId" = posts.id AND post_reactions."userId" = '${userId}')`;
     }
     return '';
   }

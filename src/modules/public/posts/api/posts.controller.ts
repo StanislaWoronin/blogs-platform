@@ -53,9 +53,8 @@ export class PostsController {
   async getPostById(@Param('id') postId: string, @Req() req: Request) {
     let userId = undefined;
     if (req.headers.authorization) {
-      const tokenPayload = await this.jwtService.getTokenPayload(
-        req.headers.authorization,
-      );
+      const token = (req.headers.authorization).split(' ')[1]
+      const tokenPayload = await this.jwtService.getTokenPayload(token);
       userId = tokenPayload.userId;
     }
 

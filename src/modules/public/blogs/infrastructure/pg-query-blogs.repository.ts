@@ -9,16 +9,12 @@ import {
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
-import { BlogViewModel, BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
-import { Blogs } from "./entity/blogs.entity";
-import { BannedBlog } from "../../../super-admin/infrastructure/entity/banned_blog.entity";
+import { BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
 
 @Injectable()
 export class PgQueryBlogsRepository {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    @InjectRepository(Blogs)
-    private blogsRepository: Repository<Blogs>
   ) {
   }
 
@@ -28,81 +24,32 @@ export class PgQueryBlogsRepository {
   ): Promise<ContentPageModel> {
     const filter = this.getFilter(userId, queryDto);
 
-    // const query = `
-    //         SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
-    //           FROM public.blogs
-    //          WHERE ${filter} AND (NOT EXISTS (SELECT "blogId"
-    //                                             FROM public.banned_blog
-    //                                            WHERE banned_blog."blogId" = blogs.id))
-    //          ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-    //          LIMIT $1 OFFSET ${giveSkipNumber(
-    //            queryDto.pageNumber,
-    //            queryDto.pageSize,
-    //          )};
-    //     `;
-    //const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
+    const query = `
+            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
+              FROM public.blogs
+             WHERE ${filter} AND (NOT EXISTS (SELECT "blogId" 
+                                                FROM public.banned_blog
+                                               WHERE banned_blog."blogId" = blogs.id))
+             ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+             LIMIT $1 OFFSET ${giveSkipNumber(
+        queryDto.pageNumber,
+        queryDto.pageSize,
+    )};
+        `;
+    const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
 
-    const filters: ObjectLiteral = {}
-    if (queryDto.searchNameTerm) filters.name = Like(`${queryDto.searchNameTerm}`)
-    if (userId) filters.user = { id: userId }
-
-    const [blogs, count] = await this.blogsRepository.findAndCount({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        websiteUrl: true,
-        createdAt: true,
-        isMembership:true,
-        userId: false
-      },
-      where: filters,
-      relations: {
-        isBanned: true,
-        user: true,
-      },
-    })
-
-    // // if (queryDto.searchNameTerm) ("b.name like :name", { name: `%${queryDto.searchNameTerm}%` })
-    //
-    // const result = await this.dataSource.getRepository("blogs")
-    //     .createQueryBuilder("b")
-    //     .select("b.id, b.name, b.description, b.\"websiteUrl\", b.\"createdAt\", b.\"isMembership\"")
-    //   .where(filters)
-    //     // .where([
-    //     //   searchNameFilter,
-    //     //   userIdFilter
-    //     // ])
-    //     // .andWhere((qb) =>
-    //     //   `result.id IN ${qb
-    //     //       .subQuery()
-    //     //       .select("banned_blog.blogId")
-    //     //       .from(BannedBlog)
-    //     //       .where()
-    //     // }`
-    //     // )
-    //     .getMany()
-    // console.log('resived', result)
-    // const countResult = await this.dataSource.getRepository("blogs")
-    //     .createQueryBuilder("b")
-    //     .select("b.id")
-    //     .where("", {})
-    //     .andWhere("", {})
-    //     .getCount()
-
-
-    // const totalCountQuery = `
-    //       SELECT COUNT(id)
-    //         FROM public.blogs
-    //        WHERE ${filter}
-    //     `;
-    // const totalCount = await this.dataSource.query(totalCountQuery);
+    const totalCountQuery = `
+          SELECT COUNT(id)
+            FROM public.blogs
+           WHERE ${filter}
+        `;
+    const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
         queryDto.pageNumber,
         queryDto.pageSize,
-        blogs as BlogViewModel[],
-        Number(count),
+        blogs,
+        Number(totalCount[0].count),
     );
   }
 
@@ -155,7 +102,7 @@ export class PgQueryBlogsRepository {
              WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')
         `;
     const result = await this.dataSource.query(query);
-    //console.log('return blog by id:', result.body)
+
     if (!result.length) {
       return null
     }
@@ -194,36 +141,15 @@ export class PgQueryBlogsRepository {
     if (userId) {
       return `${nameFilter} AND "userId" = '${userId}'`;
     }
-    return `${nameFilter}`;
+    return `${nameFilter}`
   }
 
   private searchNameFilter(query: QueryParametersDto) {
-    const {searchNameTerm} = query;
+    const { searchNameTerm } = query;
 
-    if (searchNameTerm) {
-      return ["b.name like :name", { name: `%${searchNameTerm}%` }]
-    }
+    const name = `name ILIKE '%${searchNameTerm}%'`;
 
-    return ['', {}]
-  }
-
-  private userIdFilter(userId: string | null) {
-    if (userId) {
-      return ["b.userId = :userId", { userId: userId }]
-    }
-
-    return ['','']
-  }
-
-  writeSQL = async (sql: string) => {
-    const fs = require('fs/promises');
-
-    async function example() {
-      try {
-        await  fs.writeSQL('sql.txt', sql)
-      } catch (err) {
-        console.log(err)
-      }
-    }
+    if (name) return name;
+    return '';
   }
 }

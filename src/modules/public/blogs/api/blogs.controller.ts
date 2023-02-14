@@ -14,6 +14,7 @@ export class BlogsController {
   constructor(
     protected queryBlogsRepository: PgQueryBlogsRepository,
     protected queryPostsRepository: PgQueryPostsRepository,
+    //protected blogsRepository: BlogsRepository
   ) {}
 
   @Get()
@@ -21,7 +22,6 @@ export class BlogsController {
     @Query()
     query: QueryParametersDto,
   ) {
-    console.log('controller');
     try {
       return await this.queryBlogsRepository.getBlogs(query);
     } catch (e) {

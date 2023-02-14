@@ -110,9 +110,8 @@ describe('e2e tests', () => {
 
     describe('Return blogs with paging', () => {
       it('Get blogs without query', async () => {
-        console.log('1')
         const items = expect.getState().items1
-        console.log('2')
+
         const response = await request(server)
           .get(`/blogs`)
           .expect(200)
