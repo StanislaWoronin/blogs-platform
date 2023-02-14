@@ -56,6 +56,7 @@ import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller
 import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
+import { BlogsRepository } from "./modules/public/blogs/infrastructure/blogs.repository";
 
 const controllers = [
   AuthController,
@@ -86,7 +87,7 @@ const entity = [
 ];
 
 const repositories = [
-  //BlogsRepository,
+  BlogsRepository,
   PgBanInfoRepository,
   PgBlogsRepository,
   PgQueryBlogsRepository,
@@ -136,11 +137,12 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.POSTGRES_URI,
-      entities: [...entity],
       autoLoadEntities: true,
       synchronize: true,
     }),
-    //BlogModule,
+    TypeOrmModule.forFeature([...entity])
+    // BlogModule,
+    //
     // ThrottlerModule.forRoot({
     //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
     //   limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
