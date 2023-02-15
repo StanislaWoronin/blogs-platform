@@ -1,9 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
 import { Users } from '../../../../super-admin/infrastructure/entity/users';
 import { Comments } from '../../../comments/infrastructure/entity/comments.entity';
 
 @Entity()
 export class CommentReactions {
+  @PrimaryGeneratedColumn() id: number
+
   @Column() status: string;
 
   @Column() addedAt: string;

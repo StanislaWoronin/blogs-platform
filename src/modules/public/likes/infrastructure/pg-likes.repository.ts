@@ -88,10 +88,10 @@ export class PgLikesRepository {
     const query = `
       INSERT INTO public.post_reactions
              (status, "addedAt", "userId", "postId")
-      VALUES ($1, $2, $3, $4)  
+      VALUES ('${likeStatus}', '${addedAt}', '${userId}', '${postId}')  
              RETURNING status, "addedAt", "userId", "postId"
     `
-    const result = await this.dataSource.query(query, [likeStatus, addedAt, userId, postId])
+    const result = await this.dataSource.query(query/*, [likeStatus, addedAt, userId, postId]*/)
 
     if (!result[0]) {
       return false

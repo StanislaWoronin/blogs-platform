@@ -19,7 +19,7 @@ export class PgQueryPostsRepository {
   async getPosts(
     queryDto: QueryParametersDto,
     blogId: string | undefined,
-    userId?: string | undefined,
+    userId: string | undefined,
   ): Promise<ContentPageModel> {
     const blogIdFilter = this.getBlogIdFilter(blogId);
     const statusFilter = this.myStatusFilter(userId)
@@ -32,15 +32,12 @@ export class PgQueryPostsRepository {
                          WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
                        (SELECT COUNT("postId")
                           FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount",
-                       (SELECT "addedAt"
-                          FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id)
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
                        ${statusFilter}
                   FROM public.posts
-                 ${blogIdFilter}
+                 ${blogIdFilter}   
                  ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-                 LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
+                 LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
                    queryDto.pageNumber,
                    queryDto.pageSize,
                  )};      
@@ -151,10 +148,11 @@ export class PgQueryPostsRepository {
       SELECT "userId", "addedAt",
              (SELECT login FROM public.users WHERE users.id = post_reactions."userId")
         FROM public.post_reactions
-       WHERE "postId" = $1
-       LIMIT ${settings.newestLikes.limit}
+       WHERE "postId" = '${postId}' AND status = 'Like'
+       ORDER BY "addedAt" DESC
+       LIMIT ${settings.newestLikes.limit};
     `
-    return await this.dataSource.query(newestLikesQuery, [postId])
+    return await this.dataSource.query(newestLikesQuery)
   }
 
   private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
@@ -177,7 +175,7 @@ export class PgQueryPostsRepository {
         likesCount: Number(post.likesCount),
         dislikesCount: Number(post.dislikesCount),
         myStatus: myStatus,
-        newestLikes: newestLikes,
+        newestLikes,
       },
     };
   }

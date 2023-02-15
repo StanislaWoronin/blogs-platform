@@ -1,9 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
 import { Users } from '../../../../super-admin/infrastructure/entity/users';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 
 @Entity()
 export class PostReactions {
+  @PrimaryGeneratedColumn() id: number
+
   @Column() status: string;
 
   @Column() addedAt: string;
@@ -11,7 +13,7 @@ export class PostReactions {
   @ManyToOne(() => Users, (u) => u.pReactions)
   @JoinColumn()
   user: Users;
-  @PrimaryColumn() userId: string;
+  @Column() userId: string;
 
   @ManyToOne(() => Posts, (c) => c.reactions)
   @JoinColumn()

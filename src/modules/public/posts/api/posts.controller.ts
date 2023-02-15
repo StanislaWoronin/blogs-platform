@@ -38,15 +38,15 @@ export class PostsController {
 
   @Get()
   async getPosts(@Query() query: QueryParametersDto, @Req() req: Request) {
+    let blogId;
     let userId;
     if (req.headers.authorization) {
-      const tokenPayload = await this.jwtService.getTokenPayload(
-        req.headers.authorization,
-      );
+      const token = (req.headers.authorization).split(' ')[1]
+      const tokenPayload = await this.jwtService.getTokenPayload(token);
       userId = tokenPayload.userId;
     }
 
-    return this.queryPostsRepository.getPosts(query, userId);
+    return this.queryPostsRepository.getPosts(query, blogId, userId);
   }
 
   @Get(':id')

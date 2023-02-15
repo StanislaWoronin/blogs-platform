@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Blogs} from "./entity/blogs.entity";
-import {Like, ObjectLiteral, Repository} from "typeorm";
+import {IsNull, Like, ObjectLiteral, Repository} from "typeorm";
 import {QueryParametersDto} from "../../../../global-model/query-parameters.dto";
 import {paginationContentPage} from "../../../../helper.functions";
 import {BlogViewModel} from "../api/dto/blogView.model";
@@ -11,15 +11,21 @@ export class BlogsRepository {
     constructor(
         @InjectRepository(Blogs)
         private readonly blogsRepository: Repository<Blogs>
-    ) {
-        console.log('BlogsRepository')
-    }
+    ) {}
 
     async getBlogs(query: QueryParametersDto, userId?: string | null) {
         const filters: ObjectLiteral = {}
         if (query.searchNameTerm) filters.name = Like(`${query.searchNameTerm}`)
         if (userId) filters.user = { id: userId }
-        console.log('here')
+        isBanned: IsNull()
+
+        let sortFilter: ObjectLiteral = {}
+        const {sortBy} = query
+        const {sortDirection} = query
+        if (sortBy && sortDirection) {
+            sortFilter["${sortBy}"] = sortDirection
+        }
+
         const [blogs, count] = await this.blogsRepository.findAndCount({
             select: {
                 id: true,
@@ -30,12 +36,13 @@ export class BlogsRepository {
                 isMembership: true,
                 userId: false
             },
-            where: filters,
             relations: {
-                isBanned: true,
-                user: true,
+                isBanned: false,
             },
+            where: filters,
+            order: sortFilter
         })
+
         console.log(blogs)
         return paginationContentPage(
             query.pageNumber,
