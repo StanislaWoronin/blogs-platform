@@ -3,7 +3,7 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Blogs} from "./entity/blogs.entity";
 import {IsNull, Like, ObjectLiteral, Repository} from "typeorm";
 import {QueryParametersDto} from "../../../../global-model/query-parameters.dto";
-import {paginationContentPage} from "../../../../helper.functions";
+import {giveSkipNumber, paginationContentPage} from "../../../../helper.functions";
 import {BlogViewModel} from "../api/dto/blogView.model";
 
 @Injectable()
@@ -25,7 +25,7 @@ export class BlogsRepository {
         if (sortBy && sortDirection) {
             sortFilter["${sortBy}"] = sortDirection
         }
-
+        console.log(sortBy)
         const [blogs, count] = await this.blogsRepository.findAndCount({
             select: {
                 id: true,
@@ -40,7 +40,9 @@ export class BlogsRepository {
                 isBanned: false,
             },
             where: filters,
-            order: sortFilter
+            order: {[sortBy]: [sortDirection]},
+            // skip: giveSkipNumber(query.pageNumber,query.pageSize),
+            // take: query.pageNumber
         })
 
         console.log(blogs)

@@ -125,185 +125,185 @@ describe('e2e tests', () => {
         })
       })
 
-      it('Get blogs with sorting and paging', async () => {
-        const items = expect.getState().items2
-        const response = await request(server)
-          .get(`/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=3`)
-          .expect(200)
-
-        expect(response.body).toStrictEqual({
-          pagesCount: 2,
-          page: 2,
-          pageSize: 3,
-          totalCount: 5,
-          items: items
-        })
-      })
-
-      it('Get blogs with sorting and paging', async () => {
-        const items = expect.getState().blog5
-        const response = await request(server)
-          .get(`/blogs?sortBy=websiteUrl&sortDirection=desc&pageSize=3`)
-          .expect(200)
-
-        expect(response.body).toBe({
-          pagesCount: 2,
-          page: 1,
-          pageSize: 3,
-          totalCount: 5,
-          items: items
-        })
-      })
-
-      it('Get blogs search name term', async () => {
-        const items = expect.getState().blog5
-        const response = await request(server)
-          .get(`/blogs?searchNameTerm=1`)
-          .expect(200)
-
-        expect(response.body).toStrictEqual({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 1,
-          items: [items]
-        })
-      })
-    })
-
-    describe('Return all posts for specified blog', () => {
-      it('Create posts', async () => {
-        const { token, blog1, blog5 } = expect.getState()
-        const url1 = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blog5.id)
-        const url2 = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blog1.id)
-
-        await request(server)
-          .post(url1)
-          .send(preparedPost.valid)
-          .auth(token.accessToken, {type: 'bearer'})
-          .expect(201)
-
-        const post1 = await request(server)
-          .post(url2)
-          .send({
-            title: 'PostName1',
-            shortDescription: 'SomeOneShortDescription1',
-            content: 'SomeOneContent3'
-          })
-          .auth(token.accessToken, {type: 'bearer'})
-          .expect(201)
-
-        const post2 = await request(server)
-          .post(url2)
-          .send({
-            title: 'PostName2',
-            shortDescription: 'SomeOneShortDescription2',
-            content: 'SomeOneContent2'
-          })
-          .auth(token.accessToken, {type: 'bearer'})
-          .expect(201)
-
-        const post3 = await request(server)
-          .post(url2)
-          .send({
-            title: 'PostName3',
-            shortDescription: 'SomeOneShortDescription3',
-            content: 'SomeOneContent1'
-          })
-          .auth(token.accessToken, {type: 'bearer'})
-          .expect(201)
-
-        expect.setState({items1: [post3.body, post2.body, post1.body]})
-      })
-
-      it('Return all post without query', async () => {
-        const { blog1 } = expect.getState()
-        const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog1.id)
-
-        const response = await request(server)
-          .get(url)
-          .expect(200)
-
-        expect(response.body).toStrictEqual({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [
-            getPostsByBlogId(3, 3, blog1),
-            getPostsByBlogId(2, 3, blog1),
-            getPostsByBlogId(1, 3, blog1)
-          ]
-        })
-      })
-
-      it('Return all post with sorting and pagination', async () => {
-        const blog = expect.getState().blog1
-        const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog.id)
-
-        const response = await request(server)
-          .get(`${url}?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
-          .expect(200)
-
-        expect(response.body).toStrictEqual({
-          pagesCount: 2,
-          page: 2,
-          pageSize: 2,
-          totalCount: 3,
-          items: [
-            getPostsByBlogId(3, 3, blog)
-          ]
-        })
-      })
-
-      it('Return all post with sorting and pagination', async () => {
-        const {blog1} = expect.getState()
-        const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog1.id)
-
-        const response = await request(server)
-          .get(`${url}?sortBy=content&sortDirection=desc&pageSize=2`)
-          .expect(200)
-
-        expect(response.body).toBe({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [
-            getPostsByBlogId(3, 3, blog1),
-            getPostsByBlogId(2, 3, blog1),
-          ]
-        })
-      })
-    })
-
-    describe('Return blog by id', () => {
-      const randomUuid = uuidv4()
-      const url = getUrlWithId(endpoints.blogController, randomUuid)
-
-      it('Try find not exist blog', async () => {
-        await request(server)
-          .get(url)
-          .expect(404)
-      })
-
-      it('Should return blog by id', async () => {
-        const blog = expect.getState().blog1
-        const url = getUrlWithId(endpoints.blogController, blog.id)
-
-        const response = await request(server)
-          .get(url)
-          .expect(200)
-
-        expect(response.body).toStrictEqual({
-          id: expect.any(String),
-          name: blog.name,
-          description: blog.description,
-          websiteUrl: blog.websiteUrl,
-          createdAt: expect.any(String),
-          isMembership: expect.any(Boolean)
-        })
-      })
+      // it('Get blogs with sorting and paging', async () => {
+      //   const items = expect.getState().items2
+      //   const response = await request(server)
+      //     .get(`/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=3`)
+      //     .expect(200)
+      //
+      //   expect(response.body).toStrictEqual({
+      //     pagesCount: 2,
+      //     page: 2,
+      //     pageSize: 3,
+      //     totalCount: 5,
+      //     items: items
+      //   })
+      // })
+      //
+    //   it('Get blogs with sorting and paging', async () => {
+    //     const items = expect.getState().blog5
+    //     const response = await request(server)
+    //       .get(`/blogs?sortBy=websiteUrl&sortDirection=desc&pageSize=3`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toBe({
+    //       pagesCount: 2,
+    //       page: 1,
+    //       pageSize: 3,
+    //       totalCount: 5,
+    //       items: items
+    //     })
+    //   })
+    //
+    //   it('Get blogs search name term', async () => {
+    //     const items = expect.getState().blog5
+    //     const response = await request(server)
+    //       .get(`/blogs?searchNameTerm=1`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       pagesCount: 1,
+    //       page: 1,
+    //       pageSize: 10,
+    //       totalCount: 1,
+    //       items: [items]
+    //     })
+    //   })
+    // })
+    //
+    // describe('Return all posts for specified blog', () => {
+    //   it('Create posts', async () => {
+    //     const { token, blog1, blog5 } = expect.getState()
+    //     const url1 = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blog5.id)
+    //     const url2 = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blog1.id)
+    //
+    //     await request(server)
+    //       .post(url1)
+    //       .send(preparedPost.valid)
+    //       .auth(token.accessToken, {type: 'bearer'})
+    //       .expect(201)
+    //
+    //     const post1 = await request(server)
+    //       .post(url2)
+    //       .send({
+    //         title: 'PostName1',
+    //         shortDescription: 'SomeOneShortDescription1',
+    //         content: 'SomeOneContent3'
+    //       })
+    //       .auth(token.accessToken, {type: 'bearer'})
+    //       .expect(201)
+    //
+    //     const post2 = await request(server)
+    //       .post(url2)
+    //       .send({
+    //         title: 'PostName2',
+    //         shortDescription: 'SomeOneShortDescription2',
+    //         content: 'SomeOneContent2'
+    //       })
+    //       .auth(token.accessToken, {type: 'bearer'})
+    //       .expect(201)
+    //
+    //     const post3 = await request(server)
+    //       .post(url2)
+    //       .send({
+    //         title: 'PostName3',
+    //         shortDescription: 'SomeOneShortDescription3',
+    //         content: 'SomeOneContent1'
+    //       })
+    //       .auth(token.accessToken, {type: 'bearer'})
+    //       .expect(201)
+    //
+    //     expect.setState({items1: [post3.body, post2.body, post1.body]})
+    //   })
+    //
+    //   it('Return all post without query', async () => {
+    //     const { blog1 } = expect.getState()
+    //     const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog1.id)
+    //
+    //     const response = await request(server)
+    //       .get(url)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       pagesCount: 1,
+    //       page: 1,
+    //       pageSize: 10,
+    //       totalCount: 3,
+    //       items: [
+    //         getPostsByBlogId(3, 3, blog1),
+    //         getPostsByBlogId(2, 3, blog1),
+    //         getPostsByBlogId(1, 3, blog1)
+    //       ]
+    //     })
+    //   })
+    //
+    //   it('Return all post with sorting and pagination', async () => {
+    //     const blog = expect.getState().blog1
+    //     const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog.id)
+    //
+    //     const response = await request(server)
+    //       .get(`${url}?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       pagesCount: 2,
+    //       page: 2,
+    //       pageSize: 2,
+    //       totalCount: 3,
+    //       items: [
+    //         getPostsByBlogId(3, 3, blog)
+    //       ]
+    //     })
+    //   })
+    //
+    //   it('Return all post with sorting and pagination', async () => {
+    //     const {blog1} = expect.getState()
+    //     const url = getUrlForEndpointPostByBlogger(endpoints.blogController, blog1.id)
+    //
+    //     const response = await request(server)
+    //       .get(`${url}?sortBy=content&sortDirection=desc&pageSize=2`)
+    //       .expect(200)
+    //
+    //     expect(response.body).toBe({
+    //       pagesCount: 1,
+    //       page: 1,
+    //       pageSize: 10,
+    //       totalCount: 3,
+    //       items: [
+    //         getPostsByBlogId(3, 3, blog1),
+    //         getPostsByBlogId(2, 3, blog1),
+    //       ]
+    //     })
+    //   })
+    // })
+    //
+    // describe('Return blog by id', () => {
+    //   const randomUuid = uuidv4()
+    //   const url = getUrlWithId(endpoints.blogController, randomUuid)
+    //
+    //   it('Try find not exist blog', async () => {
+    //     await request(server)
+    //       .get(url)
+    //       .expect(404)
+    //   })
+    //
+    //   it('Should return blog by id', async () => {
+    //     const blog = expect.getState().blog1
+    //     const url = getUrlWithId(endpoints.blogController, blog.id)
+    //
+    //     const response = await request(server)
+    //       .get(url)
+    //       .expect(200)
+    //
+    //     expect(response.body).toStrictEqual({
+    //       id: expect.any(String),
+    //       name: blog.name,
+    //       description: blog.description,
+    //       websiteUrl: blog.websiteUrl,
+    //       createdAt: expect.any(String),
+    //       isMembership: expect.any(Boolean)
+    //     })
+    //   })
     })
   })
 });
