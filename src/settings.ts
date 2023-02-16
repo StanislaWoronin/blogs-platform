@@ -27,6 +27,6 @@ export const settings = {
   },
   environment: 'dev',
   newestLikes: {
-    limit: '3'
-  }
+    limit: '3',
+  },
 };

@@ -5,11 +5,17 @@ import { PgUsersRepository } from '../../super-admin/infrastructure/pg-users.rep
 import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg-query-users.repository';
 import { PgBanInfoRepository } from '../../super-admin/infrastructure/pg-ban-info.repository';
 import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-blogs.repository';
-import { BlogsService } from "../../public/blogs/application/blogs.service";
-import { PostForBlogViewModel, PostViewModel } from "../../public/posts/api/dto/postsView.model";
-import { PostDto } from "../api/dto/post.dto";
-import { PostsService } from "../../public/posts/application/posts.service";
-import { toCreatedPostsViewModel, toPostsViewModel } from "../../../data-mapper/to-posts-view.model";
+import { BlogsService } from '../../public/blogs/application/blogs.service';
+import {
+  PostForBlogViewModel,
+  PostViewModel,
+} from '../../public/posts/api/dto/postsView.model';
+import { PostDto } from '../api/dto/post.dto';
+import { PostsService } from '../../public/posts/application/posts.service';
+import {
+  toCreatedPostsViewModel,
+  toPostsViewModel,
+} from '../../../data-mapper/to-posts-view.model';
 
 @Injectable()
 export class BloggerBlogService {
@@ -33,7 +39,6 @@ export class BloggerBlogService {
       dto.blogId,
     );
 
-
     // юзер для блога не в бане, но мы хотим его забанить
     // false        true
     if (youBanned === dto.isBanned) {
@@ -41,7 +46,6 @@ export class BloggerBlogService {
     }
     // !true         false
     if (!youBanned) {
-
       const banDate = new Date().toISOString();
       return await this.banInfoRepository.createUserBanForBlogStatus(
         userId,

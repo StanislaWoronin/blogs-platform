@@ -1,4 +1,4 @@
-import { IsBoolean, IsString, IsUUID, MinLength } from "class-validator";
+import { IsBoolean, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class BanUserDto {
   @IsString()

@@ -54,7 +54,7 @@ export class PgQueryUsersRepository {
     blogId: string,
     queryDto: QueryParametersDto,
   ): Promise<ContentPageModel> {
-    const filter = this.bannedUserFilter(blogId, queryDto)
+    const filter = this.bannedUserFilter(blogId, queryDto);
 
     const usersQuery = `
       SELECT b."banDate", b."banReason",
@@ -148,10 +148,10 @@ export class PgQueryUsersRepository {
     const userFilter = this.userFilter(query);
 
     if (!userFilter) {
-      return `WHERE b."blogId" = '${blogId}'`
+      return `WHERE b."blogId" = '${blogId}'`;
     }
 
-    return `WHERE b."blogId" = '${blogId}' AND ${userFilter}`
+    return `WHERE b."blogId" = '${blogId}' AND ${userFilter}`;
   }
 
   private banFilter(query: QueryParametersDto): string {
@@ -179,5 +179,4 @@ export class PgQueryUsersRepository {
     if (searchEmailTerm) return email;
     return '';
   }
-
 }

@@ -35,5 +35,3 @@ export class CreatedComment {
   userId: string;
   userLogin: string;
 }
-
-

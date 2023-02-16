@@ -3,7 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { EmailConfirmationModel } from './entity/emailConfirmation.model';
 import { v4 as uuidv4 } from 'uuid';
-import {log} from "util";
+import { log } from 'util';
 
 @Injectable()
 export class PgEmailConfirmationRepository {
@@ -87,7 +87,11 @@ export class PgEmailConfirmationRepository {
          SET "confirmationCode" = $2, "expirationDate" = $3
        WHERE "userId" = $1;
     `;
-    const result = await this.dataSource.query(query, [userId, confirmationCode, expirationDate]);
+    const result = await this.dataSource.query(query, [
+      userId,
+      confirmationCode,
+      expirationDate,
+    ]);
 
     if (result[1] !== 1) {
       return false;

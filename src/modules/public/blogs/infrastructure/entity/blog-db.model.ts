@@ -6,7 +6,7 @@ export class BlogDBModel {
     public websiteUrl: string,
     public createdAt: string,
     public userId: string,
-    public isMembership: boolean
+    public isMembership: boolean,
   ) {}
 }
 

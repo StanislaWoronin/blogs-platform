@@ -1,14 +1,14 @@
 export const getAllDevices = (num: number) => {
-    const devices = []
+  const devices = [];
 
-    for (let i = 0; i < num; i++) {
-        devices.push({
-            ip: expect.any(String),
-            title: expect.any(String),
-            lastActiveDate: expect.any(String),
-            deviceId: expect.any(String),
-        })
-    }
+  for (let i = 0; i < num; i++) {
+    devices.push({
+      ip: expect.any(String),
+      title: expect.any(String),
+      lastActiveDate: expect.any(String),
+      deviceId: expect.any(String),
+    });
+  }
 
-    return devices
-}
+  return devices;
+};

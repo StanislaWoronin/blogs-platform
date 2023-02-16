@@ -19,12 +19,12 @@ export class PostViewModel {
 }
 
 export class PostForBlogViewModel {
-    constructor(
-        public id: string,
-        public title: string,
-        public shortDescription: string,
-        public content: string,
-        public blogId: string,
-        public blogName: string
-    ) {}
+  constructor(
+    public id: string,
+    public title: string,
+    public shortDescription: string,
+    public content: string,
+    public blogId: string,
+    public blogName: string,
+  ) {}
 }

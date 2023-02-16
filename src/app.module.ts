@@ -14,7 +14,7 @@ import { EmailExistValidator } from './validation/email-exist-validator.service'
 import { LoginExistValidator } from './validation/login-exist-validator.service';
 import { ConfirmationCodeValidator } from './validation/confirmation-code.validator';
 import { CreateUserBySaUseCase } from './modules/super-admin/use-cases/create-user-by-sa.use-case';
-import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { PgJwtRepository } from './modules/public/auth/infrastructure/pg-jwt.repository';
 import { UsersService } from './modules/super-admin/application/users.service';
 import { PgBanInfoRepository } from './modules/super-admin/infrastructure/pg-ban-info.repository';
@@ -37,27 +37,27 @@ import { BannedUsersForBlog } from './modules/public/blogs/infrastructure/entity
 import { CommentReactions } from './modules/public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from './modules/public/likes/infrastructure/entity/post-reactions.entity';
 import { Comments } from './modules/public/comments/infrastructure/entity/comments.entity';
-import { BloggerBlogsController } from "./modules/blogger/api/blogger-blogs.controller";
-import { BloggerUsersController } from "./modules/blogger/api/blogger-users.controller";
-import { BloggerBlogService } from "./modules/blogger/application/blogger-blogs.service";
-import { BlogsController } from "./modules/public/blogs/api/blogs.controller";
-import { BlogsService } from "./modules/public/blogs/application/blogs.service";
-import { PgBlogsRepository } from "./modules/public/blogs/infrastructure/pg-blogs.repository";
-import { PgQueryBlogsRepository } from "./modules/public/blogs/infrastructure/pg-query-blogs.repository";
-import { CommentsService } from "./modules/public/comments/application/comments.service";
-import { PgCommentsRepository } from "./modules/public/comments/infrastructure/pg-comments.repository";
-import { PgQueryCommentsRepository } from "./modules/public/comments/infrastructure/pg-query-comments.repository";
-import { PgLikesRepository } from "./modules/public/likes/infrastructure/pg-likes.repository";
-import { PostsController } from "./modules/public/posts/api/posts.controller";
-import { PostsService } from "./modules/public/posts/application/posts.service";
-import { PgPostsRepository } from "./modules/public/posts/infrastructure/pg-posts.repository";
-import { PgQueryPostsRepository } from "./modules/public/posts/infrastructure/pg-query-posts.repository";
-import { SaBlogsController } from "./modules/super-admin/api/sa-blogs.controller";
-import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.service";
-import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
-import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
-import { BlogsRepository } from "./modules/public/blogs/infrastructure/blogs.repository";
-import {CommentsController} from "./modules/public/comments/api/comments.controller";
+import { BloggerBlogsController } from './modules/blogger/api/blogger-blogs.controller';
+import { BloggerUsersController } from './modules/blogger/api/blogger-users.controller';
+import { BloggerBlogService } from './modules/blogger/application/blogger-blogs.service';
+import { BlogsController } from './modules/public/blogs/api/blogs.controller';
+import { BlogsService } from './modules/public/blogs/application/blogs.service';
+import { PgBlogsRepository } from './modules/public/blogs/infrastructure/pg-blogs.repository';
+import { PgQueryBlogsRepository } from './modules/public/blogs/infrastructure/pg-query-blogs.repository';
+import { CommentsService } from './modules/public/comments/application/comments.service';
+import { PgCommentsRepository } from './modules/public/comments/infrastructure/pg-comments.repository';
+import { PgQueryCommentsRepository } from './modules/public/comments/infrastructure/pg-query-comments.repository';
+import { PgLikesRepository } from './modules/public/likes/infrastructure/pg-likes.repository';
+import { PostsController } from './modules/public/posts/api/posts.controller';
+import { PostsService } from './modules/public/posts/application/posts.service';
+import { PgPostsRepository } from './modules/public/posts/infrastructure/pg-posts.repository';
+import { PgQueryPostsRepository } from './modules/public/posts/infrastructure/pg-query-posts.repository';
+import { SaBlogsController } from './modules/super-admin/api/sa-blogs.controller';
+import { SaBlogsService } from './modules/super-admin/application/sa-blogs.service';
+import { BannedPost } from './modules/super-admin/infrastructure/entity/banned-post.entity';
+import { PasswordRecoveryValidator } from './validation/password-recovery.validator';
+import { BlogsRepository } from './modules/public/blogs/infrastructure/blogs.repository';
+import { CommentsController } from './modules/public/comments/api/comments.controller';
 
 const controllers = [
   AuthController,
@@ -128,7 +128,7 @@ const validators = [
   EmailResendingValidator,
   EmailExistValidator,
   LoginExistValidator,
-  PasswordRecoveryValidator
+  PasswordRecoveryValidator,
 ];
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
@@ -142,7 +142,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       autoLoadEntities: true,
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([...entity])
+    TypeOrmModule.forFeature([...entity]),
     // BlogModule,
     //
     // ThrottlerModule.forRoot({

@@ -1,18 +1,22 @@
-import { BlogViewModel } from "../../src/modules/public/blogs/api/dto/blogView.model";
-import {preparedPost} from "./prepeared-data";
-import { PostDto } from "../../src/modules/blogger/api/dto/post.dto";
-import {PostViewModel} from "../../src/modules/public/posts/api/dto/postsView.model";
+import { BlogViewModel } from '../../src/modules/public/blogs/api/dto/blogView.model';
+import { preparedPost } from './prepeared-data';
+import { PostDto } from '../../src/modules/blogger/api/dto/post.dto';
+import { PostViewModel } from '../../src/modules/public/posts/api/dto/postsView.model';
 
-export const getPostsByBlogId = (num: number, count: number, blog: BlogViewModel) => {
+export const getPostsByBlogId = (
+  num: number,
+  count: number,
+  blog: BlogViewModel,
+) => {
   return {
     id: expect.any(String),
     title: `PostName${num}`,
     shortDescription: `SomeOneShortDescription${num}`,
     content: `SomeOneContent${count - num + 1}`,
     blogId: blog.id,
-    blogName: blog.name
-  }
-}
+    blogName: blog.name,
+  };
+};
 
 export const getPosts = (post: PostViewModel, blog: BlogViewModel) => {
   return {
@@ -26,17 +30,17 @@ export const getPosts = (post: PostViewModel, blog: BlogViewModel) => {
     extendedLikesInfo: {
       likesCount: 0,
       dislikesCount: 0,
-      myStatus: "None",
+      myStatus: 'None',
       newestLikes: [
         // {
         //     "addedAt": "2023-01-23T07:56:46.794Z",
         //     "userId": "string",
         //     "login": "string"
         // }
-      ]
-    }
-  }
-}
+      ],
+    },
+  };
+};
 
 export const getStandardPosts = (blog: BlogViewModel) => {
   return {
@@ -50,14 +54,14 @@ export const getStandardPosts = (blog: BlogViewModel) => {
     extendedLikesInfo: {
       likesCount: 0,
       dislikesCount: 0,
-      myStatus: "None",
+      myStatus: 'None',
       newestLikes: [
         // {
         //     "addedAt": "2023-01-23T07:56:46.794Z",
         //     "userId": "string",
         //     "login": "string"
         // }
-      ]
-    }
-  }
-}
+      ],
+    },
+  };
+};

@@ -1,13 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PgCommentsRepository } from '../infrastructure/pg-comments.repository';
 import { CommentBDModel } from '../infrastructure/entity/commentDB.model';
-import {CommentViewModel, CreatedCommentViewModel} from '../api/dto/commentView.model';
+import {
+  CommentViewModel,
+  CreatedCommentViewModel,
+} from '../api/dto/commentView.model';
 import { v4 as uuidv4 } from 'uuid';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
-import {createdCommentViewModel, toCommentsViewModel} from "../../../../data-mapper/to_comments_view.model";
-import {PgLikesRepository} from "../../likes/infrastructure/pg-likes.repository";
-import {ReactionModel} from "../../../../global-model/reaction.model";
+import {
+  createdCommentViewModel,
+  toCommentsViewModel,
+} from '../../../../data-mapper/to_comments_view.model';
+import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
+import { ReactionModel } from '../../../../global-model/reaction.model';
 
 @Injectable()
 export class CommentsService {
@@ -33,7 +39,9 @@ export class CommentsService {
       user.id,
     );
 
-    const createdComment = await this.commentsRepository.createComment(newComment);
+    const createdComment = await this.commentsRepository.createComment(
+      newComment,
+    );
 
     return createdCommentViewModel(createdComment);
   }
@@ -47,23 +55,29 @@ export class CommentsService {
     commentId: string,
     likeStatus: string,
   ): Promise<boolean> {
-    const currentReaction = await this.likesRepository.getCommentReaction(userId, commentId)
+    const currentReaction = await this.likesRepository.getCommentReaction(
+      userId,
+      commentId,
+    );
 
     if (!currentReaction) {
       if (likeStatus === ReactionModel.None) {
-        return true
+        return true;
       }
 
       return await this.likesRepository.createCommentReaction(
-          userId,
-          commentId,
-          likeStatus,
-          new Date().toISOString()
-      )
+        userId,
+        commentId,
+        likeStatus,
+        new Date().toISOString(),
+      );
     }
 
     if (likeStatus === ReactionModel.None) {
-      return await this.likesRepository.deleteCommentReaction(userId, commentId);
+      return await this.likesRepository.deleteCommentReaction(
+        userId,
+        commentId,
+      );
     }
 
     return await this.likesRepository.updateCommentReaction(

@@ -7,7 +7,7 @@ import {
 import { UsersService } from '../modules/super-admin/application/users.service';
 import { JwtService } from '../modules/public/auth/application/jwt.service';
 import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
-import { log } from "util";
+import { log } from 'util';
 
 @Injectable()
 export class RefreshTokenValidationGuard implements CanActivate {

@@ -16,7 +16,7 @@ export class Users {
     type: 'character varying',
     length: 15,
     nullable: false,
-    collation: 'C'
+    collation: 'C',
   })
   login: string;
 

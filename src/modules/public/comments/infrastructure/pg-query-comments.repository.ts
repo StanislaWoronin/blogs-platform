@@ -9,7 +9,10 @@ import {
 import { DbCommentWithUserAndLikesInfoModel } from './entity/db_comment.model';
 import { toCommentsViewModel } from '../../../../data-mapper/to_comments_view.model';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
-import {CommentViewModel, CommentWithAdditionalInfo} from "../api/dto/commentView.model";
+import {
+  CommentViewModel,
+  CommentWithAdditionalInfo,
+} from '../api/dto/commentView.model';
 
 @Injectable()
 export class PgQueryCommentsRepository {
@@ -48,10 +51,8 @@ export class PgQueryCommentsRepository {
                queryDto.pageSize,
              )};         
         `;
-    const commentDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query, [
-      blogId,
-      queryDto.pageNumber,
-    ]);
+    const commentDB: DbCommentWithUserAndLikesInfoModel[] =
+      await this.dataSource.query(query, [blogId, queryDto.pageNumber]);
 
     const comments = commentDB.map((c) => toCommentsViewModel(c));
 
@@ -101,12 +102,10 @@ export class PgQueryCommentsRepository {
                queryDto.pageSize,
              )};   
         `;
-    const commentsDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query, [
-      postId,
-      queryDto.pageSize,
-    ]);
+    const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
+      await this.dataSource.query(query, [postId, queryDto.pageSize]);
 
-    const comments = commentsDB.map(c => toCommentsViewModel(c))
+    const comments = commentsDB.map((c) => toCommentsViewModel(c));
 
     const totalCountQuery = `
           SELECT COUNT(id)
@@ -123,7 +122,10 @@ export class PgQueryCommentsRepository {
     );
   }
 
-  async getCommentById(commentId: string, userId: string | undefined): Promise<CommentViewModel> {
+  async getCommentById(
+    commentId: string,
+    userId: string | undefined,
+  ): Promise<CommentViewModel> {
     const myStatusFilter = this.myStatusFilter(userId);
 
     const query = `
@@ -144,12 +146,13 @@ export class PgQueryCommentsRepository {
               FROM public.comments
              WHERE comments.id = '${commentId}'
         `;
-    const commentsDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query);
+    const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
+      await this.dataSource.query(query);
 
-    if(!commentsDB.length) {
-      return null
+    if (!commentsDB.length) {
+      return null;
     }
-    return toCommentsViewModel(commentsDB[0])
+    return toCommentsViewModel(commentsDB[0]);
   }
 
   async commentExists(commentId: string): Promise<{ userId: string } | null> {
@@ -157,13 +160,13 @@ export class PgQueryCommentsRepository {
       SELECT "userId"
         FROM public.comments
        WHERE id = $1;
-    `
-    const response = await this.dataSource.query(query, [commentId])
+    `;
+    const response = await this.dataSource.query(query, [commentId]);
 
     if (!response[0]) {
-      return null
+      return null;
     }
-    return response[0]
+    return response[0];
   }
 
   private myStatusFilter(userId: string | undefined): string {

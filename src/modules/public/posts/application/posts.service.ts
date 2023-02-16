@@ -7,7 +7,10 @@ import { PostViewModel } from '../api/dto/postsView.model';
 import { PostDBModel } from '../infrastructure/entity/post-db.model';
 import { v4 as uuidv4 } from 'uuid';
 import { PgPostsRepository } from '../infrastructure/pg-posts.repository';
-import { toCreatedPostsViewModel, toPostsViewModel } from "../../../../data-mapper/to-posts-view.model";
+import {
+  toCreatedPostsViewModel,
+  toPostsViewModel,
+} from '../../../../data-mapper/to-posts-view.model';
 
 @Injectable()
 export class PostsService {
@@ -36,23 +39,30 @@ export class PostsService {
 
     const createdPost = await this.postsRepository.createPost(newPost);
 
-    return toCreatedPostsViewModel(createdPost)
+    return toCreatedPostsViewModel(createdPost);
   }
 
-  async updatePostReaction(userId: string, postId: string, likeStatus: string): Promise<boolean> {
-    const currentReaction = await this.likesRepository.getPostReaction(userId, postId)
+  async updatePostReaction(
+    userId: string,
+    postId: string,
+    likeStatus: string,
+  ): Promise<boolean> {
+    const currentReaction = await this.likesRepository.getPostReaction(
+      userId,
+      postId,
+    );
 
     if (!currentReaction) {
       if (likeStatus === ReactionModel.None) {
-        return true
+        return true;
       }
 
       return await this.likesRepository.createPostReaction(
-          userId,
-          postId,
-          likeStatus,
-          new Date().toISOString()
-      )
+        userId,
+        postId,
+        likeStatus,
+        new Date().toISOString(),
+      );
     }
 
     if (likeStatus === ReactionModel.None) {
@@ -63,7 +73,7 @@ export class PostsService {
       userId,
       postId,
       likeStatus,
-      new Date().toISOString()
+      new Date().toISOString(),
     );
   }
 

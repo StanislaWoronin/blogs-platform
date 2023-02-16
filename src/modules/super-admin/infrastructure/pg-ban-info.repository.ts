@@ -4,7 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BanUserDto } from '../../blogger/api/dto/ban-user.dto';
 import { query } from 'express';
-import {blogsForCurrentUser} from "../../../../test/helper/exect-blogger.model";
+import { blogsForCurrentUser } from '../../../../test/helper/exect-blogger.model';
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -85,15 +85,19 @@ export class PgBanInfoRepository {
     return true;
   }
 
-  async createPostsBanInfo(postsId: { id: string }[], banReason: string, banDate: string): Promise<boolean> {
-    const values = this.getValues(postsId, banReason, banDate)
+  async createPostsBanInfo(
+    postsId: { id: string }[],
+    banReason: string,
+    banDate: string,
+  ): Promise<boolean> {
+    const values = this.getValues(postsId, banReason, banDate);
 
     const query = `
       INSERT INTO public.banned_post 
              ("postId", "banReason", "banDate")
       VALUES ${values};       
-    `
-    const result = await this.dataSource.query(query)
+    `;
+    const result = await this.dataSource.query(query);
 
     if (!result.length) {
       return false;
@@ -172,7 +176,7 @@ export class PgBanInfoRepository {
         FROM public.banned_post
        WHERE "postId" IN (SELECT id FROM posts WHERE "blogId" = $1)
     `;
-    const result = await this.dataSource.query(query, [blogId])
+    const result = await this.dataSource.query(query, [blogId]);
 
     return result[1];
   }
@@ -189,17 +193,21 @@ export class PgBanInfoRepository {
     return filter;
   }
 
-  private getValues(postsId: { id: string }[], banReason: string, banDate: string): string {
-    let values = ''
+  private getValues(
+    postsId: { id: string }[],
+    banReason: string,
+    banDate: string,
+  ): string {
+    let values = '';
 
     // for(let p in postsId) {
     //   values += `('${id}', '${banReason}', '${banDate}'), `
     // } // TODO
 
-    for(let i = 0, l = postsId.length; i < l; i++) {
-      values += `('${postsId[i].id}', '${banReason}', '${banDate}'), `
+    for (let i = 0, l = postsId.length; i < l; i++) {
+      values += `('${postsId[i].id}', '${banReason}', '${banDate}'), `;
     }
 
-    return values.slice(0, -2)
+    return values.slice(0, -2);
   }
 }

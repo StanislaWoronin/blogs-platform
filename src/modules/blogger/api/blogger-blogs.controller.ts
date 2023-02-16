@@ -44,7 +44,7 @@ export class BloggerBlogsController {
   ): Promise<ContentPageModel> {
     const blogs = await this.queryBlogsRepository.getBlogs(query, user.id);
 
-    return blogs
+    return blogs;
   }
 
   @Get('comments')

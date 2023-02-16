@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Like, ObjectLiteral, Repository } from "typeorm";
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Like, ObjectLiteral, Repository } from 'typeorm';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
@@ -9,18 +9,15 @@ import {
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
-import { BlogViewModelWithBanStatus } from "../api/dto/blogView.model";
+import { BlogViewModelWithBanStatus } from '../api/dto/blogView.model';
 
 @Injectable()
 export class PgQueryBlogsRepository {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-  ) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getBlogs(
-      queryDto: QueryParametersDto,
-      userId?: string,
+    queryDto: QueryParametersDto,
+    userId?: string,
   ): Promise<ContentPageModel> {
     const filter = this.getFilter(userId, queryDto);
 
@@ -32,9 +29,9 @@ export class PgQueryBlogsRepository {
                                                WHERE banned_blog."blogId" = blogs.id))
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-    )};
+               queryDto.pageNumber,
+               queryDto.pageSize,
+             )};
         `;
     const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
 
@@ -46,10 +43,10 @@ export class PgQueryBlogsRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-        blogs,
-        Number(totalCount[0].count),
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      blogs,
+      Number(totalCount[0].count),
     );
   }
 
@@ -72,8 +69,8 @@ export class PgQueryBlogsRepository {
              )};
         `;
     const blogsDB: dbBlogWithAdditionalInfo[] = await this.dataSource.query(
-        blogsQuery,
-        [queryDto.pageSize],
+      blogsQuery,
+      [queryDto.pageSize],
     );
 
     const blogs = blogsDB.map((b) => toBlogWithAdditionalInfoModel(b));
@@ -88,10 +85,10 @@ export class PgQueryBlogsRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-        blogs,
-        Number(totalCount[0].count),
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      blogs,
+      Number(totalCount[0].count),
     );
   }
 
@@ -104,7 +101,7 @@ export class PgQueryBlogsRepository {
     const result = await this.dataSource.query(query);
 
     if (!result.length) {
-      return null
+      return null;
     }
 
     return result[0];
@@ -119,7 +116,7 @@ export class PgQueryBlogsRepository {
     const result = await this.dataSource.query(query, [blogId]);
 
     if (!result[0]) {
-      return null
+      return null;
     }
     return result[0].userId;
   }
@@ -130,18 +127,18 @@ export class PgQueryBlogsRepository {
         FROM public.blogs
        WHERE id = $1;
     `;
-    const response = await this.dataSource.query(query, [blogId])
+    const response = await this.dataSource.query(query, [blogId]);
 
-    return response[0].isBanned
+    return response[0].isBanned;
   }
 
   private getFilter(userId: string | null, query: QueryParametersDto): string {
-    const nameFilter = this.searchNameFilter(query)
+    const nameFilter = this.searchNameFilter(query);
 
     if (userId) {
       return `${nameFilter} AND "userId" = '${userId}'`;
     }
-    return `${nameFilter}`
+    return `${nameFilter}`;
   }
 
   private searchNameFilter(query: QueryParametersDto) {

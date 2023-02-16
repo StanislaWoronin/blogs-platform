@@ -20,7 +20,7 @@ export class AuthService {
       await this.emailConfirmationRepository.updateConfirmationCode(
         userId,
         newRecoveryCode,
-        expirationDate
+        expirationDate,
       );
 
     if (!result) {

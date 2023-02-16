@@ -12,6 +12,6 @@ export enum SortParametersModel {
 }
 
 export enum SortDirections {
-  Ascending = 'ASC',
-  Distending = 'DESC',
+  Ascending = 'asc',
+  Distending = 'desc',
 }

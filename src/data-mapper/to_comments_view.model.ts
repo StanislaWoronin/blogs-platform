@@ -1,13 +1,18 @@
-import {CreatedComment, DbCommentWithUserAndLikesInfoModel} from '../modules/public/comments/infrastructure/entity/db_comment.model';
 import {
-  CommentViewModel, CreatedCommentViewModel,
+  CreatedComment,
+  DbCommentWithUserAndLikesInfoModel,
+} from '../modules/public/comments/infrastructure/entity/db_comment.model';
+import {
+  CommentViewModel,
+  CreatedCommentViewModel,
 } from '../modules/public/comments/api/dto/commentView.model';
 
 export const toCommentsViewModel = (
   comment: DbCommentWithUserAndLikesInfoModel,
 ): CommentViewModel => {
   let myStatus = 'None';
-  if (!!comment.myStatus) { // TODO "!!" — является проверкой как определена ли переменная и является истиной, а "!!!" — как определена переменная и является ложью.
+  if (!!comment.myStatus) {
+    // TODO "!!" — является проверкой как определена ли переменная и является истиной, а "!!!" — как определена переменная и является ложью.
     myStatus = comment.myStatus;
   }
 
@@ -22,12 +27,14 @@ export const toCommentsViewModel = (
     },
     commentatorInfo: {
       userId: comment.userId,
-      userLogin: comment.userLogin
+      userLogin: comment.userLogin,
     },
   };
 };
 
-export const createdCommentViewModel = (comment: CreatedComment): CreatedCommentViewModel => {
+export const createdCommentViewModel = (
+  comment: CreatedComment,
+): CreatedCommentViewModel => {
   return {
     id: comment.id,
     content: comment.content,
@@ -39,7 +46,7 @@ export const createdCommentViewModel = (comment: CreatedComment): CreatedComment
     },
     commentatorInfo: {
       userId: comment.userId,
-      userLogin: comment.userLogin
+      userLogin: comment.userLogin,
     },
-  }
-}
+  };
+};

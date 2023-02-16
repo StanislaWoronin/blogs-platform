@@ -5,7 +5,7 @@ export const User = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
 
     if (!request.user) {
-        console.log('AuthBearerGuard must be used');
+      console.log('AuthBearerGuard must be used');
     }
 
     return request.user;

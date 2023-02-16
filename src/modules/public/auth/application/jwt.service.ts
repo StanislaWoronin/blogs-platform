@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { settings } from '../../../../settings';
 import { PgJwtRepository } from '../infrastructure/pg-jwt.repository';
-import {TokenPayloadModel} from "../../../../global-model/token-payload.model";
+import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
 
 @Injectable()
 export class JwtService {
@@ -16,7 +16,7 @@ export class JwtService {
         userId: result.userId,
         deviceId: result.deviceId,
         iat: result.iat * 1000,
-        exp: result.exp * 1000
+        exp: result.exp * 1000,
       };
     } catch (error) {
       return null;
@@ -45,7 +45,7 @@ export class JwtService {
         expiresIn: `${timeToExpired}s`,
       });
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 

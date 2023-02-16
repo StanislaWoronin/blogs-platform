@@ -39,37 +39,50 @@ export class PgLikesRepository {
   //   }
   // }
   //
-  async getCommentReaction(userId: string, commentId: string): Promise<string | null> {
+  async getCommentReaction(
+    userId: string,
+    commentId: string,
+  ): Promise<string | null> {
     const query = `
       SELECT status
         FROM public.comment_reactions
        WHERE "userId" = $1 AND "commentId" = $2
-    `
-    const result = await this.dataSource.query(query, [userId, commentId])
+    `;
+    const result = await this.dataSource.query(query, [userId, commentId]);
 
-    return result[0]
+    return result[0];
   }
 
-  async createCommentReaction(userId: string, commentId: string, likeStatus: string, addedAt: string): Promise<boolean> {
+  async createCommentReaction(
+    userId: string,
+    commentId: string,
+    likeStatus: string,
+    addedAt: string,
+  ): Promise<boolean> {
     const query = `
       INSERT INTO public.comment_reactions
              (status, "addedAt", "userId", "commentId")
       VALUES ($1, $2, $3, $4)  
              RETURNING status, "addedAt", "userId", "commentId"
-    `
-    const result = await this.dataSource.query(query, [likeStatus, addedAt, userId, commentId])
+    `;
+    const result = await this.dataSource.query(query, [
+      likeStatus,
+      addedAt,
+      userId,
+      commentId,
+    ]);
 
     if (!result[0]) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async updateCommentReaction(
-      commentId: string,
-      userId: string,
-      likeStatus: string,
-      addedAt: string,
+    commentId: string,
+    userId: string,
+    likeStatus: string,
+    addedAt: string,
   ): Promise<boolean> {
     const query = `
       UPDATE public.comment_reactions
@@ -89,7 +102,10 @@ export class PgLikesRepository {
     return true;
   }
 
-  async deleteCommentReaction(userId: string, commentId: string): Promise<boolean> {
+  async deleteCommentReaction(
+    userId: string,
+    commentId: string,
+  ): Promise<boolean> {
     const query = `
       DELETE FROM public.comment_reactions
        WHERE "userId" = $1 AND "commentId" = $2
@@ -102,30 +118,40 @@ export class PgLikesRepository {
     return true;
   }
 
-  async getPostReaction(userId: string, postId: string): Promise<string | null> {
+  async getPostReaction(
+    userId: string,
+    postId: string,
+  ): Promise<string | null> {
     const query = `
       SELECT status
         FROM public.post_reactions
        WHERE "userId" = $1 AND "postId" = $2
-    `
-    const result = await this.dataSource.query(query, [userId, postId])
+    `;
+    const result = await this.dataSource.query(query, [userId, postId]);
 
-    return result[0]
+    return result[0];
   }
 
-  async createPostReaction(userId: string, postId: string, likeStatus: string, addedAt: string): Promise<boolean> {
+  async createPostReaction(
+    userId: string,
+    postId: string,
+    likeStatus: string,
+    addedAt: string,
+  ): Promise<boolean> {
     const query = `
       INSERT INTO public.post_reactions
              (status, "addedAt", "userId", "postId")
       VALUES ('${likeStatus}', '${addedAt}', '${userId}', '${postId}')  
              RETURNING status, "addedAt", "userId", "postId"
-    `
-    const result = await this.dataSource.query(query/*, [likeStatus, addedAt, userId, postId]*/)
+    `;
+    const result = await this.dataSource.query(
+      query /*, [likeStatus, addedAt, userId, postId]*/,
+    );
 
     if (!result[0]) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async updatePostReaction(

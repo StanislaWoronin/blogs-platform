@@ -17,10 +17,10 @@ export class Blogs {
   @PrimaryColumn('uuid') id: string;
 
   @Column({
-    type: "character varying",
+    type: 'character varying',
     length: 15,
     nullable: false,
-    collation: "C"
+    collation: 'C',
   })
   name: string;
 
@@ -30,7 +30,7 @@ export class Blogs {
 
   @Column() createdAt: string;
 
-  @Column({default: false}) isMembership: boolean;
+  @Column({ default: false }) isMembership: boolean;
 
   @ManyToOne(() => Users, (u) => u.blogs)
   @JoinColumn()

@@ -1,12 +1,16 @@
-import { INestApplication } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
-import { AppModule } from "../src/app.module";
-import { createApp } from "../src/helpers/create-app";
-import request from "supertest";
-import {preparedPost, preparedUser, superUser} from "./helper/prepeared-data";
+import { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AppModule } from '../src/app.module';
+import { createApp } from '../src/helpers/create-app';
+import request from 'supertest';
+import { preparedPost, preparedUser, superUser } from './helper/prepeared-data';
 import { v4 as uuidv4 } from 'uuid';
-import {getPostsByBlogId} from "./helper/expect-post-models";
-import {endpoints, getUrlForEndpointPostByBlogger, getUrlWithId} from "./helper/routing";
+import { getPostsByBlogId } from './helper/expect-post-models';
+import {
+  endpoints,
+  getUrlForEndpointPostByBlogger,
+  getUrlWithId,
+} from './helper/routing';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -32,98 +36,98 @@ describe('e2e tests', () => {
 
   describe('Public blogs', () => {
     it('Clear date base', async () => {
-      await request(server)
-        .delete(`/testing/all-data`)
-        .expect(204)
-    })
+      await request(server).delete(`/testing/all-data`).expect(204);
+    });
 
     it('Creat blogs', async () => {
       await request(server)
         .post(endpoints.sa.users)
         .send(preparedUser.valid1)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
-        .expect(201)
+        .auth(superUser.valid.login, superUser.valid.password, {
+          type: 'basic',
+        })
+        .expect(201);
 
       const token = await request(server)
         .post(endpoints.authController.login)
         .send(preparedUser.login1)
         .set({ 'user-agent': 'chrome/0.1' })
-        .expect(200)
+        .expect(200);
 
       const blog1 = await request(server)
         .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName5',
           description: 'valid description',
-          websiteUrl: 'https://someUrl1.io/'
+          websiteUrl: 'https://someUrl1.io/',
         })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+        .auth(token.body.accessToken, { type: 'bearer' })
+        .expect(201);
 
       const blog2 = await request(server)
         .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName4',
           description: 'valid description',
-          websiteUrl: 'https://someUrl2.io/'
+          websiteUrl: 'https://someUrl2.io/',
         })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+        .auth(token.body.accessToken, { type: 'bearer' })
+        .expect(201);
 
       const blog3 = await request(server)
         .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName3',
           description: 'valid description',
-          websiteUrl: 'https://someUrl3.io/'
+          websiteUrl: 'https://someUrl3.io/',
         })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+        .auth(token.body.accessToken, { type: 'bearer' })
+        .expect(201);
 
       const blog4 = await request(server)
         .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName2',
           description: 'valid description',
-          websiteUrl: 'https://someUrl4.io/'
+          websiteUrl: 'https://someUrl4.io/',
         })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+        .auth(token.body.accessToken, { type: 'bearer' })
+        .expect(201);
 
       const blog5 = await request(server)
         .post(endpoints.bloggerController.blogs)
         .send({
           name: 'BlogName1',
           description: 'valid description',
-          websiteUrl: 'https://someUrl5.io/'
+          websiteUrl: 'https://someUrl5.io/',
         })
-        .auth(token.body.accessToken, {type: 'bearer'})
-        .expect(201)
+        .auth(token.body.accessToken, { type: 'bearer' })
+        .expect(201);
 
-      expect.setState({token: token.body})
-      expect.setState({blog1: blog1.body})
-      expect.setState({blog5: blog5.body})
-      expect.setState({items1: [blog5.body, blog4.body, blog3.body, blog2.body, blog1.body]})
-      expect.setState({items2: [blog2.body, blog1.body]})
-      expect.setState({items3: [blog1.body, blog2.body, blog3.body]})
-    })
+      expect.setState({ token: token.body });
+      expect.setState({ blog1: blog1.body });
+      expect.setState({ blog5: blog5.body });
+      expect.setState({
+        items1: [blog5.body, blog4.body, blog3.body, blog2.body, blog1.body],
+      });
+      expect.setState({ items2: [blog2.body, blog1.body] });
+      expect.setState({ items3: [blog1.body, blog2.body, blog3.body] });
+    });
 
     describe('Return blogs with paging', () => {
       it('Get blogs without query', async () => {
-        const items = expect.getState().items1
+        const items = expect.getState().items1;
 
-        const response = await request(server)
-          .get(`/blogs`)
-          .expect(200)
+        const response = await request(server).get(`/blogs`).expect(200);
 
         expect(response.body).toStrictEqual({
           pagesCount: 1,
           page: 1,
           pageSize: 10,
           totalCount: 5,
-          items: items
-        })
-      })
+          items: items,
+        });
+      });
 
       // it('Get blogs with sorting and paging1', async () => {
       //   const items = expect.getState().items2
@@ -169,7 +173,7 @@ describe('e2e tests', () => {
       //     items: [items]
       //   })
       // })
-    })
+    });
 
     // describe('Return all posts for specified blog', () => {
     //   it('Create posts', async () => {
@@ -305,5 +309,5 @@ describe('e2e tests', () => {
     //     })
     //   })
     // })
-  })
+  });
 });

@@ -3,63 +3,70 @@ const blogController = `/blogs`;
 const bloggerController = `/blogger`;
 const commentController = `/comments`;
 const postController = `/posts`;
-const saController = `/sa`
+const saController = `/sa`;
 const securityController = `/security/devices`;
 const testingController = `/testing`;
 
 export const endpoints = {
-    authController: {
-        login: `${authController}/login`,
-        logout: `${authController}/logout`,
-        me: `${authController}/me`,
-        newPassword: `${authController}/new-password`,
-        passwordRecovery: `${authController}/password-recovery`,
-        registration: `${authController}/registration`,
-        registrationConfirmation: `${authController}/registration-confirmation`,
-        registrationEmailResending: `${authController}/registration-email-resending`,
-        refreshToken: `${authController}/refresh-token`,
+  authController: {
+    login: `${authController}/login`,
+    logout: `${authController}/logout`,
+    me: `${authController}/me`,
+    newPassword: `${authController}/new-password`,
+    passwordRecovery: `${authController}/password-recovery`,
+    registration: `${authController}/registration`,
+    registrationConfirmation: `${authController}/registration-confirmation`,
+    registrationEmailResending: `${authController}/registration-email-resending`,
+    refreshToken: `${authController}/refresh-token`,
+  },
+  blogController,
+  bloggerController: {
+    blogs: `${bloggerController}/blogs`,
+    users: {
+      '': `${bloggerController}/users`,
+      blogs: `${bloggerController}/users/blog`,
     },
-    blogController,
-    bloggerController: {
-        blogs: `${bloggerController}/blogs`,
-        users: {
-          '': `${bloggerController}/users`,
-          blogs: `${bloggerController}/users/blog`,
-        }
-    },
-    commentController,
-    postController,
-    sa: {
-        blogs: `${saController}/blogs`,
-        users: `${saController}/users`
-    },
-    securityController,
-    testingController: {
-        allData: `${testingController}/all-data`,
-    },
+  },
+  commentController,
+  postController,
+  sa: {
+    blogs: `${saController}/blogs`,
+    users: `${saController}/users`,
+  },
+  securityController,
+  testingController: {
+    allData: `${testingController}/all-data`,
+  },
 };
 
-export const getUrlForEndpointPostByBlogger = (endpoint: string, blogId: string): string => {
-    return `${endpoint}/${blogId}/posts`
-}
+export const getUrlForEndpointPostByBlogger = (
+  endpoint: string,
+  blogId: string,
+): string => {
+  return `${endpoint}/${blogId}/posts`;
+};
 
 export const getUrlForBanned = (url: string, userId: string): string => {
-    const urlWithId = getUrlWithId(url, userId)
-    return `${urlWithId}/ban`
-}
+  const urlWithId = getUrlWithId(url, userId);
+  return `${urlWithId}/ban`;
+};
 
 export const getUrlWithId = (url: string, id: string): string => {
-    return `${url}/${id}`
-}
+  return `${url}/${id}`;
+};
 
-export const getUrlPostForSpecificBlog = (url: string, blogId: string, postId: string): string => {
-    return `${url}/${blogId}/posts/${postId}`
-}
+export const getUrlPostForSpecificBlog = (
+  url: string,
+  blogId: string,
+  postId: string,
+): string => {
+  return `${url}/${blogId}/posts/${postId}`;
+};
 
 export const getUrlForComment = (url: string, id: string): string => {
-    return `${url}/${id}/comments`
-}
+  return `${url}/${id}/comments`;
+};
 
 export const getUrlForReactionStatus = (url: string, id: string): string => {
-    return `${url}/${id}/like-status`
-}
+  return `${url}/${id}/like-status`;
+};

@@ -1,19 +1,25 @@
-import { superUser } from "./prepeared-data";
-import { UserDto } from "../../src/modules/super-admin/api/dto/user.dto";
+import { preparedComment, superUser } from "./prepeared-data";
+import { UserDto } from '../../src/modules/super-admin/api/dto/user.dto';
 import request from 'supertest';
-import { UserViewModel, UserViewModelWithBanInfo } from "../../src/modules/super-admin/api/dto/user.view.model";
-import { PostViewModel } from "../../src/modules/public/posts/api/dto/postsView.model";
-import { PostDto } from "../../src/modules/blogger/api/dto/post.dto";
-import { PostWithBlogIdDTO } from "../../src/modules/public/posts/api/dto/postDTO";
-import { faker } from "@faker-js/faker";
-import { BlogDto } from "../../src/modules/blogger/api/dto/blog.dto";
-import {endpoints, getUrlForComment, getUrlForEndpointPostByBlogger} from "./routing";
-import {CreatedComment} from "../../src/modules/public/comments/infrastructure/entity/db_comment.model";
-import {CommentDTO} from "../../src/modules/public/comments/api/dto/commentDTO";
+import {
+  UserViewModel,
+  UserViewModelWithBanInfo,
+} from '../../src/modules/super-admin/api/dto/user.view.model';
+import { PostViewModel } from '../../src/modules/public/posts/api/dto/postsView.model';
+import { PostDto } from '../../src/modules/blogger/api/dto/post.dto';
+import { PostWithBlogIdDTO } from '../../src/modules/public/posts/api/dto/postDTO';
+import { faker } from '@faker-js/faker';
+import { BlogDto } from '../../src/modules/blogger/api/dto/blog.dto';
+import {
+  endpoints,
+  getUrlForComment,
+  getUrlForEndpointPostByBlogger,
+} from './routing';
+import { CreatedComment } from '../../src/modules/public/comments/infrastructure/entity/db_comment.model';
+import { CommentDTO } from '../../src/modules/public/comments/api/dto/commentDTO';
 
 export class Factories {
-  constructor(private readonly server: any) {
-  }
+  constructor(private readonly server: any) {}
 
   async createUsers(usersCount: number): Promise<UserViewModelWithBanInfo[]> {
     const users = [];
@@ -27,7 +33,9 @@ export class Factories {
 
       const response = await request(this.server)
         .post(endpoints.sa.users)
-        .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+        .auth(superUser.valid.login, superUser.valid.password, {
+          type: 'basic',
+        })
         .send(inputUserData);
 
       users.push(response.body);
@@ -36,7 +44,13 @@ export class Factories {
     return users;
   }
 
-  async createAndLoginUsers(userCount: number): Promise<{ user: UserViewModelWithBanInfo, accessToken: string, refreshToken: string }[]> {
+  async createAndLoginUsers(userCount: number): Promise<
+    {
+      user: UserViewModelWithBanInfo;
+      accessToken: string;
+      refreshToken: string;
+    }[]
+  > {
     const users = await this.createUsers(userCount);
 
     const tokens = [];
@@ -44,7 +58,7 @@ export class Factories {
     for (let i = 0; i < userCount; i++) {
       const userLoginData = {
         loginOrEmail: users[i].login,
-        password: `password${i}`
+        password: `password${i}`,
       };
 
       const response = await request(this.server)
@@ -53,7 +67,9 @@ export class Factories {
         .send(userLoginData);
 
       const accessToken = response.body.accessToken;
-      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+      const refreshToken = response.headers['set-cookie'][0]
+        .split(';')[0]
+        .split('=')[1];
 
       tokens.push({ user: users[i], accessToken, refreshToken });
     }
@@ -73,7 +89,7 @@ export class Factories {
       const response = await request(this.server)
         .post(endpoints.bloggerController.blogs)
         .auth(accessToken, { type: 'bearer' })
-        .send(inputBlogData)
+        .send(inputBlogData);
 
       blogs.push(response.body);
     }
@@ -81,7 +97,11 @@ export class Factories {
     return blogs;
   }
 
-  async createPostsForBlog(accessToken: string, blogId: string, postsCount: number): Promise<PostViewModel[]> {
+  async createPostsForBlog(
+    accessToken: string,
+    blogId: string,
+    postsCount: number,
+  ): Promise<PostViewModel[]> {
     const posts = [];
 
     for (let i = 0; i < postsCount; i++) {
@@ -92,7 +112,10 @@ export class Factories {
         blogId: blogId,
       };
 
-      const url = getUrlForEndpointPostByBlogger(endpoints.bloggerController.blogs, blogId)
+      const url = getUrlForEndpointPostByBlogger(
+        endpoints.bloggerController.blogs,
+        blogId,
+      );
 
       const response = await request(this.server)
         .post(url)
@@ -104,24 +127,27 @@ export class Factories {
     return posts;
   }
 
-  async createComments(accessToken: string, postId: string, postsCount: number) : Promise<CreatedComment[]> {
+  async createComments(
+    accessToken: string,
+    postId: string,
+    postsCount: number,
+  ): Promise<CreatedComment[]> {
     const comment = [];
 
     for (let i = 0; i < postsCount; i++) {
       const inputPostData: CommentDTO = {
-        content: faker.lorem.words(5)
+        content: preparedComment.valid.content,
       };
 
-      const url = getUrlForComment(endpoints.postController, postId)
+      const url = getUrlForComment(endpoints.postController, postId);
 
       const response = await request(this.server)
-          .post(url)
-          .auth(accessToken, { type: 'bearer' })
-          .send(inputPostData);
+        .post(url)
+        .auth(accessToken, { type: 'bearer' })
+        .send(inputPostData);
       comment.push(response.body);
     }
 
-    return comment
+    return comment;
   }
-
 }

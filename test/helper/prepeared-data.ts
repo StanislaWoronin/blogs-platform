@@ -80,7 +80,7 @@ export const preparedBlog = {
   long: {
     name: 'Length-16_RJmZKM',
     description: faker.random.alpha(501),
-    websiteUrl: `https://it-incubator.io/new/${faker.random.alpha(73)}`
+    websiteUrl: `https://it-incubator.io/new/${faker.random.alpha(73)}`,
   },
 };
 
@@ -104,50 +104,53 @@ export const preparedPost = {
 
 export const preparedSecurity = {
   email: {
-    valid: {email: 'somemail@gmail.com'},
-    notValid: {email: '222^gmail.com'},
-    notExist: {email: 'notexist@mail.com'}
-  }
-}
+    valid: { email: 'somemail@gmail.com' },
+    notValid: { email: '222^gmail.com' },
+    notExist: { email: 'notexist@mail.com' },
+  },
+};
 
 export const preparedPassword = {
   valid: 'password',
-  short: {password: faker.random.alpha(5)},
-  long: {password: faker.random.alpha(21)},
-  newPass: 'newpassword'
-}
+  short: { password: faker.random.alpha(5) },
+  long: { password: faker.random.alpha(21) },
+  newPass: 'newpassword',
+};
 
 export const prepareLogin = {
   valid: {
     loginOrEmail: 'MyLogin',
-    password: 'newpassword'
+    password: 'newpassword',
   },
   notValid: {
     loginOrEmail: 1,
-    password: 1
+    password: 1,
   },
   notExist: {
     loginOrEmail: 'NotExist',
-    password: 'qwerty'
+    password: 'qwerty',
   },
-}
+};
 
 export const preparedComment = {
   valid: {
-    content: faker.random.alpha(21)
+    content: faker.random.alpha(21),
+  },
+  newValid: {
+    content: faker.random.alpha(31),
   },
   short: {
-    content: faker.random.alpha(19)
+    content: faker.random.alpha(19),
   },
   long: {
-    content: faker.random.alpha(301)
-  }
-}
+    content: faker.random.alpha(301),
+  },
+};
 
 export const preparedStatus = {
   notValid: {
     emptyString: '',
     lowerCase: 'like',
-    abracadabra: faker.random.alpha(5)
-  }
-}
+    abracadabra: faker.random.alpha(5),
+  },
+};

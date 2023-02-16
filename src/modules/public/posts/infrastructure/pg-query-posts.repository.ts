@@ -8,9 +8,12 @@ import {
 } from '../../../../helper.functions';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { DbPostModel } from './entity/db-post.model';
-import {PostForBlogViewModel, PostViewModel} from '../api/dto/postsView.model';
-import {settings} from "../../../../settings";
-import {NewestLikesModel} from "../../likes/infrastructure/entity/newestLikes.model";
+import {
+  PostForBlogViewModel,
+  PostViewModel,
+} from '../api/dto/postsView.model';
+import { settings } from '../../../../settings';
+import { NewestLikesModel } from '../../likes/infrastructure/entity/newestLikes.model';
 
 @Injectable()
 export class PgQueryPostsRepository {
@@ -22,7 +25,7 @@ export class PgQueryPostsRepository {
     userId: string | undefined,
   ): Promise<ContentPageModel> {
     const blogIdFilter = this.getBlogIdFilter(blogId);
-    const statusFilter = this.myStatusFilter(userId)
+    const statusFilter = this.myStatusFilter(userId);
 
     const query = `
             SELECT id, title, "shortDescription", content, "createdAt", "blogId",
@@ -38,12 +41,15 @@ export class PgQueryPostsRepository {
                  ${blogIdFilter}   
                  ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                  LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
-                   queryDto.pageNumber,
-                   queryDto.pageSize,
+                    queryDto.pageNumber,
+                    queryDto.pageSize,
                  )};      
         `;
     const postsDB: DbPostModel[] = await this.dataSource.query(query);
-    const posts = await Promise.all(postsDB.map(async p => await this.addNewestLikes(p)))
+
+    const posts = await Promise.all(
+      postsDB.map(async (p) => await this.addNewestLikes(p)),
+    );
 
     const totalCountQuery = `
           SELECT COUNT(id)
@@ -87,10 +93,13 @@ export class PgQueryPostsRepository {
     if (!postDB.length) {
       return null;
     }
-    return await this.addNewestLikes(postDB[0])
+    return await this.addNewestLikes(postDB[0]);
   }
 
-  async getPostsForBlog(queryDto: QueryParametersDto, blogId: string): Promise<ContentPageModel> {
+  async getPostsForBlog(
+    queryDto: QueryParametersDto,
+    blogId: string,
+  ): Promise<ContentPageModel> {
     const blogIdFilter = this.getBlogIdFilter(blogId);
 
     const postQuery = `
@@ -100,11 +109,13 @@ export class PgQueryPostsRepository {
        ${blogIdFilter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                  LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
-                   queryDto.pageNumber,
-                   queryDto.pageSize,
-                 )}; 
-    `
-    const posts: PostForBlogViewModel[] = await this.dataSource.query(postQuery)
+      queryDto.pageNumber,
+      queryDto.pageSize,
+    )}; 
+    `;
+    const posts: PostForBlogViewModel[] = await this.dataSource.query(
+      postQuery,
+    );
 
     const totalCountQuery = `
       SELECT COUNT(id)
@@ -114,20 +125,20 @@ export class PgQueryPostsRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-        posts,
-        Number(totalCount[0].count),
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      posts,
+      Number(totalCount[0].count),
     );
   }
 
-  async getAllPostsId(blogId: string): Promise<{id: string}[]> {
+  async getAllPostsId(blogId: string): Promise<{ id: string }[]> {
     const query = `
       SELECT id
         FROM public.posts
        WHERE "blogId" = $1;
     `;
-    return await this.dataSource.query(query, [blogId])
+    return await this.dataSource.query(query, [blogId]);
   }
 
   async postExist(id: string): Promise<boolean> {
@@ -151,12 +162,12 @@ export class PgQueryPostsRepository {
        WHERE "postId" = '${postId}' AND status = 'Like'
        ORDER BY "addedAt" DESC
        LIMIT ${settings.newestLikes.limit};
-    `
-    return await this.dataSource.query(newestLikesQuery)
+    `;
+    return await this.dataSource.query(newestLikesQuery);
   }
 
   private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
-    const newestLikes = await this.newestLikes(post.id)
+    const newestLikes = await this.newestLikes(post.id);
 
     let myStatus = 'None';
     if (post.myStatus) {

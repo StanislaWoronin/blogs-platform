@@ -4,7 +4,7 @@ import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-blogs.re
 import { PgBanInfoRepository } from '../infrastructure/pg-ban-info.repository';
 import { PgPostsRepository } from '../../public/posts/infrastructure/pg-posts.repository';
 import { PgQueryBlogsRepository } from '../../public/blogs/infrastructure/pg-query-blogs.repository';
-import {PgQueryPostsRepository} from "../../public/posts/infrastructure/pg-query-posts.repository";
+import { PgQueryPostsRepository } from '../../public/posts/infrastructure/pg-query-posts.repository';
 
 @Injectable()
 export class SaBlogsService {
@@ -32,15 +32,21 @@ export class SaBlogsService {
     if (!blogBanned) {
       const banDate = new Date().toISOString();
       if (postsId.length) {
-        const postBanReason = 'The blog that owns this post has been banned'
-        await this.banInfoRepository.createPostsBanInfo(postsId, postBanReason, banDate)
+        const postBanReason = 'The blog that owns this post has been banned';
+        await this.banInfoRepository.createPostsBanInfo(
+          postsId,
+          postBanReason,
+          banDate,
+        );
       }
 
       return await this.banInfoRepository.createBlogBanStatus(blogId, banDate);
     }
 
-    if(postsId.length) {
-      const numberOfDeleted = await this.banInfoRepository.deletePostsBanStatus(blogId)
+    if (postsId.length) {
+      const numberOfDeleted = await this.banInfoRepository.deletePostsBanStatus(
+        blogId,
+      );
 
       if (numberOfDeleted !== postsId.length) {
         console.log('Not all posts are unbanded');

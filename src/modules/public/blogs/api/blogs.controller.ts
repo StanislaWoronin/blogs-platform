@@ -8,14 +8,14 @@ import {
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import { PgQueryBlogsRepository } from '../infrastructure/pg-query-blogs.repository';
 import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
-import { BlogsRepository } from "../infrastructure/blogs.repository";
+import { BlogsRepository } from '../infrastructure/blogs.repository';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     protected queryBlogsRepository: PgQueryBlogsRepository,
     protected queryPostsRepository: PgQueryPostsRepository,
-    protected blogsRepository: BlogsRepository
+    protected blogsRepository: BlogsRepository,
   ) {}
 
   @Get()
@@ -24,7 +24,7 @@ export class BlogsController {
     query: QueryParametersDto,
   ) {
     try {
-      return await this.queryBlogsRepository.getBlogs(query);
+      return await this.blogsRepository.getBlogs(query);
     } catch (e) {
       console.log(e);
     }
@@ -52,9 +52,6 @@ export class BlogsController {
       throw new NotFoundException();
     }
 
-    return this.queryPostsRepository.getPostsForBlog(
-      query,
-      blogId,
-    );
+    return this.queryPostsRepository.getPostsForBlog(query, blogId);
   }
 }

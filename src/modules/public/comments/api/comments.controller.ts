@@ -19,29 +19,32 @@ import { AuthBearerGuard } from '../../../../guards/auth.bearer.guard';
 import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { ReactionDto } from '../../../../global-model/reaction.dto';
-import {PgQueryCommentsRepository} from "../infrastructure/pg-query-comments.repository";
-import {AccessTokenValidationGuard} from "../../../../guards/access-token-validation.guard";
+import { PgQueryCommentsRepository } from '../infrastructure/pg-query-comments.repository';
+import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
-      protected commentsService: CommentsService,
-      protected queryCommentsRepository: PgQueryCommentsRepository
+    protected commentsService: CommentsService,
+    protected queryCommentsRepository: PgQueryCommentsRepository,
   ) {}
 
   @UseGuards(AccessTokenValidationGuard)
   @Get(':id')
-  async getCommentById(@Param('id') commentId: string, @User() user: UserDBModel) {
-    let userId
+  async getCommentById(
+    @Param('id') commentId: string,
+    @User() user: UserDBModel,
+  ) {
+    let userId;
     if (user) {
-      userId = user.id
+      userId = user.id;
     }
 
     const comment = await this.queryCommentsRepository.getCommentById(
       commentId,
       userId,
     );
-    console.log(comment)
+
     if (!comment) {
       throw new NotFoundException();
     }
@@ -68,12 +71,12 @@ export class CommentsController {
     }
 
     const isUpdate = await this.commentsService.updateComment(
-        commentId,
-        dto.content,
+      commentId,
+      dto.content,
     );
 
     if (!isUpdate) {
-      Error('Something went wrong.')
+      Error('Something went wrong.');
     }
     return;
   }
@@ -99,7 +102,7 @@ export class CommentsController {
     );
 
     if (!result) {
-      Error('Something went wrong.')
+      Error('Something went wrong.');
     }
 
     return;
@@ -113,7 +116,6 @@ export class CommentsController {
     @User() user: UserDBModel,
   ) {
     const comment = await this.queryCommentsRepository.commentExists(commentId);
-
     if (!comment) {
       throw new NotFoundException();
     }
@@ -123,9 +125,8 @@ export class CommentsController {
     }
 
     const isDeleted = await this.commentsService.deleteCommentById(commentId);
-
     if (!isDeleted) {
-      Error('Something went wrong.')
+      Error('Something went wrong.');
     }
     return;
   }

@@ -5,7 +5,7 @@ import { giveSkipNumber } from '../../../../helper.functions';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentViewModel } from '../api/dto/commentView.model';
-import {CreatedComment} from "./entity/db_comment.model";
+import { CreatedComment } from './entity/db_comment.model';
 
 @Injectable()
 export class PgCommentsRepository {
@@ -39,8 +39,8 @@ export class PgCommentsRepository {
       UPDATE public.comments
          SET content = $1
        WHERE id = $2
-    `
-    const result = await this.dataSource.query(query, [content, commentId])
+    `;
+    const result = await this.dataSource.query(query, [content, commentId]);
 
     if (result[1] !== 1) {
       return false;
@@ -49,11 +49,16 @@ export class PgCommentsRepository {
   }
 
   async deleteCommentById(commentId: string): Promise<boolean> {
+    const reactionsQuery = `
+      DELETE FROM public.comment_reactions
+       WHERE comment_reactions."commentId" = '${commentId}';
+    `;
+    await this.dataSource.query(reactionsQuery)
     const query = `
       DELETE FROM public.comments
        WHERE id = '${commentId}';
     `;
-    const result = await this.dataSource.query(query)
+    const result = await this.dataSource.query(query);
 
     if (result[1] !== 1) {
       return false;

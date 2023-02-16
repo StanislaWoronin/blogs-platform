@@ -25,6 +25,7 @@ import { PgQueryPostsRepository } from '../infrastructure/pg-query-posts.reposit
 import { JwtService } from '../../auth/application/jwt.service';
 import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
 import { PgQueryCommentsRepository } from '../../comments/infrastructure/pg-query-comments.repository';
+import { AccessTokenValidationGuard } from "../../../../guards/access-token-validation.guard";
 
 @Controller('posts')
 export class PostsController {
@@ -36,14 +37,13 @@ export class PostsController {
     protected queryPostsRepository: PgQueryPostsRepository,
   ) {}
 
+  @UseGuards(AccessTokenValidationGuard)
   @Get()
-  async getPosts(@Query() query: QueryParametersDto, @Req() req: Request) {
-    let blogId;
+  async getPosts(@Query() query: QueryParametersDto, @User() user: UserDBModel) {
+    let blogId = undefined;
     let userId;
-    if (req.headers.authorization) {
-      const token = (req.headers.authorization).split(' ')[1]
-      const tokenPayload = await this.jwtService.getTokenPayload(token);
-      userId = tokenPayload.userId;
+    if (user) {
+      userId = user.id;
     }
 
     return this.queryPostsRepository.getPosts(query, blogId, userId);
@@ -53,7 +53,7 @@ export class PostsController {
   async getPostById(@Param('id') postId: string, @Req() req: Request) {
     let userId = undefined;
     if (req.headers.authorization) {
-      const token = (req.headers.authorization).split(' ')[1]
+      const token = req.headers.authorization.split(' ')[1];
       const tokenPayload = await this.jwtService.getTokenPayload(token);
       userId = tokenPayload.userId;
     }

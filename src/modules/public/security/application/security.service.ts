@@ -6,7 +6,7 @@ import { toActiveSessionsViewModel } from '../../../../data-mapper/to-active-ses
 import { PgSecurityRepository } from '../infrastructure/pg-security.repository';
 import { PgQuerySecurityRepository } from '../infrastructure/pg-query-security.repository';
 import { v4 as uuidv4 } from 'uuid';
-import {TokenPayloadModel} from "../../../../global-model/token-payload.model";
+import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
 
 @Injectable()
 export class SecurityService {
@@ -32,11 +32,11 @@ export class SecurityService {
   async getDeviceById(deviceId: string): Promise<UserDeviceModel | null> {
     const device = await this.querySecurityRepository.getDeviseById(deviceId);
 
-    if(!device) {
-      return  null
+    if (!device) {
+      return null;
     }
 
-    return device
+    return device;
   }
 
   async createUserDevice(
@@ -64,7 +64,10 @@ export class SecurityService {
     return token;
   }
 
-  async createNewRefreshToken(refreshToken: string, tokenPayload: TokenPayloadModel) {
+  async createNewRefreshToken(
+    refreshToken: string,
+    tokenPayload: TokenPayloadModel,
+  ) {
     await this.jwtService.addTokenInBlackList(refreshToken);
     const token = await this.jwtService.createToken(
       tokenPayload.userId,
@@ -73,8 +76,8 @@ export class SecurityService {
     const newTokenPayload = await this.jwtService.getTokenPayload(
       token.refreshToken,
     );
-    const iat = new Date(newTokenPayload.iat).toISOString()
-    const exp = new Date(newTokenPayload.exp).toISOString()
+    const iat = new Date(newTokenPayload.iat).toISOString();
+    const exp = new Date(newTokenPayload.exp).toISOString();
 
     await this.securityRepository.updateCurrentActiveSessions(
       newTokenPayload.deviceId,

@@ -1,5 +1,8 @@
 import { PostViewModel } from '../modules/public/posts/api/dto/postsView.model';
-import { CreatedPostModel, DbPostModel } from "../modules/public/posts/infrastructure/entity/db-post.model";
+import {
+  CreatedPostModel,
+  DbPostModel,
+} from '../modules/public/posts/infrastructure/entity/db-post.model';
 
 export const toPostsViewModel = (post: DbPostModel): PostViewModel => {
   let myStatus = post.myStatus;
@@ -24,7 +27,9 @@ export const toPostsViewModel = (post: DbPostModel): PostViewModel => {
   };
 };
 
-export const toCreatedPostsViewModel = (post: CreatedPostModel ): PostViewModel => {
+export const toCreatedPostsViewModel = (
+  post: CreatedPostModel,
+): PostViewModel => {
   return {
     id: post.id,
     title: post.title,
