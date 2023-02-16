@@ -131,3 +131,23 @@ export const prepareLogin = {
     password: 'qwerty'
   },
 }
+
+export const preparedComment = {
+  valid: {
+    content: faker.random.alpha(21)
+  },
+  short: {
+    content: faker.random.alpha(19)
+  },
+  long: {
+    content: faker.random.alpha(301)
+  }
+}
+
+export const preparedStatus = {
+  notValid: {
+    emptyString: '',
+    lowerCase: 'like',
+    abracadabra: faker.random.alpha(5)
+  }
+}

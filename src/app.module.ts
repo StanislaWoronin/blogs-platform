@@ -57,12 +57,14 @@ import { SaBlogsService } from "./modules/super-admin/application/sa-blogs.servi
 import {BannedPost} from "./modules/super-admin/infrastructure/entity/banned-post.entity";
 import { PasswordRecoveryValidator } from "./validation/password-recovery.validator";
 import { BlogsRepository } from "./modules/public/blogs/infrastructure/blogs.repository";
+import {CommentsController} from "./modules/public/comments/api/comments.controller";
 
 const controllers = [
   AuthController,
   BlogsController,
   BloggerBlogsController,
   BloggerUsersController,
+  CommentsController,
   PostsController,
   SaBlogsController,
   SecurityController,

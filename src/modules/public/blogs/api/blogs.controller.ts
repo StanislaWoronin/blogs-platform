@@ -24,7 +24,7 @@ export class BlogsController {
     query: QueryParametersDto,
   ) {
     try {
-      return await this.blogsRepository.getBlogs(query);
+      return await this.queryBlogsRepository.getBlogs(query);
     } catch (e) {
       console.log(e);
     }

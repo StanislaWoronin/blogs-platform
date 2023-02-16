@@ -34,18 +34,30 @@ export class PgCommentsRepository {
     return result[0];
   }
 
-  // async updateComment(commentId: string, comment: string): Promise<boolean> {
-  //   const result = await this.commentsRepository.updateOne(
-  //     { id: commentId },
-  //     { $set: { content: comment } },
-  //   );
-  //
-  //   return result.modifiedCount === 1;
-  // }
-  //
-  // async deleteCommentById(commentId: string): Promise<boolean> {
-  //   const result = await this.commentsRepository.deleteOne({ id: commentId });
-  //
-  //   return result.deletedCount === 1;
-  // }
+  async updateComment(commentId: string, content: string): Promise<boolean> {
+    const query = `
+      UPDATE public.comments
+         SET content = $1
+       WHERE id = $2
+    `
+    const result = await this.dataSource.query(query, [content, commentId])
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
+
+  async deleteCommentById(commentId: string): Promise<boolean> {
+    const query = `
+      DELETE FROM public.comments
+       WHERE id = '${commentId}';
+    `;
+    const result = await this.dataSource.query(query)
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
 }

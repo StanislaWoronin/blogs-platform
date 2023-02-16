@@ -125,7 +125,7 @@ describe('e2e tests', () => {
         })
       })
 
-      // it('Get blogs with sorting and paging', async () => {
+      // it('Get blogs with sorting and paging1', async () => {
       //   const items = expect.getState().items2
       //   const response = await request(server)
       //     .get(`/blogs?sortBy=name&sortDirection=asc&pageNumber=2&pageSize=3`)
@@ -140,37 +140,37 @@ describe('e2e tests', () => {
       //   })
       // })
       //
-    //   it('Get blogs with sorting and paging', async () => {
-    //     const items = expect.getState().blog5
-    //     const response = await request(server)
-    //       .get(`/blogs?sortBy=websiteUrl&sortDirection=desc&pageSize=3`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toBe({
-    //       pagesCount: 2,
-    //       page: 1,
-    //       pageSize: 3,
-    //       totalCount: 5,
-    //       items: items
-    //     })
-    //   })
-    //
-    //   it('Get blogs search name term', async () => {
-    //     const items = expect.getState().blog5
-    //     const response = await request(server)
-    //       .get(`/blogs?searchNameTerm=1`)
-    //       .expect(200)
-    //
-    //     expect(response.body).toStrictEqual({
-    //       pagesCount: 1,
-    //       page: 1,
-    //       pageSize: 10,
-    //       totalCount: 1,
-    //       items: [items]
-    //     })
-    //   })
-    // })
-    //
+      // it('Get blogs with sorting and paging2', async () => {
+      //   const items = expect.getState().blog5
+      //   const response = await request(server)
+      //     .get(`/blogs?sortBy=websiteUrl&sortDirection=desc&pageSize=3`)
+      //     .expect(200)
+      //
+      //   expect(response.body).toBe({
+      //     pagesCount: 2,
+      //     page: 1,
+      //     pageSize: 3,
+      //     totalCount: 5,
+      //     items: items
+      //   })
+      // })
+      //
+      // it('Get blogs search name term', async () => {
+      //   const items = expect.getState().blog5
+      //   const response = await request(server)
+      //     .get(`/blogs?searchNameTerm=1`)
+      //     .expect(200)
+      //
+      //   expect(response.body).toStrictEqual({
+      //     pagesCount: 1,
+      //     page: 1,
+      //     pageSize: 10,
+      //     totalCount: 1,
+      //     items: [items]
+      //   })
+      // })
+    })
+
     // describe('Return all posts for specified blog', () => {
     //   it('Create posts', async () => {
     //     const { token, blog1, blog5 } = expect.getState()
@@ -276,7 +276,7 @@ describe('e2e tests', () => {
     //     })
     //   })
     // })
-    //
+
     // describe('Return blog by id', () => {
     //   const randomUuid = uuidv4()
     //   const url = getUrlWithId(endpoints.blogController, randomUuid)
@@ -304,6 +304,6 @@ describe('e2e tests', () => {
     //       isMembership: expect.any(Boolean)
     //     })
     //   })
-    })
+    // })
   })
 });

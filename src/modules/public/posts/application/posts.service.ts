@@ -39,15 +39,15 @@ export class PostsService {
     return toCreatedPostsViewModel(createdPost)
   }
 
-  async updatePostReaction(userId, postId, likeStatus): Promise<boolean> {
-    const currentReaction = await this.likesRepository.getReaction(userId, postId)
+  async updatePostReaction(userId: string, postId: string, likeStatus: string): Promise<boolean> {
+    const currentReaction = await this.likesRepository.getPostReaction(userId, postId)
 
     if (!currentReaction) {
       if (likeStatus === ReactionModel.None) {
         return true
       }
 
-      return await this.likesRepository.createReaction(
+      return await this.likesRepository.createPostReaction(
           userId,
           postId,
           likeStatus,
@@ -56,7 +56,7 @@ export class PostsService {
     }
 
     if (likeStatus === ReactionModel.None) {
-      return await this.likesRepository.deleteReaction(userId, postId);
+      return await this.likesRepository.deletePostReaction(userId, postId);
     }
 
     return await this.likesRepository.updatePostReaction(

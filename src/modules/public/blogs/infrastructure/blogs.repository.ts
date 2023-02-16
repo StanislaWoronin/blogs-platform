@@ -41,8 +41,8 @@ export class BlogsRepository {
             },
             where: filters,
             order: {[sortBy]: [sortDirection]},
-            // skip: giveSkipNumber(query.pageNumber,query.pageSize),
-            // take: query.pageNumber
+            skip: giveSkipNumber(query.pageNumber,query.pageSize),
+            take: query.pageNumber
         })
 
         console.log(blogs)

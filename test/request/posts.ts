@@ -1,13 +1,13 @@
 import request from "supertest";
-import {PostViewModel} from "../../src/modules/public/posts/api/dto/postsView.model";
-import {endpoints, getUrlWithId} from "../helper/routing";
-import {ContentPageModel} from "../../src/global-model/contentPage.model";
+import {endpoints, getUrlForReactionStatus, getUrlWithId} from "../helper/routing";
 
 export class Posts {
     constructor(private readonly server: any) {
     }
 
-    async addReaction(accessToken: string, url, status: string) {
+    async addReaction(postId: string, status: string, accessToken?: string) {
+        const url = getUrlForReactionStatus(endpoints.postController, postId)
+
         const response = await request(this.server)
             .put(url)
             .auth(accessToken, { type: 'bearer' })
@@ -34,12 +34,12 @@ export class Posts {
     }
 
     async getPosts(accessToken?: string) {
-        if (!accessToken) {
-            const response = await request(this.server)
-                .get(endpoints.postController)
-
-            return {status: response.statusCode, body: response.body}
-        }
+        // if (!accessToken) {
+        //     const response = await request(this.server)
+        //         .get(endpoints.postController)
+        //
+        //     return {status: response.statusCode, body: response.body}
+        // }
 
         const response = await request(this.server)
             .get(endpoints.postController)

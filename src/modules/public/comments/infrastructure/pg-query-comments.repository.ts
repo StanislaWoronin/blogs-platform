@@ -9,6 +9,7 @@ import {
 import { DbCommentWithUserAndLikesInfoModel } from './entity/db_comment.model';
 import { toCommentsViewModel } from '../../../../data-mapper/to_comments_view.model';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
+import {CommentViewModel, CommentWithAdditionalInfo} from "../api/dto/commentView.model";
 
 @Injectable()
 export class PgQueryCommentsRepository {
@@ -122,12 +123,55 @@ export class PgQueryCommentsRepository {
     );
   }
 
+  async getCommentById(commentId: string, userId: string | undefined): Promise<CommentViewModel> {
+    const myStatusFilter = this.myStatusFilter(userId);
+
+    const query = `
+              SELECT id, content, "createdAt",
+                     (SELECT COUNT("commentId") AS "likesCount"
+                        FROM public.comment_reactions
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like'),
+                     (SELECT COUNT("commentId") AS "dislikesCount"
+                        FROM public.comment_reactions
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike'),
+                     (SELECT id AS "userId"
+                        FROM public.users
+                       WHERE users.id = comments."userId"),
+                     (SELECT login AS "userLogin"
+                        FROM public.users
+                       WHERE users.id = comments."userId")
+                   ${myStatusFilter} 
+              FROM public.comments
+             WHERE comments.id = '${commentId}'
+        `;
+    const commentsDB: DbCommentWithUserAndLikesInfoModel[] = await this.dataSource.query(query);
+
+    if(!commentsDB.length) {
+      return null
+    }
+    return toCommentsViewModel(commentsDB[0])
+  }
+
+  async commentExists(commentId: string): Promise<{ userId: string } | null> {
+    const query = `
+      SELECT "userId"
+        FROM public.comments
+       WHERE id = $1;
+    `
+    const response = await this.dataSource.query(query, [commentId])
+
+    if (!response[0]) {
+      return null
+    }
+    return response[0]
+  }
+
   private myStatusFilter(userId: string | undefined): string {
     if (userId) {
       return `, (SELECT status AS "myStatus" 
-                         FROM public.comment_reactions
-                        WHERE "commentId".comment_reactions = id.posts
-                          AND "userId".comment_reactions = '${userId}')`;
+                   FROM public.comment_reactions
+                  WHERE comment_reactions."commentId" = comments.id
+                    AND comment_reactions."userId" = '${userId}')`;
     }
     return '';
   }

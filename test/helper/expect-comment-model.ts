@@ -3,37 +3,39 @@ import {
     CreatedComment,
     DbCommentWithUserAndLikesInfoModel
 } from "../../src/modules/public/comments/infrastructure/entity/db_comment.model";
+import {preparedComment} from "./prepeared-data";
+import {CreatedCommentViewModel} from "../../src/modules/public/comments/api/dto/commentView.model";
 
-export const getCreatedComment = (user: UserViewModelWithBanInfo, comment?: DbCommentWithUserAndLikesInfoModel) =>{
-    if (!comment) {
-        return {
-            id: expect.any(String),
-            content: "aBqFljveZokLojESGyqiRg",
-            commentatorInfo: {
-                userId: user.id,
-                userLogin: user.login
-            },
-            createdAt: expect.any(String),
-            likesInfo: {
-                likesCount: 0,
-                dislikesCount: 0,
-                myStatus: "None"
-            }
+export const getCreatedComment = (user: UserViewModelWithBanInfo) =>{
+    return {
+        id: expect.any(String),
+        content: preparedComment.valid,
+        commentatorInfo: {
+            userId: user.id,
+            userLogin: user.login
+        },
+        createdAt: expect.any(String),
+        likesInfo: {
+            likesCount: 0,
+            dislikesCount: 0,
+            myStatus: "None"
         }
-    } else {
-        return {
-            id: comment.id,
-            content: comment.content,
-            createdAt: comment.createdAt,
-            commentatorInfo: {
-                userId: user.id,
-                userLogin: user.login
-            },
-            likesInfo: {
-                likesCount: Number(comment.likesCount),
-                dislikesCount: Number(comment.dislikesCount),
-                myStatus: Number(comment.myStatus)
-            }
+    }
+}
+
+export const getExpectComment = (user: UserViewModelWithBanInfo, comment: CreatedCommentViewModel, likesCount: number, dislikesCount: number, myStatus: string) => {
+    return {
+        id: comment.id,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        commentatorInfo: {
+            userId: user.id,
+            userLogin: user.login
+        },
+        likesInfo: {
+            likesCount: likesCount,
+            dislikesCount: dislikesCount,
+            myStatus: myStatus
         }
     }
 }
