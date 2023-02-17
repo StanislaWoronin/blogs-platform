@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
+  HttpCode, Inject,
   Param,
   Put,
   Query,
@@ -10,17 +10,17 @@ import {
 } from '@nestjs/common';
 import { AuthBasicGuard } from '../../../guards/auth.basic.guard';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
-import { PgQueryBlogsRepository } from '../../public/blogs/infrastructure/pg-query-blogs.repository';
 import { BanBlogDto } from './dto/ban-blog.dto';
 import { SaBlogsService } from '../application/sa-blogs.service';
 import { BindBlogDto } from './dto/bind-blog.dto';
 import { ContentPageModel } from '../../../global-model/contentPage.model';
+import {IQueryBlogsRepository} from "../../public/blogs/infrastructure/i-query-blogs.repository";
 
 @UseGuards(AuthBasicGuard)
 @Controller('sa/blogs')
 export class SaBlogsController {
   constructor(
-    protected queryBlogsRepository: PgQueryBlogsRepository,
+    @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository,
     protected blogsService: SaBlogsService,
   ) {}
 

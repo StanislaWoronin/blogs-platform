@@ -178,7 +178,7 @@ describe('e2e tests', () => {
 
         await request(server)
           .put(url1)
-          .send(banUserDto.valid)
+          .send(banUserDto.validBan)
           .auth(superUser.valid.login, superUser.valid.password, {
             type: 'basic',
           })
@@ -186,7 +186,7 @@ describe('e2e tests', () => {
 
         await request(server)
           .put(url2)
-          .send(banUserDto.valid)
+          .send(banUserDto.validBan)
           .auth(superUser.valid.login, superUser.valid.password, {
             type: 'basic',
           })
@@ -387,7 +387,7 @@ describe('e2e tests', () => {
 
         await request(server)
           .put(url)
-          .send(banUserDto.valid)
+          .send(banUserDto.validBan)
           .auth(superUser.notValid.login, superUser.notValid.password, {
             type: 'basic',
           })
@@ -415,7 +415,7 @@ describe('e2e tests', () => {
 
         await request(server)
           .put(url)
-          .send(banUserDto.valid)
+          .send(banUserDto.validBan)
           .auth(superUser.valid.login, superUser.valid.password, {
             type: 'basic',
           })
@@ -431,7 +431,7 @@ describe('e2e tests', () => {
         expect(response.body.items[0].banInfo).toEqual({
           isBanned: true,
           banDate: expect.any(String),
-          banReason: banUserDto.valid.banReason,
+          banReason: banUserDto.validBan.banReason,
         });
       });
 

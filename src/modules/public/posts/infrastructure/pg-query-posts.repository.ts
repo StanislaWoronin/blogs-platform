@@ -154,6 +154,30 @@ export class PgQueryPostsRepository {
     return true;
   }
 
+  async getBlogIdByCommentId(commentId: string): Promise<string> {
+    const query = `
+      SELECT "blogId" 
+        FROM public.posts 
+       WHERE posts.id = (SELECT "postId" 
+                           FROM public.comments
+                          WHERE comments.id = $1);
+    `;
+    const result = await this.dataSource.query(query, [commentId])
+
+    return result[0].blogId
+  }
+
+  async getBlogIdByPostId(postId: string): Promise<string> {
+    const query = `
+      SELECT "blogId" 
+        FROM public.posts 
+       WHERE posts.id = '${postId}';
+    `;
+    const result = await this.dataSource.query(query)
+
+    return result[0].blogId
+  }
+
   async newestLikes(postId: string): Promise<NewestLikesModel[]> {
     const newestLikesQuery = `
       SELECT "userId", "addedAt",

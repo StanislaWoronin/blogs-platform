@@ -3,7 +3,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  HttpCode,
+  HttpCode, Inject,
   NotFoundException,
   Param,
   Post,
@@ -23,9 +23,9 @@ import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.m
 import { ReactionDto } from '../../../../global-model/reaction.dto';
 import { PgQueryPostsRepository } from '../infrastructure/pg-query-posts.repository';
 import { JwtService } from '../../auth/application/jwt.service';
-import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
-import { PgQueryCommentsRepository } from '../../comments/infrastructure/pg-query-comments.repository';
+import { PgQueryCommentsRepository } from '../../comments/infrastructure/pg-repository/pg-query-comments.repository';
 import { AccessTokenValidationGuard } from "../../../../guards/access-token-validation.guard";
+import {IQueryCommentsRepository} from "../../comments/infrastructure/i-query-comments.repository";
 
 @Controller('posts')
 export class PostsController {
@@ -33,7 +33,7 @@ export class PostsController {
     protected commentsService: CommentsService,
     protected jwtService: JwtService,
     protected postsService: PostsService,
-    protected queryCommentsRepository: PgQueryCommentsRepository,
+    @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
     protected queryPostsRepository: PgQueryPostsRepository,
   ) {}
 
@@ -67,18 +67,16 @@ export class PostsController {
     return post;
   }
 
+  @UseGuards(AccessTokenValidationGuard)
   @Get(':id/comments')
   async getCommentsByPostId(
     @Query() query: QueryParametersDto,
     @Param('id') postId: string,
-    @Req() req: Request,
+    @User() user: UserDBModel
   ) {
-    let userId = undefined;
-    if (req.headers.authorization) {
-      const tokenPayload = await this.jwtService.getTokenPayload(
-        req.headers.authorization,
-      );
-      userId = tokenPayload.userId;
+    let userId;
+    if (user) {
+      userId = user.id;
     }
 
     const comment = await this.queryCommentsRepository.getCommentByPostId(
@@ -102,19 +100,17 @@ export class PostsController {
     @Param('id') postId: string,
     @User() user: UserDBModel,
   ) {
-    const post = await this.queryPostsRepository.postExist(postId);
-
-    if (!post) {
-      throw new NotFoundException();
+    const banStatus = await this.postsService.checkUserBanStatus(
+        user.id,
+        postId,
+    );
+    if (banStatus) {
+      throw new ForbiddenException();
     }
 
-    const banStatus = await this.postsService.checkUserBanStatus(
-      user.id,
-      postId,
-    );
-
-    if (banStatus) {
-      throw new ForbiddenException(); // if user banned for this blog
+    const post = await this.queryPostsRepository.postExist(postId);
+    if (!post) {
+      throw new NotFoundException();
     }
 
     return this.commentsService.createComment(postId, dto.content, user);
@@ -129,9 +125,16 @@ export class PostsController {
     @User() user: UserDBModel,
   ) {
     const post = await this.queryPostsRepository.postExist(postId);
-
     if (!post) {
       throw new NotFoundException();
+    }
+
+    const banStatus = await this.postsService.checkUserBanStatus(
+        user.id,
+        postId,
+    );
+    if (banStatus) {
+      throw new ForbiddenException();
     }
 
     await this.postsService.updatePostReaction(user.id, postId, dto.likeStatus);

@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
+import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-query-users.repository';
 import { JwtService } from '../modules/public/auth/application/jwt.service';
 
 @Injectable()

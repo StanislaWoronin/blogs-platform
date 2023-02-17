@@ -29,4 +29,9 @@ export const settings = {
   newestLikes: {
     limit: '3',
   },
+  repository: {
+    mongoos: '',
+    postgres: 'pg',
+    orm: 'orm'
+  }
 };

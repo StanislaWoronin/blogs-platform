@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blogs } from './infrastructure/entity/blogs.entity';
 import { BlogsService } from './application/blogs.service';
-import { PgBlogsRepository } from './infrastructure/pg-blogs.repository';
-import { PgQueryBlogsRepository } from './infrastructure/pg-query-blogs.repository';
+import { PgBlogsRepository } from './infrastructure/pg-repository/pg-blogs.repository';
+import { PgQueryBlogsRepository } from './infrastructure/pg-repository/pg-query-blogs.repository';
 import { BlogsController } from './api/blogs.controller';
 
 @Module({

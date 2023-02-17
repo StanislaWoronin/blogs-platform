@@ -37,13 +37,6 @@ export class Posts {
   }
 
   async getPosts(accessToken?: string) {
-    // if (!accessToken) {
-    //     const response = await request(this.server)
-    //         .get(endpoints.postController)
-    //
-    //     return {status: response.statusCode, body: response.body}
-    // }
-
     const response = await request(this.server)
       .get(endpoints.postController)
       .auth(accessToken, { type: 'bearer' });

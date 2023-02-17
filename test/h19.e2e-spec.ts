@@ -8,8 +8,6 @@ import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
 import {
   endpoints,
-  getUrlForReactionStatus,
-  getUrlWithId,
 } from './helper/routing';
 import { Posts } from './request/posts';
 import { randomUUID } from 'crypto';
@@ -18,6 +16,8 @@ import { ReactionModel } from '../src/global-model/reaction.model';
 import { preparedComment, preparedStatus } from './helper/prepeared-data';
 import { Comments } from './request/comments';
 import { getExpectComment } from './helper/expect-comment-model';
+import {SA} from "./request/sa";
+import {Blogger} from "./request/blogger";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -25,9 +25,11 @@ describe('e2e tests', () => {
 
   let app: INestApplication;
   let server;
-  let factories: Factories;
+  let blogger: Blogger
   let comments: Comments;
+  let factories: Factories;
   let posts: Posts;
+  let sa: SA;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -41,9 +43,11 @@ describe('e2e tests', () => {
     app = createApp(rawApp);
     await app.init();
     server = await app.getHttpServer();
-    factories = new Factories(server);
+    blogger = new Blogger(server)
     comments = new Comments(server);
+    factories = new Factories(server);
     posts = new Posts(server);
+    sa = new SA(server);
   });
 
   afterAll(async () => {
@@ -55,6 +59,7 @@ describe('e2e tests', () => {
          CRUD for comments
          Likes for posts and comments
          Logic for all get response where we should return users reaction status
+         Banned user cant put reaction and comments
      */
 
   describe('Post`s reaction status', () => {
@@ -66,28 +71,28 @@ describe('e2e tests', () => {
       });
 
       it('Create data', async () => {
-        const [response] = await factories.createAndLoginUsers(1);
-        const [blog] = await factories.createBlogs(response.accessToken, 1);
+        const [postOwner, justUser] = await factories.createAndLoginUsers(2);
+        const [blog] = await factories.createBlogs(postOwner.accessToken, 1);
         const [post] = await factories.createPostsForBlog(
-          response.accessToken,
+            postOwner.accessToken,
           blog.id,
           1,
         );
 
         expect.setState({
-          accessToken: response.accessToken,
+          userToken: justUser.accessToken,
           postId: post.id,
         });
       });
 
       it("Shouldn`t put status if post with specified postId doesn't exists", async () => {
-        const { accessToken } = expect.getState();
+        const { userToken } = expect.getState();
         const randomId = randomUUID();
 
         const responseStatus = await posts.addReaction(
           randomId,
           ReactionModel.Like,
-          accessToken,
+            userToken,
         );
         expect(responseStatus.status).toBe(404);
       });
@@ -103,13 +108,13 @@ describe('e2e tests', () => {
       });
 
       it('Shouldn`t put status if the inputModel has incorrect values', async () => {
-        const { accessToken, postId } = expect.getState();
+        const { userToken, postId } = expect.getState();
         const errorsMessages = getErrorMessage(['likeStatus']);
 
         const emptyString = await posts.addReaction(
           postId,
           preparedStatus.notValid.emptyString,
-          accessToken,
+            userToken,
         );
         expect(emptyString.status).toBe(400);
         expect(emptyString.errorsMessages).toEqual({ errorsMessages });
@@ -117,7 +122,7 @@ describe('e2e tests', () => {
         const lowerCase = await posts.addReaction(
           postId,
           preparedStatus.notValid.lowerCase,
-          accessToken,
+            userToken,
         );
         expect(lowerCase.status).toBe(400);
         expect(lowerCase.errorsMessages).toEqual({ errorsMessages });
@@ -125,19 +130,19 @@ describe('e2e tests', () => {
         const abracadabra = await posts.addReaction(
           postId,
           preparedStatus.notValid.abracadabra,
-          accessToken,
+            userToken,
         );
         expect(abracadabra.status).toBe(400);
         expect(abracadabra.errorsMessages).toEqual({ errorsMessages });
       });
 
       it('Should put "Like"', async () => {
-        const { accessToken, postId } = expect.getState();
+        const { userToken, postId } = expect.getState();
 
         const responseStatus = await posts.addReaction(
           postId,
           ReactionModel.Like,
-          accessToken,
+            userToken,
         );
         expect(responseStatus.status).toBe(204);
 
@@ -149,7 +154,7 @@ describe('e2e tests', () => {
           ReactionModel.None,
         );
 
-        const postWithToken = await posts.getPostById(postId, accessToken);
+        const postWithToken = await posts.getPostById(postId, userToken);
         expect(postWithToken.status).toBe(200);
         expect(postWithToken.body.extendedLikesInfo.myStatus).toBe(
           ReactionModel.Like,
@@ -157,16 +162,16 @@ describe('e2e tests', () => {
       });
 
       it('Should put "Dislike"', async () => {
-        const { accessToken, postId } = expect.getState();
+        const { userToken, postId } = expect.getState();
 
         const responseStatus = await posts.addReaction(
           postId,
           ReactionModel.Dislike,
-          accessToken,
+            userToken,
         );
         expect(responseStatus.status).toBe(204);
 
-        const post = await posts.getPostById(postId, accessToken);
+        const post = await posts.getPostById(postId, userToken);
         expect(post.status).toBe(200);
         expect(post.body.extendedLikesInfo.likesCount).toBe(0);
         expect(post.body.extendedLikesInfo.dislikesCount).toBe(1);
@@ -176,16 +181,16 @@ describe('e2e tests', () => {
       });
 
       it('Should put "None"', async () => {
-        const { accessToken, postId } = expect.getState();
+        const { userToken, postId } = expect.getState();
 
         const responseStatus = await posts.addReaction(
           postId,
           ReactionModel.None,
-          accessToken,
+            userToken,
         );
         expect(responseStatus.status).toBe(204);
 
-        const post = await posts.getPostById(postId, accessToken);
+        const post = await posts.getPostById(postId, userToken);
         expect(post.status).toBe(200);
         expect(post.body.extendedLikesInfo.likesCount).toBe(0);
         expect(post.body.extendedLikesInfo.dislikesCount).toBe(0);
@@ -679,4 +684,95 @@ describe('e2e tests', () => {
       });
     },
   );
+
+  describe('Shouldn`t put reaction if user was banned', () => {
+    it('Drop all data.', async () => {
+      await request(server)
+          .delete(endpoints.testingController.allData)
+          .expect(204);
+    });
+
+    it('Create data', async () => {
+      const [owner, simpleUser] = await factories.createAndLoginUsers(2)
+      const [blog] = await factories.createBlogs(owner.accessToken, 1)
+      const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+      const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
+
+      expect.setState({
+        ownerToken: owner.accessToken,
+        simpleUserId: simpleUser.user.id,
+        simpleUserToken: simpleUser.accessToken,
+        blogId: blog.id,
+        postId: post.id,
+        commentId: comment.id
+      })
+    })
+
+    describe('User banned by sa can`t put comment and reactions', () => {
+      it('SA banned simple user', async () => {
+        const {simpleUserId} = expect.getState()
+
+        const isBanned = await sa.saBannedUser(simpleUserId, true)
+        expect(isBanned.status).toBe(204)
+      })
+
+      it('User banned by sa try put status to post', async () => {
+        const {simpleUserToken, postId} = expect.getState()
+
+        const response = await posts.addReaction(postId, ReactionModel.Like, simpleUserToken)
+        expect(response.status).toBe(401)
+      })
+
+      it('User banned by sa try put status to comment', async () => {
+        const {simpleUserToken, commentId} = expect.getState()
+
+        const response = await comments.addReaction(commentId, ReactionModel.Like, simpleUserToken)
+        expect(response.status).toBe(401)
+      })
+
+      it('User banned by sa try put comment', async () => {
+        const {simpleUserToken, postId} = expect.getState()
+
+        const response = await comments.createComments(postId, preparedComment.valid, simpleUserToken)
+        expect(response.status).toBe(401)
+      })
+
+      it('SA unBan simple user', async () => {
+        const {simpleUserId} = expect.getState()
+
+        const isBanned = await sa.saBannedUser(simpleUserId, false)
+        expect(isBanned.status).toBe(204)
+      })
+    })
+
+    describe('User banned by blogger can`t put comment and reactions', () => {
+      it('Blogger banned simple user', async () => {
+        const {ownerToken, simpleUserId, blogId} = expect.getState()
+
+        const isBanned = await blogger.banUser(ownerToken, simpleUserId, blogId,true)
+        expect(isBanned.status).toBe(204)
+      })
+
+      it('User banned by blogger try put status to post', async () => {
+        const {simpleUserToken, postId} = expect.getState()
+
+        const response = await posts.addReaction(postId, ReactionModel.Like, simpleUserToken)
+        expect(response.status).toBe(403)
+      })
+
+      it('User banned by blogger try put status to comment', async () => {
+        const {simpleUserToken, commentId} = expect.getState()
+
+        const response = await comments.addReaction(commentId, ReactionModel.Like, simpleUserToken)
+        expect(response.status).toBe(403)
+      })
+
+      it('User banned by blogger try put comment', async () => {
+        const {simpleUserToken, postId} = expect.getState()
+
+        const response = await comments.createComments(postId, preparedComment.valid, simpleUserToken)
+        expect(response.status).toBe(403)
+      })
+    })
+  })
 });

@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import { BlogDto } from '../api/dto/blog.dto';
 import { BanUserDto } from '../api/dto/ban-user.dto';
-import { PgUsersRepository } from '../../super-admin/infrastructure/pg-users.repository';
-import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg-query-users.repository';
-import { PgBanInfoRepository } from '../../super-admin/infrastructure/pg-ban-info.repository';
-import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-blogs.repository';
+import { PgUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-users.repository';
+import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-query-users.repository';
+import { PgBanInfoRepository } from '../../super-admin/infrastructure/pg.repository/pg-ban-info.repository';
+import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-repository/pg-blogs.repository';
 import { BlogsService } from '../../public/blogs/application/blogs.service';
 import {
   PostForBlogViewModel,
@@ -16,11 +16,12 @@ import {
   toCreatedPostsViewModel,
   toPostsViewModel,
 } from '../../../data-mapper/to-posts-view.model';
+import {IBanInfoRepository} from "../../super-admin/infrastructure/i-ban-info.repository";
 
 @Injectable()
 export class BloggerBlogService {
   constructor(
-    protected banInfoRepository: PgBanInfoRepository,
+    @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
     protected queryUserRepository: PgQueryUsersRepository,
   ) {}
 
@@ -29,7 +30,6 @@ export class BloggerBlogService {
     dto: BanUserDto,
   ): Promise<boolean | null> {
     const user = await this.queryUserRepository.getUserById(userId);
-
     if (!user) {
       return null;
     }
@@ -38,13 +38,10 @@ export class BloggerBlogService {
       userId,
       dto.blogId,
     );
-
-    // юзер для блога не в бане, но мы хотим его забанить
-    // false        true
     if (youBanned === dto.isBanned) {
       return true;
     }
-    // !true         false
+
     if (!youBanned) {
       const banDate = new Date().toISOString();
       return await this.banInfoRepository.createUserBanForBlogStatus(

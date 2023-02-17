@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Headers,
-  HttpCode,
+  HttpCode, Inject,
   Ip,
   NotFoundException,
   NotImplementedException,
@@ -25,14 +25,15 @@ import { User } from '../../../../decorator/user.decorator';
 import { toAboutMeViewModel } from '../../../../data-mapper/to-about-me-view.model';
 import { CheckCredentialGuard } from '../../../../guards/check-credential.guard';
 import { RefreshTokenValidationGuard } from '../../../../guards/refresh-token-validation.guard';
-import { PgQueryUsersRepository } from '../../../super-admin/infrastructure/pg-query-users.repository';
+import { PgQueryUsersRepository } from '../../../super-admin/infrastructure/pg.repository/pg-query-users.repository';
 import { CreateUserUseCase } from '../../../super-admin/use-cases/create-user.use-case';
-import { PgEmailConfirmationRepository } from '../../../super-admin/infrastructure/pg-email-confirmation.repository';
+import { PgEmailConfirmationRepository } from '../../../super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
 import { ResendingDto } from './dto/resending.dto';
 import { AuthDto } from './dto/auth.dto';
 import { EmailDto } from './dto/email.dto';
 import { NewPasswordDto } from './dto/new-password.dto';
 import { UserDto } from '../../../super-admin/api/dto/user.dto';
+import {IEmailConfirmationRepository} from "../../../super-admin/infrastructure/i-email-confirmation.repository";
 
 @Controller('auth')
 export class AuthController {
@@ -40,7 +41,7 @@ export class AuthController {
     protected authService: AuthService,
     protected createUserUseCase: CreateUserUseCase,
     protected emailManager: EmailManager,
-    protected emailConfirmationRepository: PgEmailConfirmationRepository,
+    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
     protected securityService: SecurityService,
     protected userService: UsersService,
     protected queryUsersRepository: PgQueryUsersRepository,

@@ -1,18 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import { BindBlogDto } from '../api/dto/bind-blog.dto';
-import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-blogs.repository';
-import { PgBanInfoRepository } from '../infrastructure/pg-ban-info.repository';
-import { PgPostsRepository } from '../../public/posts/infrastructure/pg-posts.repository';
-import { PgQueryBlogsRepository } from '../../public/blogs/infrastructure/pg-query-blogs.repository';
 import { PgQueryPostsRepository } from '../../public/posts/infrastructure/pg-query-posts.repository';
+import {IBlogsRepository} from "../../public/blogs/infrastructure/i-blogs.repository";
+import {IQueryBlogsRepository} from "../../public/blogs/infrastructure/i-query-blogs.repository";
+import {IBanInfoRepository} from "../infrastructure/i-ban-info.repository";
 
 @Injectable()
 export class SaBlogsService {
   constructor(
-    protected banInfoRepository: PgBanInfoRepository,
-    protected queryBlogsRepository: PgQueryBlogsRepository,
+    @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
     protected queryPostsRepository: PgQueryPostsRepository,
-    protected blogsRepository: PgBlogsRepository,
+    @Inject(IBlogsRepository) protected blogsRepository: IBlogsRepository,
+    @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository
   ) {}
 
   async updateBlogBanStatus(

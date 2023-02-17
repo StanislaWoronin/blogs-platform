@@ -14,7 +14,7 @@ import { ForbiddenGuard } from '../../../guards/forbidden.guard';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { BloggerBlogService } from '../application/blogger-blogs.service';
-import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg-query-users.repository';
+import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-query-users.repository';
 
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
 @Controller('blogger/users')

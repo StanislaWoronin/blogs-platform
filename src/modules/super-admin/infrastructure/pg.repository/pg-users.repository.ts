@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { CreatedUserModel, UserDBModel } from './entity/userDB.model';
+import { CreatedUserModel, UserDBModel } from '../entity/userDB.model';
 
 @Injectable()
 export class PgUsersRepository {

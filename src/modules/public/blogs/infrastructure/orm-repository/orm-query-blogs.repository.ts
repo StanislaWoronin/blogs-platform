@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Blogs } from './entity/blogs.entity';
+import { Blogs } from '../entity/blogs.entity';
 import {
   FindOptionsOrder,
   IsNull,
@@ -8,15 +8,15 @@ import {
   ObjectLiteral,
   Repository,
 } from 'typeorm';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
   paginationContentPage,
-} from '../../../../helper.functions';
-import { BlogViewModel } from '../api/dto/blogView.model';
+} from '../../../../../helper.functions';
+import { BlogViewModel } from '../../api/dto/blogView.model';
 
 @Injectable()
-export class BlogsRepository {
+export class OrmQueryBlogsRepository {
   constructor(
     @InjectRepository(Blogs)
     private readonly blogsRepository: Repository<Blogs>,

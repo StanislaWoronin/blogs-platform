@@ -1,26 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { EmailConfirmationModel } from './entity/emailConfirmation.model';
+import { EmailConfirmationModel } from '../entity/emailConfirmation.model';
 import { v4 as uuidv4 } from 'uuid';
 import { log } from 'util';
 
 @Injectable()
 export class PgEmailConfirmationRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
-
-  // async getEmailConfirmationByCodeOrId(
-  //   userId: string,
-  // ): Promise<EmailConfirmationModel | null> {
-  //   const query = `
-  //     SELECT user_id as "userId", confirmation_code as "confirmationCode", expiration_date as "expirationDate", is_confirmed as "isConfirmed"
-  //       FROM public.email_confirmation
-  //      WHERE user_id = '${userId}';
-  //   `
-  //   const result = await this.dataSource.query(query)
-  //   //console.log(result, 'from email confirmation repo')
-  //   return result[0]
-  // }
 
   async getEmailConfirmationByCode(
     code: string,

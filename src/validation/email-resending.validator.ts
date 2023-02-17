@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
-import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg-email-confirmation.repository';
+import {Inject, Injectable} from '@nestjs/common';
+import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-query-users.repository';
+import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
 import {
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { request } from 'express';
+import {IEmailConfirmationRepository} from "../modules/super-admin/infrastructure/i-email-confirmation.repository";
 
 @ValidatorConstraint({ name: 'EmailResendingValidator', async: true })
 @Injectable()
 export class EmailResendingValidator implements ValidatorConstraintInterface {
   constructor(
-    protected emailConfirmationService: PgEmailConfirmationRepository,
+      @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
     protected queryUsersRepository: PgQueryUsersRepository,
   ) {}
 
@@ -23,7 +24,7 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
       return false;
     }
 
-    const isConfirmed = await this.emailConfirmationService.checkConfirmation(
+    const isConfirmed = await this.emailConfirmationRepository.checkConfirmation(
       user.id,
     );
 

@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
   paginationContentPage,
-} from '../../../../helper.functions';
-import { DbCommentWithUserAndLikesInfoModel } from './entity/db_comment.model';
-import { toCommentsViewModel } from '../../../../data-mapper/to_comments_view.model';
-import { ContentPageModel } from '../../../../global-model/contentPage.model';
+} from '../../../../../helper.functions';
+import { DbCommentWithUserAndLikesInfoModel } from '../entity/db_comment.model';
+import { toCommentsViewModel } from '../../../../../data-mapper/to_comments_view.model';
+import { ContentPageModel } from '../../../../../global-model/contentPage.model';
 import {
   CommentViewModel,
-  CommentWithAdditionalInfo,
-} from '../api/dto/commentView.model';
+} from '../../api/dto/commentView.model';
 
 @Injectable()
 export class PgQueryCommentsRepository {

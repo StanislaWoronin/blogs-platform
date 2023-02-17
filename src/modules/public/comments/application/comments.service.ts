@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PgCommentsRepository } from '../infrastructure/pg-comments.repository';
+import { PgCommentsRepository } from '../infrastructure/pg-repository/pg-comments.repository';
 import { CommentBDModel } from '../infrastructure/entity/commentDB.model';
 import {
-  CommentViewModel,
   CreatedCommentViewModel,
 } from '../api/dto/commentView.model';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,18 +9,26 @@ import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.m
 import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
 import {
   createdCommentViewModel,
-  toCommentsViewModel,
 } from '../../../../data-mapper/to_comments_view.model';
 import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
 import { ReactionModel } from '../../../../global-model/reaction.model';
+import {IBanInfoRepository} from "../../../super-admin/infrastructure/i-ban-info.repository";
+import {ICommentsRepository} from "../infrastructure/i-comments.repository";
 
 @Injectable()
 export class CommentsService {
   constructor(
-    protected commentsRepository: PgCommentsRepository,
+    @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
+    @Inject(ICommentsRepository) protected commentsRepository: ICommentsRepository,
     protected queryPostsRepository: PgQueryPostsRepository,
     protected likesRepository: PgLikesRepository,
   ) {}
+
+  async checkUserBanStatus(userId: string, commentId: string): Promise<boolean> {
+    const blogId = await this.queryPostsRepository.getBlogIdByCommentId(commentId)
+
+    return await this.banInfoRepository.youBanned(userId, blogId)
+  }
 
   async createComment(
     postId: string,

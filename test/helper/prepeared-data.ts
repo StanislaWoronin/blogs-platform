@@ -47,7 +47,7 @@ export const preparedUser = {
 };
 
 export const banUserDto = {
-  valid: {
+  validBan: {
     isBanned: true,
     banReason: faker.random.alpha(20),
   },

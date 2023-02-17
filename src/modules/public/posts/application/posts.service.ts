@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { PgBanInfoRepository } from '../../../super-admin/infrastructure/pg-ban-info.repository';
+import {Inject, Injectable} from '@nestjs/common';
 import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
 import { ReactionModel } from '../../../../global-model/reaction.model';
 import { PostDto } from '../../../blogger/api/dto/post.dto';
@@ -9,19 +8,23 @@ import { v4 as uuidv4 } from 'uuid';
 import { PgPostsRepository } from '../infrastructure/pg-posts.repository';
 import {
   toCreatedPostsViewModel,
-  toPostsViewModel,
 } from '../../../../data-mapper/to-posts-view.model';
+import {PgQueryPostsRepository} from "../infrastructure/pg-query-posts.repository";
+import {IBanInfoRepository} from "../../../super-admin/infrastructure/i-ban-info.repository";
 
 @Injectable()
 export class PostsService {
   constructor(
-    protected banInfoRepository: PgBanInfoRepository,
+    @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
     protected likesRepository: PgLikesRepository,
     protected postsRepository: PgPostsRepository,
+    protected queryPostRepository: PgQueryPostsRepository
   ) {}
 
   async checkUserBanStatus(userId: string, postId: string): Promise<boolean> {
-    return await this.banInfoRepository.youBanned(userId, postId);
+    const blogId = await this.queryPostRepository.getBlogIdByPostId(postId)
+
+    return await this.banInfoRepository.youBanned(userId, blogId);
   }
 
   async createPost(
@@ -51,7 +54,6 @@ export class PostsService {
       userId,
       postId,
     );
-
     if (!currentReaction) {
       if (likeStatus === ReactionModel.None) {
         return true;

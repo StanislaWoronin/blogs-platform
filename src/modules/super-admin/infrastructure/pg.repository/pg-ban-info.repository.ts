@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { BanInfoModel } from './entity/banInfo.model';
+import { BanInfoModel } from '../entity/banInfo.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { BanUserDto } from '../../blogger/api/dto/ban-user.dto';
-import { query } from 'express';
-import { blogsForCurrentUser } from '../../../../test/helper/exect-blogger.model';
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -21,20 +18,7 @@ export class PgBanInfoRepository {
     return result[0];
   }
 
-  async youBanned(userId, blogId): Promise<boolean> {
-    const query = `
-      SELECT EXISTS (SELECT "blogId"
-                       FROM public.banned_users_for_blog
-                      WHERE "userId" = $1 AND "blogId" = $2)
-    `;
-    const result = await this.dataSource.query(query, [userId, blogId]);
-
-    return result[0].exists;
-  }
-
   async createBanInfo(banInfo: BanInfoModel): Promise<BanInfoModel> {
-    //const filter = this.getCreateFilter(banInfo);
-
     await this.dataSource.query(`
         INSERT INTO public.user_ban_info
                ("userId", "banStatus", "banReason", "banDate")
@@ -42,6 +26,50 @@ export class PgBanInfoRepository {
     `);
 
     return banInfo;
+  }
+
+  async saUpdateUserBanStatus(
+      userId: string,
+      banStatus: boolean,
+      banReason: string | null,
+      banDate: Date | null,
+  ): Promise<boolean> {
+    const filter = this.getUpdateFilter(banStatus, banReason, banDate);
+    const result = await this.dataSource.query(`
+       UPDATE public.user_ban_info
+          SET ${filter}
+        WHERE "userId" = '${userId}';
+    `);
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
+
+  async deleteUserBanInfoById(userId: string): Promise<boolean> {
+    const query = `
+      DELETE 
+        FROM public.user_ban_info
+       WHERE "userId" = $1;
+    `;
+    const result = await this.dataSource.query(query, [userId]);
+
+    if (result[1] !== 1) {
+      return false;
+    }
+    return true;
+  }
+
+  async youBanned(userId: string, blogId: string): Promise<boolean> {
+    const query = `
+      SELECT EXISTS (SELECT "blogId"
+                       FROM public.banned_users_for_blog
+                      WHERE "userId" = '${userId}' AND "blogId" = '${blogId}')
+    `;
+    const result = await this.dataSource.query(query);
+
+    return result[0].exists;
   }
 
   async createUserBanForBlogStatus(
@@ -64,6 +92,23 @@ export class PgBanInfoRepository {
     ]);
 
     if (!result.length) {
+      return false;
+    }
+    return true;
+  }
+
+  async deleteUserBanForBlogStatus(
+      userId: string,
+      blogId: string,
+  ): Promise<boolean> {
+    const query = `
+      DELETE 
+        FROM public.banned_users_for_blog
+       WHERE "userId" = $1 AND "blogId" = $2;
+    `;
+    const result = await this.dataSource.query(query, [userId, blogId]);
+
+    if (result[1] !== 1) {
       return false;
     }
     return true;
@@ -100,56 +145,6 @@ export class PgBanInfoRepository {
     const result = await this.dataSource.query(query);
 
     if (!result.length) {
-      return false;
-    }
-    return true;
-  }
-
-  async saUpdateUserBanStatus(
-    userId: string,
-    banStatus: boolean,
-    banReason: string | null,
-    banDate: Date | null,
-  ): Promise<boolean> {
-    const filter = this.getUpdateFilter(banStatus, banReason, banDate);
-    const result = await this.dataSource.query(`
-       UPDATE public.user_ban_info
-          SET ${filter}
-        WHERE "userId" = '${userId}';
-    `);
-
-    if (result[1] !== 1) {
-      return false;
-    }
-    return true;
-  }
-
-  async deleteUserBanInfoById(userId: string): Promise<boolean> {
-    const query = `
-      DELETE 
-        FROM public.user_ban_info
-       WHERE "userId" = $1;
-    `;
-    const result = await this.dataSource.query(query, [userId]);
-
-    if (result[1] !== 1) {
-      return false;
-    }
-    return true;
-  }
-
-  async deleteUserBanForBlogStatus(
-    userId: string,
-    blogId: string,
-  ): Promise<boolean> {
-    const query = `
-      DELETE 
-        FROM public.banned_users_for_blog
-       WHERE "userId" = $1 AND "blogId" = $2;
-    `;
-    const result = await this.dataSource.query(query, [userId, blogId]);
-
-    if (result[1] !== 1) {
       return false;
     }
     return true;

@@ -4,7 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
-  HttpCode,
+  HttpCode, Inject,
   NotFoundException,
   NotImplementedException,
   Param,
@@ -14,19 +14,18 @@ import {
 } from '@nestjs/common';
 import { CommentsService } from '../application/comments.service';
 import { CommentDTO } from './dto/commentDTO';
-import { Request } from 'express';
 import { AuthBearerGuard } from '../../../../guards/auth.bearer.guard';
 import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { ReactionDto } from '../../../../global-model/reaction.dto';
-import { PgQueryCommentsRepository } from '../infrastructure/pg-query-comments.repository';
 import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
+import {IQueryCommentsRepository} from "../infrastructure/i-query-comments.repository";
 
 @Controller('comments')
 export class CommentsController {
   constructor(
     protected commentsService: CommentsService,
-    protected queryCommentsRepository: PgQueryCommentsRepository,
+    @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
   ) {}
 
   @UseGuards(AccessTokenValidationGuard)
@@ -90,9 +89,13 @@ export class CommentsController {
     @User() user: UserDBModel,
   ) {
     const comment = await this.queryCommentsRepository.commentExists(commentId);
-
     if (!comment) {
       throw new NotFoundException();
+    }
+
+    const banStatus = await this.commentsService.checkUserBanStatus(user.id, commentId)
+    if (banStatus) {
+      throw new ForbiddenException();
     }
 
     const result = await this.commentsService.updateReaction(

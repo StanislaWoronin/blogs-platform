@@ -1,21 +1,21 @@
 import {
   Controller,
-  Get,
+  Get, Inject,
   NotFoundException,
   Param,
   Query,
 } from '@nestjs/common';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { PgQueryBlogsRepository } from '../infrastructure/pg-query-blogs.repository';
+import { PgQueryBlogsRepository } from '../infrastructure/pg-repository/pg-query-blogs.repository';
 import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
-import { BlogsRepository } from '../infrastructure/blogs.repository';
+import { OrmQueryBlogsRepository } from '../infrastructure/orm-repository/orm-query-blogs.repository';
+import {IQueryBlogsRepository} from "../infrastructure/i-query-blogs.repository";
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    protected queryBlogsRepository: PgQueryBlogsRepository,
+    @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository,
     protected queryPostsRepository: PgQueryPostsRepository,
-    protected blogsRepository: BlogsRepository,
   ) {}
 
   @Get()
@@ -24,7 +24,7 @@ export class BlogsController {
     query: QueryParametersDto,
   ) {
     try {
-      return await this.blogsRepository.getBlogs(query);
+      return await this.queryBlogsRepository.getBlogs(query);
     } catch (e) {
       console.log(e);
     }

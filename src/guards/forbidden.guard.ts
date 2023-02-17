@@ -6,11 +6,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PgQueryBlogsRepository } from '../modules/public/blogs/infrastructure/pg-query-blogs.repository';
+import {IQueryBlogsRepository} from "../modules/public/blogs/infrastructure/i-query-blogs.repository";
 
 @Injectable()
 export class ForbiddenGuard implements CanActivate {
-  constructor(protected blogsRepository: PgQueryBlogsRepository) {}
+  constructor(
+      @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -23,7 +25,7 @@ export class ForbiddenGuard implements CanActivate {
       blogId = req.params.blogId;
     }
 
-    const bloggerId = await this.blogsRepository.blogExist(blogId);
+    const bloggerId = await this.queryBlogsRepository.blogExist(blogId);
 
     if (!bloggerId) {
       throw new NotFoundException();

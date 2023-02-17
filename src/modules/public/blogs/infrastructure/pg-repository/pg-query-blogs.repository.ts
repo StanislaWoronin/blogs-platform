@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, ObjectLiteral, Repository } from 'typeorm';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
   paginationContentPage,
-} from '../../../../helper.functions';
-import { ContentPageModel } from '../../../../global-model/contentPage.model';
-import { dbBlogWithAdditionalInfo } from './entity/blog-db.model';
-import { toBlogWithAdditionalInfoModel } from '../../../../data-mapper/to-blog-with-additional-info.model';
-import { BlogViewModelWithBanStatus } from '../api/dto/blogView.model';
+} from '../../../../../helper.functions';
+import { ContentPageModel } from '../../../../../global-model/contentPage.model';
+import { dbBlogWithAdditionalInfo } from '../entity/blog-db.model';
+import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blog-with-additional-info.model';
+import { BlogViewModelWithBanStatus } from '../../api/dto/blogView.model';
 
 @Injectable()
 export class PgQueryBlogsRepository {

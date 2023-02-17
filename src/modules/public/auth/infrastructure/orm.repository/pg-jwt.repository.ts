@@ -1,6 +1,6 @@
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { TokenBlackList } from './entity/tokenBlackList';
+import { TokenBlackList } from '../entity/tokenBlackList';
 
 export class PgJwtRepository {
   constructor(

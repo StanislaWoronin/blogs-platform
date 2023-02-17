@@ -4,7 +4,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg-query-users.repository';
+import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-query-users.repository';
 
 @Injectable()
 @ValidatorConstraint({ name: 'email', async: true })

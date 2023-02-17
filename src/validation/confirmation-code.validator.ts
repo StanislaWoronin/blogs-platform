@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import {
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg-email-confirmation.repository';
+import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
 import { request } from 'express';
+import {IEmailConfirmationRepository} from "../modules/super-admin/infrastructure/i-email-confirmation.repository";
 
 @ValidatorConstraint({ name: 'ConfirmationCodeValidator', async: true })
 @Injectable()
 export class ConfirmationCodeValidator implements ValidatorConstraintInterface {
   constructor(
-    protected emailConfirmationRepository: PgEmailConfirmationRepository,
+    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
   ) {}
 
   async validate(code: string) {

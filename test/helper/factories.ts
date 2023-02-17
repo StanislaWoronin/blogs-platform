@@ -130,11 +130,11 @@ export class Factories {
   async createComments(
     accessToken: string,
     postId: string,
-    postsCount: number,
+    commentCount: number,
   ): Promise<CreatedComment[]> {
     const comment = [];
 
-    for (let i = 0; i < postsCount; i++) {
+    for (let i = 0; i < commentCount; i++) {
       const inputPostData: CommentDTO = {
         content: preparedComment.valid.content,
       };

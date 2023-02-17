@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import { BlogViewModel } from '../api/dto/blogView.model';
 import { BlogDto } from '../../../blogger/api/dto/blog.dto';
 import { BlogDBModel } from '../infrastructure/entity/blog-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import { PgBlogsRepository } from '../infrastructure/pg-blogs.repository';
+import {IBlogsRepository} from "../infrastructure/i-blogs.repository";
 
 @Injectable()
 export class BlogsService {
-  constructor(protected blogsRepository: PgBlogsRepository) {}
+  constructor(
+      @Inject(IBlogsRepository) protected blogsRepository: IBlogsRepository
+  ){}
 
   async createBlog(
     userId: string,

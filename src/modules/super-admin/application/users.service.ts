@@ -1,23 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import {
   CreatedUserModel,
   UserDBModel,
 } from '../infrastructure/entity/userDB.model';
 import { BanUserDTO } from '../api/dto/ban-user.dto';
-import { PgUsersRepository } from '../infrastructure/pg-users.repository';
-import { PgEmailConfirmationRepository } from '../infrastructure/pg-email-confirmation.repository';
-import { PgBanInfoRepository } from '../infrastructure/pg-ban-info.repository';
+import { PgUsersRepository } from '../infrastructure/pg.repository/pg-users.repository';
+import { PgEmailConfirmationRepository } from '../infrastructure/pg.repository/pg-email-confirmation.repository';
 import { _generateHash } from '../../../helper.functions';
 import { BanInfoModel } from '../infrastructure/entity/banInfo.model';
 import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
 import { UserDto } from '../api/dto/user.dto';
-import { UserViewModelWithBanInfo } from '../api/dto/user.view.model';
+import {IBanInfoRepository} from "../infrastructure/i-ban-info.repository";
+import {IEmailConfirmationRepository} from "../infrastructure/i-email-confirmation.repository";
 
 @Injectable()
 export class UsersService {
   constructor(
-    protected banInfoRepository: PgBanInfoRepository,
-    protected emailConfirmationRepository: PgEmailConfirmationRepository,
+    @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
+    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
     protected usersRepository: PgUsersRepository,
   ) {}
 

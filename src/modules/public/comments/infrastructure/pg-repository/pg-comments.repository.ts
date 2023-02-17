@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CommentBDModel } from './entity/commentDB.model';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { giveSkipNumber } from '../../../../helper.functions';
+import { CommentBDModel } from '../entity/commentDB.model';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
+import { giveSkipNumber } from '../../../../../helper.functions';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { CommentViewModel } from '../api/dto/commentView.model';
-import { CreatedComment } from './entity/db_comment.model';
+import { CommentViewModel } from '../../api/dto/commentView.model';
+import { CreatedComment } from '../entity/db_comment.model';
 
 @Injectable()
 export class PgCommentsRepository {

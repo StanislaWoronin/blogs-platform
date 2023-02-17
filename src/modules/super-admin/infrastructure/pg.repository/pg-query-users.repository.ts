@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
+import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
   paginationContentPage,
-} from '../../../helper.functions';
-import { UserDBModel } from './entity/userDB.model';
-import { BanStatusModel } from '../../../global-model/ban-status.model';
-import { toUserViewModel } from '../../../data-mapper/to-create-user-view.model';
-import { ContentPageModel } from '../../../global-model/contentPage.model';
-import { SortParametersModel } from '../../../global-model/sort-parameters.model';
-import { toBannedUsersModel } from '../../../data-mapper/to-banned-users.model';
-import { DbBannedUsersModel } from './entity/db-banned-users.model';
+} from '../../../../helper.functions';
+import { UserDBModel } from '../entity/userDB.model';
+import { BanStatusModel } from '../../../../global-model/ban-status.model';
+import { toUserViewModel } from '../../../../data-mapper/to-create-user-view.model';
+import { ContentPageModel } from '../../../../global-model/contentPage.model';
+import { SortParametersModel } from '../../../../global-model/sort-parameters.model';
+import { toBannedUsersModel } from '../../../../data-mapper/to-banned-users.model';
+import { DbBannedUsersModel } from '../entity/db-banned-users.model';
 
 @Injectable()
 export class PgQueryUsersRepository {
@@ -42,7 +42,7 @@ export class PgQueryUsersRepository {
     const query = `
       SELECT id, login, email, "passwordHash", "passwordSalt", "createdAt"
         FROM public.users
-       WHERE id = $1;
+       WHERE id = $1 AND (SELECT "banStatus" FROM public.user_ban_info WHERE "userId" = '${userId}') = false;
     `;
 
     const result = await this.dataSource.query(query, [userId]);

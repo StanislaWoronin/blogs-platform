@@ -4,12 +4,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EmailManager } from '../email-transfer/email.manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailConfirmation } from '../../../super-admin/infrastructure/entity/email-confirmation.entity';
-import { PgEmailConfirmationRepository } from '../../../super-admin/infrastructure/pg-email-confirmation.repository';
+import { PgEmailConfirmationRepository } from '../../../super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
+import {IEmailConfirmationRepository} from "../../../super-admin/infrastructure/i-email-confirmation.repository";
 
 @Injectable()
 export class AuthService {
   constructor(
-    protected emailConfirmationRepository: PgEmailConfirmationRepository,
+      @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
     protected emailsManager: EmailManager,
   ) {}
 
