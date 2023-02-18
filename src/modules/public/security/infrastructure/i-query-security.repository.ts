@@ -1,4 +1,4 @@
-import { UserDeviceModel } from "./infrastructure/entity/userDevice.model";
+import { UserDeviceModel } from "./entity/userDevice.model";
 
 export interface IQuerySecurityRepository {
   getAllActiveSessions(userId: string): Promise<UserDeviceModel[]>

@@ -10,8 +10,6 @@ export class DbPostModel {
   blogName: string;
   likesCount: number;
   dislikesCount: number;
-  login: string;
-  newestLikes: NewestLikesModel[];
   myStatus?: string;
 }
 

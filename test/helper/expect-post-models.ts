@@ -33,9 +33,9 @@ export const getPosts = (post: PostViewModel, blog: BlogViewModel) => {
       myStatus: 'None',
       newestLikes: [
         // {
-        //     "addedAt": "2023-01-23T07:56:46.794Z",
-        //     "userId": "string",
-        //     "login": "string"
+        //   addedAt: expect.any(String),
+        //   userId: "string",
+        //   login: "string"
         // }
       ],
     },

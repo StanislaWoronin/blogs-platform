@@ -89,7 +89,6 @@ export class PgQueryPostsRepository {
                   FROM public.posts
                  WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
         `;
-    console.log('postQuery: ', query)
     const postDB: DbPostModel[] = await this.dataSource.query(query);
 
     if (!postDB.length) {
@@ -98,41 +97,54 @@ export class PgQueryPostsRepository {
     return await this.addNewestLikes(postDB[0]);
   }
 
-  async getPostsForBlog(
-    queryDto: QueryParametersDto,
-    blogId: string,
-  ): Promise<ContentPageModel> {
-    const blogIdFilter = this.getBlogIdFilter(blogId);
-
-    const postQuery = `
-      SELECT id, title, "shortDescription", content, "blogId",
-             (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId")
-        FROM public.posts     
-       ${blogIdFilter}
-       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-                 LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
-      queryDto.pageNumber,
-      queryDto.pageSize,
-    )}; 
-    `;
-    const posts: PostForBlogViewModel[] = await this.dataSource.query(
-      postQuery,
-    );
-
-    const totalCountQuery = `
-      SELECT COUNT(id)
-            FROM public.posts
-           ${blogIdFilter}
-    `;
-    const totalCount = await this.dataSource.query(totalCountQuery);
-
-    return paginationContentPage(
-      queryDto.pageNumber,
-      queryDto.pageSize,
-      posts,
-      Number(totalCount[0].count),
-    );
-  }
+  // async getPostsForBlog(
+  //   queryDto: QueryParametersDto,
+  //   blogId: string,
+  //   userId: string | undefined,
+  // ): Promise<ContentPageModel> {
+  //   const myStatusFilter = this.myStatusFilter(userId);
+  //
+  //   const postQuery = `
+  //     SELECT id, title, "shortDescription", content, "blogId",
+  //            (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId")
+  //            (SELECT COUNT("postId")
+  //               FROM public.post_reactions
+  //              WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
+  //            (SELECT COUNT("postId")
+  //               FROM public.post_reactions
+  //              WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
+  //            ${myStatusFilter}
+  //       FROM public.posts
+  //      WHERE "blogId" = $1 AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = $1)
+  //      ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+  //                LIMIT '${queryDto.pageSize}'OFFSET ${giveSkipNumber(
+  //                   queryDto.pageNumber,
+  //                   queryDto.pageSize,
+  //                )};
+  //   `;
+  //   const postsDB: DbPostModel[] = await this.dataSource.query(
+  //     postQuery,
+  //     [blogId]
+  //   );
+  //
+  //   const posts = await Promise.all(
+  //     postsDB.map(async (p) => await this.addNewestLikes(p)),
+  //   );
+  //
+  //   const totalCountQuery = `
+  //     SELECT COUNT(id)
+  //           FROM public.posts
+  //          ${blogIdFilter}
+  //   `;
+  //   const totalCount = await this.dataSource.query(totalCountQuery);
+  //
+  //   return paginationContentPage(
+  //     queryDto.pageNumber,
+  //     queryDto.pageSize,
+  //     posts,
+  //     Number(totalCount[0].count),
+  //   );
+  // }
 
   async getAllPostsId(blogId: string): Promise<{ id: string }[]> {
     const query = `
@@ -180,7 +192,7 @@ export class PgQueryPostsRepository {
     return result[0].blogId
   }
 
-  private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
+  private async addNewestLikes(post: DbPostModel ): Promise<PostViewModel> {
     const newestLikes = await this.queryReactionsRepository.newestLikes(post.id);
 
     let myStatus = 'None';

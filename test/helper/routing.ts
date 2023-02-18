@@ -70,3 +70,7 @@ export const getUrlForComment = (url: string, id: string): string => {
 export const getUrlForReactionStatus = (url: string, id: string): string => {
   return `${url}/${id}/like-status`;
 };
+
+export const getUrlForPost = (url: string, id: string): string => {
+  return `${url}/${id}/posts`
+}

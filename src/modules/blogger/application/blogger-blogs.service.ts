@@ -1,21 +1,5 @@
 import {Inject, Injectable} from '@nestjs/common';
-import { BlogDto } from '../api/dto/blog.dto';
 import { BanUserDto } from '../api/dto/ban-user.dto';
-import { PgUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-users.repository';
-import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-query-users.repository';
-import { PgBanInfoRepository } from '../../super-admin/infrastructure/pg.repository/pg-ban-info.repository';
-import { PgBlogsRepository } from '../../public/blogs/infrastructure/pg-repository/pg-blogs.repository';
-import { BlogsService } from '../../public/blogs/application/blogs.service';
-import {
-  PostForBlogViewModel,
-  PostViewModel,
-} from '../../public/posts/api/dto/postsView.model';
-import { PostDto } from '../api/dto/post.dto';
-import { PostsService } from '../../public/posts/application/posts.service';
-import {
-  toCreatedPostsViewModel,
-  toPostsViewModel,
-} from '../../../data-mapper/to-posts-view.model';
 import {IBanInfoRepository} from "../../super-admin/infrastructure/i-ban-info.repository";
 import { IQueryUsersRepository } from "../../super-admin/infrastructure/i-query-users.repository";
 

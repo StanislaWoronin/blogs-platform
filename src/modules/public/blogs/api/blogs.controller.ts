@@ -3,14 +3,14 @@ import {
   Get, Inject,
   NotFoundException,
   Param,
-  Query,
-} from '@nestjs/common';
+  Query, UseGuards
+} from "@nestjs/common";
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { PgQueryBlogsRepository } from '../infrastructure/pg-repository/pg-query-blogs.repository';
-import { PgQueryPostsRepository } from '../../posts/infrastructure/pg.repository/pg-query-posts.repository';
-import { OrmQueryBlogsRepository } from '../infrastructure/orm-repository/orm-query-blogs.repository';
-import {IQueryBlogsRepository} from "../infrastructure/i-query-blogs.repository";
+import { IQueryBlogsRepository } from "../infrastructure/i-query-blogs.repository";
 import { IQueryPostsRepository } from "../../posts/infrastructure/i-query-posts.repository";
+import { AccessTokenValidationGuard } from "../../../../guards/access-token-validation.guard";
+import { User } from "../../../../decorator/user.decorator";
+import { UserDBModel } from "../../../super-admin/infrastructure/entity/userDB.model";
 
 @Controller('blogs')
 export class BlogsController {
@@ -42,17 +42,24 @@ export class BlogsController {
     return blog;
   }
 
+  @UseGuards(AccessTokenValidationGuard)
   @Get(':id/posts')
   async getPostsByBlogId(
     @Query() query: QueryParametersDto,
     @Param('id') blogId: string,
+    @User() user: UserDBModel
   ) {
-    const post = await this.queryBlogsRepository.getBlog(blogId);
+    let userId;
+    if (user) {
+      userId = user.id;
+    }
+
+    const post = await this.queryBlogsRepository.blogExist(blogId);
 
     if (!post) {
       throw new NotFoundException();
     }
 
-    return this.queryPostsRepository.getPostsForBlog(query, blogId);
+    return this.queryPostsRepository.getPosts(query, blogId, userId);
   }
 }

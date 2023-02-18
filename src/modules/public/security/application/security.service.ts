@@ -8,7 +8,7 @@ import { PgQuerySecurityRepository } from '../infrastructure/pg.repository/pg-qu
 import { v4 as uuidv4 } from 'uuid';
 import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
 import { ISecurityRepository } from "../infrastructure/i-security.repository";
-import { IQuerySecurityRepository } from "../i-query-security.repository";
+import { IQuerySecurityRepository } from "../infrastructure/i-query-security.repository";
 
 @Injectable()
 export class SecurityService {

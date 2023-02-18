@@ -53,7 +53,7 @@ import { IReactionsRepository } from "./modules/public/likes/infrastructure/i-re
 import { IQueryReactionRepository } from "./modules/public/likes/infrastructure/i-query-reaction.repository";
 import { IQueryPostsRepository } from "./modules/public/posts/infrastructure/i-query-posts.repository";
 import { IPostsRepository } from "./modules/public/posts/infrastructure/i-posts.repository";
-import { IQuerySecurityRepository } from "./modules/public/security/i-query-security.repository";
+import { IQuerySecurityRepository } from "./modules/public/security/infrastructure/i-query-security.repository";
 import { ISecurityRepository } from "./modules/public/security/infrastructure/i-security.repository";
 import { IQueryUsersRepository } from "./modules/super-admin/infrastructure/i-query-users.repository";
 import { IUsersRepository } from "./modules/super-admin/infrastructure/i-users.repository";

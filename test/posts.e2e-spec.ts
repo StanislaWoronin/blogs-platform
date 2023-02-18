@@ -6,7 +6,6 @@ import request from 'supertest';
 import { preparedComment, preparedPost } from "./helper/prepeared-data";
 import {
   getPosts,
-  getPostsByBlogId,
   getStandardPosts,
 } from './helper/expect-post-models';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,8 +13,8 @@ import { getCreatedComment } from './helper/expect-comment-model';
 import {
   endpoints,
   getUrlForComment,
-  getUrlForEndpointPostByBlogger,
-} from './helper/routing';
+  getUrlForEndpointPostByBlogger, getUrlForPost
+} from "./helper/routing";
 import { Factories } from './helper/factories';
 
 describe('e2e tests', () => {
@@ -83,6 +82,47 @@ describe('e2e tests', () => {
       );
 
       expect.setState({ post0: post0.body, post1, post2, post3 });
+    });
+
+    describe('Return all posts by blogId', () => {
+      it('Return posts without query', async () => {
+        const { blog1, post1, post2, post3 } = expect.getState();
+        const url = getUrlForPost(endpoints.blogController, blog1.id)
+
+        const response = await request(server)
+          .get(url)
+          .expect(200);
+
+        expect(response.body).toStrictEqual({
+          pagesCount: 1,
+          page: 1,
+          pageSize: 10,
+          totalCount: 3,
+          items: [
+            getPosts(post3, blog1),
+            getPosts(post2, blog1),
+            getPosts(post1, blog1),
+          ],
+        });
+      });
+
+      it('Return posts with sorting and pagination 1', async () => {
+        const { blog1, blog2, post3 } = expect.getState();
+
+        const response = await request(server)
+          .get(
+            `${endpoints.postController}?sortBy=title&sortDirection=asc&pageNumber=2&pageSize=2`,
+          )
+          .expect(200);
+
+        expect(response.body).toStrictEqual({
+          pagesCount: 2,
+          page: 2,
+          pageSize: 2,
+          totalCount: 4,
+          items: [getPosts(post3, blog1), getStandardPosts(blog2)],
+        });
+      });
     });
 
     describe('Return all posts', () => {
