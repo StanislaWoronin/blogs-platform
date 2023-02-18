@@ -92,6 +92,7 @@ export class PgQueryPostsRepository {
                   FROM public.posts
                  WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
         `;
+    console.log('postQuery: ', query)
     const postDB: DbPostModel[] = await this.dataSource.query(query);
 
     if (!postDB.length) {

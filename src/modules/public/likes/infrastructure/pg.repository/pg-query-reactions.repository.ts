@@ -46,6 +46,7 @@ export class PgQueryReactionsRepository {
        ORDER BY "addedAt" DESC
        LIMIT ${settings.newestLikes.limit};
     `;
+    console.log('newestLikes: ', newestLikesQuery)
     return await this.dataSource.query(newestLikesQuery);
   }
 }

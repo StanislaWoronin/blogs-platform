@@ -808,5 +808,25 @@ describe('e2e tests', () => {
       })
     })
 
+    describe('PUT -> "/posts/:postId/like-status": create post then: like the post by user 1,' +
+      'user 2, user 3, user 4. get the post after each like by user 1. NewestLikes should be sorted' +
+      'in descending; status 204; used additional methods: POST => /blogger/blogs,' +
+      'POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
+
+      it('Drop all data.', async () => {
+        await request(server)
+          .delete(endpoints.testingController.allData)
+          .expect(204);
+      });
+
+      it('get "/post/:id"', async () => {
+        const [owner] = await factories.createAndLoginUsers(1)
+        const [blog] = await factories.createBlogs(owner.accessToken, 1)
+        const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+
+        const response = await posts.getPostById(post.id)
+        console.log(response);
+      })
+    })
   })
 });

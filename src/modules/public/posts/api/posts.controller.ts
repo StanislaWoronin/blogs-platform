@@ -50,13 +50,12 @@ export class PostsController {
     return this.queryPostsRepository.getPosts(query, blogId, userId);
   }
 
+  @UseGuards(AccessTokenValidationGuard)
   @Get(':id')
-  async getPostById(@Param('id') postId: string, @Req() req: Request) {
-    let userId = undefined;
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1];
-      const tokenPayload = await this.jwtService.getTokenPayload(token);
-      userId = tokenPayload.userId;
+  async getPostById(@Param('id') postId: string, @User() user: UserDBModel) {
+    let userId;
+    if (user) {
+      userId = user.id;
     }
 
     const post = await this.queryPostsRepository.getPostById(postId, userId);
@@ -102,7 +101,6 @@ export class PostsController {
     @User() user: UserDBModel,
   ) {
     const post = await this.queryPostsRepository.postExist(postId);
-    console.log('post exist --->', post);
     if (!post) {
       throw new NotFoundException();
     }
