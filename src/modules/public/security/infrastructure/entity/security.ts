@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { Users } from '../../../../super-admin/infrastructure/entity/users';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
 
 @Entity()
 export class Security {

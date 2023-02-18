@@ -21,11 +21,12 @@ import { AuthBearerGuard } from '../../../../guards/auth.bearer.guard';
 import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { ReactionDto } from '../../../../global-model/reaction.dto';
-import { PgQueryPostsRepository } from '../infrastructure/pg-query-posts.repository';
+import { PgQueryPostsRepository } from '../infrastructure/pg.repository/pg-query-posts.repository';
 import { JwtService } from '../../auth/application/jwt.service';
 import { PgQueryCommentsRepository } from '../../comments/infrastructure/pg-repository/pg-query-comments.repository';
 import { AccessTokenValidationGuard } from "../../../../guards/access-token-validation.guard";
 import {IQueryCommentsRepository} from "../../comments/infrastructure/i-query-comments.repository";
+import { IQueryPostsRepository } from "../infrastructure/i-query-posts.repository";
 
 @Controller('posts')
 export class PostsController {
@@ -34,7 +35,7 @@ export class PostsController {
     protected jwtService: JwtService,
     protected postsService: PostsService,
     @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
-    protected queryPostsRepository: PgQueryPostsRepository,
+    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
   ) {}
 
   @UseGuards(AccessTokenValidationGuard)
@@ -85,7 +86,7 @@ export class PostsController {
       userId,
     );
 
-    if (!comment.items.length) {
+    if (!comment) {
       throw new NotFoundException();
     }
 
@@ -100,17 +101,18 @@ export class PostsController {
     @Param('id') postId: string,
     @User() user: UserDBModel,
   ) {
+    const post = await this.queryPostsRepository.postExist(postId);
+    console.log('post exist --->', post);
+    if (!post) {
+      throw new NotFoundException();
+    }
+
     const banStatus = await this.postsService.checkUserBanStatus(
-        user.id,
-        postId,
+      user.id,
+      postId,
     );
     if (banStatus) {
       throw new ForbiddenException();
-    }
-
-    const post = await this.queryPostsRepository.postExist(postId);
-    if (!post) {
-      throw new NotFoundException();
     }
 
     return this.commentsService.createComment(postId, dto.content, user);

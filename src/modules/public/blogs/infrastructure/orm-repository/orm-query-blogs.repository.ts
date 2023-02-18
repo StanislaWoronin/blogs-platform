@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Blogs } from '../entity/blogs.entity';
 import {
-  FindOptionsOrder,
   IsNull,
   Like,
   ObjectLiteral,
@@ -14,6 +13,7 @@ import {
   paginationContentPage,
 } from '../../../../../helper.functions';
 import { BlogViewModel } from '../../api/dto/blogView.model';
+import { ContentPageModel } from "../../../../../global-model/contentPage.model";
 
 @Injectable()
 export class OrmQueryBlogsRepository {
@@ -22,7 +22,7 @@ export class OrmQueryBlogsRepository {
     private readonly blogsRepository: Repository<Blogs>,
   ) {}
 
-  async getBlogs(query: QueryParametersDto, userId?: string | null) {
+  async getBlogs(query: QueryParametersDto, userId?: string | null): Promise<ContentPageModel> {
     const filters: ObjectLiteral = {};
     if (query.searchNameTerm) filters.name = Like(`%${query.searchNameTerm}%`);
     if (userId) filters.user = { id: userId };

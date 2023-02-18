@@ -4,10 +4,9 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { Users } from '../../../../super-admin/infrastructure/entity/users';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 import { CommentReactions } from '../../../likes/infrastructure/entity/comment-reactions.entity';
 

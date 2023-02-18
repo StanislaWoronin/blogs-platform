@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
-import { preparedPost } from './helper/prepeared-data';
+import { preparedComment, preparedPost } from "./helper/prepeared-data";
 import {
   getPosts,
   getPostsByBlogId,
@@ -107,7 +107,7 @@ describe('e2e tests', () => {
         });
       });
 
-      it('Return posts with sorting and pagination', async () => {
+      it('Return posts with sorting and pagination 1', async () => {
         const { blog1, blog2, post3 } = expect.getState();
 
         const response = await request(server)
@@ -122,24 +122,6 @@ describe('e2e tests', () => {
           pageSize: 2,
           totalCount: 4,
           items: [getPosts(post3, blog1), getStandardPosts(blog2)],
-        });
-      });
-
-      it('Return posts with sorting and pagination', async () => {
-        const blog = expect.getState().blog1;
-
-        const response = await request(server)
-          .get(
-            `${endpoints.postController}?sortBy=content&sortDirection=desc&pageSize=2`,
-          )
-          .expect(200);
-
-        expect(response.body).toStrictEqual({
-          pagesCount: 1,
-          page: 1,
-          pageSize: 10,
-          totalCount: 3,
-          items: [getPostsByBlogId(3, 3, blog), getPostsByBlogId(2, 3, blog)],
         });
       });
     });
@@ -221,7 +203,7 @@ describe('e2e tests', () => {
 
         const response = await request(server)
           .post(url)
-          .send({ content: 'aBqFljveZokLojESGyqiRg' })
+          .send(preparedComment.valid)
           .auth(token, { type: 'bearer' })
           .expect(201);
 

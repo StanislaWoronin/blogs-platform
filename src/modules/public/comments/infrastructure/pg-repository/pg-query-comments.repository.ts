@@ -75,7 +75,7 @@ export class PgQueryCommentsRepository {
     queryDto: QueryParametersDto,
     postId: string,
     userId: string,
-  ): Promise<ContentPageModel> {
+  ): Promise<ContentPageModel | null> {
     const myStatusFilter = this.myStatusFilter(userId);
 
     const query = `
@@ -103,6 +103,9 @@ export class PgQueryCommentsRepository {
         `;
     const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
       await this.dataSource.query(query, [postId, queryDto.pageSize]);
+    if (!commentsDB.length) {
+      return null
+    }
 
     const comments = commentsDB.map((c) => toCommentsViewModel(c));
 

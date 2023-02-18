@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UserDeviceModel } from './entity/userDevice.model';
+import { UserDeviceModel } from '../entity/userDevice.model';
 
 @Injectable()
 export class PgQuerySecurityRepository {

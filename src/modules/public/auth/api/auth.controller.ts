@@ -34,6 +34,7 @@ import { EmailDto } from './dto/email.dto';
 import { NewPasswordDto } from './dto/new-password.dto';
 import { UserDto } from '../../../super-admin/api/dto/user.dto';
 import {IEmailConfirmationRepository} from "../../../super-admin/infrastructure/i-email-confirmation.repository";
+import { IQueryUsersRepository } from "../../../super-admin/infrastructure/i-query-users.repository";
 
 @Controller('auth')
 export class AuthController {
@@ -41,10 +42,10 @@ export class AuthController {
     protected authService: AuthService,
     protected createUserUseCase: CreateUserUseCase,
     protected emailManager: EmailManager,
-    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
     protected securityService: SecurityService,
     protected userService: UsersService,
-    protected queryUsersRepository: PgQueryUsersRepository,
+    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
+    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
   ) {}
 
   @UseGuards(AuthBearerGuard)

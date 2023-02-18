@@ -1,23 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
   paginationContentPage,
-} from '../../../../helper.functions';
-import { ContentPageModel } from '../../../../global-model/contentPage.model';
-import { DbPostModel } from './entity/db-post.model';
+} from '../../../../../helper.functions';
+import { ContentPageModel } from '../../../../../global-model/contentPage.model';
+import { DbPostModel } from '../entity/db-post.model';
 import {
   PostForBlogViewModel,
   PostViewModel,
-} from '../api/dto/postsView.model';
-import { settings } from '../../../../settings';
-import { NewestLikesModel } from '../../likes/infrastructure/entity/newestLikes.model';
+} from '../../api/dto/postsView.model';
+import { settings } from '../../../../../settings';
+import { NewestLikesModel } from '../../../likes/infrastructure/entity/newestLikes.model';
+import { IQueryReactionRepository } from "../../../likes/infrastructure/i-query-reaction.repository";
 
 @Injectable()
 export class PgQueryPostsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @Inject(IQueryReactionRepository) protected queryReactionsRepository: IQueryReactionRepository
+  ) {}
 
   async getPosts(
     queryDto: QueryParametersDto,
@@ -178,20 +182,8 @@ export class PgQueryPostsRepository {
     return result[0].blogId
   }
 
-  async newestLikes(postId: string): Promise<NewestLikesModel[]> {
-    const newestLikesQuery = `
-      SELECT "userId", "addedAt",
-             (SELECT login FROM public.users WHERE users.id = post_reactions."userId")
-        FROM public.post_reactions
-       WHERE "postId" = '${postId}' AND status = 'Like'
-       ORDER BY "addedAt" DESC
-       LIMIT ${settings.newestLikes.limit};
-    `;
-    return await this.dataSource.query(newestLikesQuery);
-  }
-
   private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
-    const newestLikes = await this.newestLikes(post.id);
+    const newestLikes = await this.queryReactionsRepository.newestLikes(post.id);
 
     let myStatus = 'None';
     if (post.myStatus) {

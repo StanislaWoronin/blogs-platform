@@ -339,12 +339,12 @@ describe('e2e tests', () => {
           .expect(401);
       });
 
-      it('Shouldn`t login if the password or login is wrong', async () => {
+      it('Shouldn`t login if incorrect input data', async () => {
         await request(server)
           .post(endpoints.authController.login)
           .send(prepareLogin.notValid)
           .set({ 'user-agent': 'chrome/0.1' })
-          .expect(400);
+          .expect(401);
       });
 
       it('Should login and return token', async () => {

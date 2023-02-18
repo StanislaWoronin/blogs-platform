@@ -1,19 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from "@nestjs/common";
 import { JwtService } from '../../auth/application/jwt.service';
 import { ViewSecurityDeviseModel } from '../api/dto/viewSecurityDeviseModel';
 import { UserDeviceModel } from '../infrastructure/entity/userDevice.model';
 import { toActiveSessionsViewModel } from '../../../../data-mapper/to-active-session-view.model';
-import { PgSecurityRepository } from '../infrastructure/pg-security.repository';
-import { PgQuerySecurityRepository } from '../infrastructure/pg-query-security.repository';
+import { PgSecurityRepository } from '../infrastructure/pg.repository/pg-security.repository';
+import { PgQuerySecurityRepository } from '../infrastructure/pg.repository/pg-query-security.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
+import { ISecurityRepository } from "../infrastructure/i-security.repository";
+import { IQuerySecurityRepository } from "../i-query-security.repository";
 
 @Injectable()
 export class SecurityService {
   constructor(
     protected jwtService: JwtService,
-    protected securityRepository: PgSecurityRepository,
-    protected querySecurityRepository: PgQuerySecurityRepository,
+    @Inject(ISecurityRepository) protected securityRepository: ISecurityRepository,
+    @Inject(IQuerySecurityRepository) protected querySecurityRepository: IQuerySecurityRepository,
   ) {}
 
   async getAllActiveSessions(

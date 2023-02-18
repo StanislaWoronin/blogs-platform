@@ -17,19 +17,20 @@ import {
   toPostsViewModel,
 } from '../../../data-mapper/to-posts-view.model';
 import {IBanInfoRepository} from "../../super-admin/infrastructure/i-ban-info.repository";
+import { IQueryUsersRepository } from "../../super-admin/infrastructure/i-query-users.repository";
 
 @Injectable()
 export class BloggerBlogService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
-    protected queryUserRepository: PgQueryUsersRepository,
+    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
   ) {}
 
   async updateUserBanStatus(
     userId: string,
     dto: BanUserDto,
   ): Promise<boolean | null> {
-    const user = await this.queryUserRepository.getUserById(userId);
+    const user = await this.queryUsersRepository.getUserById(userId);
     if (!user) {
       return null;
     }

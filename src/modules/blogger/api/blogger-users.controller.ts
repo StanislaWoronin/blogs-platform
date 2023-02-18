@@ -2,26 +2,27 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
+  HttpCode, Inject,
   NotFoundException,
   Param,
   Put,
   Query,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { AuthBearerGuard } from '../../../guards/auth.bearer.guard';
 import { ForbiddenGuard } from '../../../guards/forbidden.guard';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { BloggerBlogService } from '../application/blogger-blogs.service';
 import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-query-users.repository';
+import { IQueryUsersRepository } from "../../super-admin/infrastructure/i-query-users.repository";
 
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
 @Controller('blogger/users')
 export class BloggerUsersController {
   constructor(
     protected blogsService: BloggerBlogService,
-    protected queryUsersRepository: PgQueryUsersRepository,
+    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
   ) {}
 
   @Get('blog/:id')

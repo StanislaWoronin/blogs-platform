@@ -9,7 +9,7 @@ import { CreatedCommentViewModel } from '../../src/modules/public/comments/api/d
 export const getCreatedComment = (user: UserViewModelWithBanInfo) => {
   return {
     id: expect.any(String),
-    content: preparedComment.valid,
+    content: preparedComment.valid.content,
     commentatorInfo: {
       userId: user.id,
       userLogin: user.login,

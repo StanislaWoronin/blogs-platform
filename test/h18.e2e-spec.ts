@@ -6,7 +6,7 @@ import { EmailManager } from '../src/modules/public/auth/email-transfer/email.ma
 import { EmailManagerMock } from './mock/emailAdapter.mock';
 import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
-import { preparedBlog, preparedUser, superUser } from './helper/prepeared-data';
+import { superUser } from './helper/prepeared-data';
 import { faker } from '@faker-js/faker';
 import { bannedUser } from './helper/exect-blogger.model';
 

@@ -1,27 +1,28 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PgCommentsRepository } from '../infrastructure/pg-repository/pg-comments.repository';
 import { CommentBDModel } from '../infrastructure/entity/commentDB.model';
 import {
   CreatedCommentViewModel,
 } from '../api/dto/commentView.model';
 import { v4 as uuidv4 } from 'uuid';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
-import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
 import {
   createdCommentViewModel,
 } from '../../../../data-mapper/to_comments_view.model';
-import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
 import { ReactionModel } from '../../../../global-model/reaction.model';
 import {IBanInfoRepository} from "../../../super-admin/infrastructure/i-ban-info.repository";
 import {ICommentsRepository} from "../infrastructure/i-comments.repository";
+import { IReactionsRepository } from "../../likes/infrastructure/i-reactions.repository";
+import { IQueryReactionRepository } from "../../likes/infrastructure/i-query-reaction.repository";
+import { IQueryPostsRepository } from "../../posts/infrastructure/i-query-posts.repository";
 
 @Injectable()
 export class CommentsService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
     @Inject(ICommentsRepository) protected commentsRepository: ICommentsRepository,
-    protected queryPostsRepository: PgQueryPostsRepository,
-    protected likesRepository: PgLikesRepository,
+    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
+    @Inject(IReactionsRepository) protected reactionsRepository: IReactionsRepository,
+    @Inject(IQueryReactionRepository) protected queryReactionsRepository: IQueryReactionRepository,
   ) {}
 
   async checkUserBanStatus(userId: string, commentId: string): Promise<boolean> {
@@ -62,7 +63,7 @@ export class CommentsService {
     commentId: string,
     likeStatus: string,
   ): Promise<boolean> {
-    const currentReaction = await this.likesRepository.getCommentReaction(
+    const currentReaction = await this.queryReactionsRepository.getCommentReaction(
       userId,
       commentId,
     );
@@ -72,7 +73,7 @@ export class CommentsService {
         return true;
       }
 
-      return await this.likesRepository.createCommentReaction(
+      return await this.reactionsRepository.createCommentReaction(
         userId,
         commentId,
         likeStatus,
@@ -81,13 +82,13 @@ export class CommentsService {
     }
 
     if (likeStatus === ReactionModel.None) {
-      return await this.likesRepository.deleteCommentReaction(
+      return await this.reactionsRepository.deleteCommentReaction(
         userId,
         commentId,
       );
     }
 
-    return await this.likesRepository.updateCommentReaction(
+    return await this.reactionsRepository.updateCommentReaction(
       commentId,
       userId,
       likeStatus,

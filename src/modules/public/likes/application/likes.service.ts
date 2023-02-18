@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PgLikesRepository } from '../infrastructure/pg-likes.repository';
+import { PgLikesRepository } from '../infrastructure/pg.repository/pg-likes.repository';
 
 @Injectable()
 export class LikesService {

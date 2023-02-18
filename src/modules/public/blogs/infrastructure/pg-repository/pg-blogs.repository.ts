@@ -10,7 +10,7 @@ import { Blogs } from '../entity/blogs.entity';
 @Injectable()
 export class PgBlogsRepository {
   constructor(
-    @InjectDataSource() private dataSource: DataSource, //@InjectRepository(Blogs) private blogsRepository: Repository<Blogs>
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async createBlog(newBlog: BlogDBModel): Promise<CreatedBlogModel | null> {

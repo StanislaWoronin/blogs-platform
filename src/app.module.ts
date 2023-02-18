@@ -14,17 +14,11 @@ import { LoginExistValidator } from './validation/login-exist-validator.service'
 import { ConfirmationCodeValidator } from './validation/confirmation-code.validator';
 import { CreateUserBySaUseCase } from './modules/super-admin/use-cases/create-user-by-sa.use-case';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PgJwtRepository } from './modules/public/auth/infrastructure/orm.repository/pg-jwt.repository';
 import { UsersService } from './modules/super-admin/application/users.service';
-import { PgEmailConfirmationRepository } from './modules/super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
-import { PgUsersRepository } from './modules/super-admin/infrastructure/pg.repository/pg-users.repository';
-import { UserBanInfo } from './modules/super-admin/infrastructure/entity/userBanInfo';
+import { UserBanInfo } from './modules/super-admin/infrastructure/entity/user-ban-info.entity';
 import { EmailConfirmation } from './modules/super-admin/infrastructure/entity/email-confirmation.entity';
-import { Users } from './modules/super-admin/infrastructure/entity/users';
-import { PgSecurityRepository } from './modules/public/security/infrastructure/pg-security.repository';
-import { PgQuerySecurityRepository } from './modules/public/security/infrastructure/pg-query-security.repository';
+import { Users } from './modules/super-admin/infrastructure/entity/users.entity';
 import { CreateUserUseCase } from './modules/super-admin/use-cases/create-user.use-case';
-import { PgQueryUsersRepository } from './modules/super-admin/infrastructure/pg.repository/pg-query-users.repository';
 import { EmailResendingValidator } from './validation/email-resending.validator';
 import { Security } from './modules/public/security/infrastructure/entity/security';
 import { TokenBlackList } from './modules/public/auth/infrastructure/entity/tokenBlackList';
@@ -40,16 +34,9 @@ import { BloggerUsersController } from './modules/blogger/api/blogger-users.cont
 import { BloggerBlogService } from './modules/blogger/application/blogger-blogs.service';
 import { BlogsController } from './modules/public/blogs/api/blogs.controller';
 import { BlogsService } from './modules/public/blogs/application/blogs.service';
-import { PgBlogsRepository } from './modules/public/blogs/infrastructure/pg-repository/pg-blogs.repository';
-import { PgQueryBlogsRepository } from './modules/public/blogs/infrastructure/pg-repository/pg-query-blogs.repository';
 import { CommentsService } from './modules/public/comments/application/comments.service';
-import { PgCommentsRepository } from './modules/public/comments/infrastructure/pg-repository/pg-comments.repository';
-import { PgQueryCommentsRepository } from './modules/public/comments/infrastructure/pg-repository/pg-query-comments.repository';
-import { PgLikesRepository } from './modules/public/likes/infrastructure/pg-likes.repository';
 import { PostsController } from './modules/public/posts/api/posts.controller';
 import { PostsService } from './modules/public/posts/application/posts.service';
-import { PgPostsRepository } from './modules/public/posts/infrastructure/pg-posts.repository';
-import { PgQueryPostsRepository } from './modules/public/posts/infrastructure/pg-query-posts.repository';
 import { SaBlogsController } from './modules/super-admin/api/sa-blogs.controller';
 import { SaBlogsService } from './modules/super-admin/application/sa-blogs.service';
 import { BannedPost } from './modules/super-admin/infrastructure/entity/banned-post.entity';
@@ -59,10 +46,19 @@ import {IBlogsRepository} from "./modules/public/blogs/infrastructure/i-blogs.re
 import {IQueryBlogsRepository} from "./modules/public/blogs/infrastructure/i-query-blogs.repository";
 import {IJwtRepository} from "./modules/public/auth/infrastructure/i-jwt.repository";
 import {IBanInfoRepository} from "./modules/super-admin/infrastructure/i-ban-info.repository";
-import {PgBanInfoRepository} from "./modules/super-admin/infrastructure/pg.repository/pg-ban-info.repository";
 import {ICommentsRepository} from "./modules/public/comments/infrastructure/i-comments.repository";
 import {IQueryCommentsRepository} from "./modules/public/comments/infrastructure/i-query-comments.repository";
 import {IEmailConfirmationRepository} from "./modules/super-admin/infrastructure/i-email-confirmation.repository";
+import { IReactionsRepository } from "./modules/public/likes/infrastructure/i-reactions.repository";
+import { IQueryReactionRepository } from "./modules/public/likes/infrastructure/i-query-reaction.repository";
+import { IQueryPostsRepository } from "./modules/public/posts/infrastructure/i-query-posts.repository";
+import { IPostsRepository } from "./modules/public/posts/infrastructure/i-posts.repository";
+import { IQuerySecurityRepository } from "./modules/public/security/i-query-security.repository";
+import { ISecurityRepository } from "./modules/public/security/infrastructure/i-security.repository";
+import { IQueryUsersRepository } from "./modules/super-admin/infrastructure/i-query-users.repository";
+import { IUsersRepository } from "./modules/super-admin/infrastructure/i-users.repository";
+import { repositoryName, repositorySwitcher } from "./repositories";
+import { settings } from "./settings";
 
 const controllers = [
   AuthController,
@@ -94,21 +90,21 @@ const entity = [
 ];
 
 const repositories = [
-  { provide: IBanInfoRepository, useClass: PgBanInfoRepository},
-  { provide: IBlogsRepository, useClass: PgBlogsRepository },
-  { provide: IQueryBlogsRepository, useClass: PgQueryBlogsRepository },
-  { provide: ICommentsRepository, useClass: PgCommentsRepository},
-  { provide: IQueryCommentsRepository, useClass: PgQueryCommentsRepository},
-  { provide: IEmailConfirmationRepository, useClass: PgEmailConfirmationRepository},
-  PgLikesRepository,
-  { provide: IJwtRepository, useClass: PgJwtRepository},
-  PostsController,
-  PgQueryPostsRepository,
-  PgPostsRepository,
-  PgSecurityRepository,
-  PgQuerySecurityRepository,
-  PgUsersRepository,
-  PgQueryUsersRepository,
+  { provide: IBanInfoRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.BanInfo) },
+  { provide: IBlogsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Blogs) },
+  { provide: IQueryBlogsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QueryBlogs) },
+  { provide: ICommentsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Comments) },
+  { provide: IQueryCommentsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QueryComments) },
+  { provide: IEmailConfirmationRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.EmailConfirmation) },
+  { provide: IReactionsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Reactions) },
+  { provide: IQueryReactionRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QueryReactions) },
+  { provide: IJwtRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Jwt) },
+  { provide: IPostsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Posts) },
+  { provide: IQueryPostsRepository, useClass:  repositorySwitcher(settings.currentRepository, repositoryName.QueryPosts) },
+  { provide: ISecurityRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Security) },
+  { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QuerySecurity) },
+  { provide: IUsersRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Users) },
+  { provide: IQueryUsersRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QueryUsers) },
 ];
 
 const services = [
@@ -144,6 +140,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       url: process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
+      // ssl: true,
     }),
     TypeOrmModule.forFeature([...entity]),
     // BlogModule,

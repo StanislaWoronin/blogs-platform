@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
-import { UserBanInfo } from './userBanInfo';
+
 import { Security } from '../../../public/security/infrastructure/entity/security';
 import { EmailConfirmation } from './email-confirmation.entity';
 import { Blogs } from '../../../public/blogs/infrastructure/entity/blogs.entity';
@@ -7,6 +7,7 @@ import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/
 import { Comments } from '../../../public/comments/infrastructure/entity/comments.entity';
 import { CommentReactions } from '../../../public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from '../../../public/likes/infrastructure/entity/post-reactions.entity';
+import { UserBanInfo } from "./user-ban-info.entity";
 
 @Entity()
 export class Users {

@@ -3,14 +3,14 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
+  HttpCode, Inject,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { AuthBasicGuard } from '../../../guards/auth.basic.guard';
 import { UsersService } from '../application/users.service';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
@@ -19,6 +19,7 @@ import { CreateUserBySaUseCase } from '../use-cases/create-user-by-sa.use-case';
 import { PgQueryUsersRepository } from '../infrastructure/pg.repository/pg-query-users.repository';
 import { UserDto } from './dto/user.dto';
 import { UserViewModelWithBanInfo } from './dto/user.view.model';
+import { IQueryUsersRepository } from "../infrastructure/i-query-users.repository";
 
 @UseGuards(AuthBasicGuard)
 @Controller('sa/users')
@@ -26,7 +27,7 @@ export class UsersController {
   constructor(
     protected usersService: UsersService,
     protected createUserUseCase: CreateUserBySaUseCase,
-    protected queryUsersRepository: PgQueryUsersRepository,
+    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
   ) {}
 
   @Get()

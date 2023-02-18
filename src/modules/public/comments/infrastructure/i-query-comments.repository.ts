@@ -12,7 +12,7 @@ export interface IQueryCommentsRepository {
         queryDto: QueryParametersDto,
         postId: string,
         userId: string,
-    ): Promise<ContentPageModel>;
+    ): Promise<ContentPageModel | null>;
     getCommentById(
         commentId: string,
         userId: string | undefined,

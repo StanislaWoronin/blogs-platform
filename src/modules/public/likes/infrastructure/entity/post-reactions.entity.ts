@@ -3,10 +3,9 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from '../../../../super-admin/infrastructure/entity/users';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 
 @Entity()

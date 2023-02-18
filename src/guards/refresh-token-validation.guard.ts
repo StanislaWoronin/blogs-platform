@@ -1,19 +1,20 @@
 import {
   CanActivate,
-  ExecutionContext,
+  ExecutionContext, Inject,
   Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+  UnauthorizedException
+} from "@nestjs/common";
 import { UsersService } from '../modules/super-admin/application/users.service';
 import { JwtService } from '../modules/public/auth/application/jwt.service';
 import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-query-users.repository';
 import { log } from 'util';
+import { IQueryUsersRepository } from "../modules/super-admin/infrastructure/i-query-users.repository";
 
 @Injectable()
 export class RefreshTokenValidationGuard implements CanActivate {
   constructor(
     protected jwtService: JwtService,
-    protected queryUsersRepository: PgQueryUsersRepository,
+    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

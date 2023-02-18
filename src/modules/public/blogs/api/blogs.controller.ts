@@ -7,15 +7,16 @@ import {
 } from '@nestjs/common';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import { PgQueryBlogsRepository } from '../infrastructure/pg-repository/pg-query-blogs.repository';
-import { PgQueryPostsRepository } from '../../posts/infrastructure/pg-query-posts.repository';
+import { PgQueryPostsRepository } from '../../posts/infrastructure/pg.repository/pg-query-posts.repository';
 import { OrmQueryBlogsRepository } from '../infrastructure/orm-repository/orm-query-blogs.repository';
 import {IQueryBlogsRepository} from "../infrastructure/i-query-blogs.repository";
+import { IQueryPostsRepository } from "../../posts/infrastructure/i-query-posts.repository";
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository,
-    protected queryPostsRepository: PgQueryPostsRepository,
+    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
   ) {}
 
   @Get()

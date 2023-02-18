@@ -3,13 +3,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
-import { preparedPost, preparedUser, superUser } from './helper/prepeared-data';
-import { v4 as uuidv4 } from 'uuid';
-import { getPostsByBlogId } from './helper/expect-post-models';
+import { preparedUser, superUser } from './helper/prepeared-data';
 import {
   endpoints,
-  getUrlForEndpointPostByBlogger,
-  getUrlWithId,
 } from './helper/routing';
 
 describe('e2e tests', () => {

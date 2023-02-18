@@ -11,7 +11,6 @@ import {
 } from './helper/prepeared-data';
 import { getErrorMessage } from './helper/helpers';
 import { endpoints, getUrlForBanned, getUrlWithId } from './helper/routing';
-import { factory } from 'ts-jest/dist/transformers/hoist-jest';
 import { Factories } from './helper/factories';
 
 describe('e2e tests', () => {
@@ -587,11 +586,9 @@ describe('e2e tests', () => {
           })
           .expect(204);
 
-        const response = await request(server)
+        await request(server)
           .get(`/blogs/${blogId}`)
           .expect(404);
-
-        console.log(response.body, 'blog');
       });
     });
   });

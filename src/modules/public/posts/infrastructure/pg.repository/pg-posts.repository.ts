@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PostDBModel } from './entity/post-db.model';
-import { PostDto } from '../../../blogger/api/dto/post.dto';
+import { PostDBModel } from '../entity/post-db.model';
+import { PostDto } from '../../../../blogger/api/dto/post.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { CreatedPostModel } from './entity/db-post.model';
+import { CreatedPostModel } from '../entity/db-post.model';
 
 @Injectable()
 export class PgPostsRepository {

@@ -6,7 +6,7 @@ import {
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from '../../../../super-admin/infrastructure/entity/users';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
 import { Comments } from '../../../comments/infrastructure/entity/comments.entity';
 
 @Entity()

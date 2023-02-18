@@ -8,13 +8,14 @@ import {
 } from 'class-validator';
 import { request } from 'express';
 import {IEmailConfirmationRepository} from "../modules/super-admin/infrastructure/i-email-confirmation.repository";
+import { IQueryUsersRepository } from "../modules/super-admin/infrastructure/i-query-users.repository";
 
 @ValidatorConstraint({ name: 'EmailResendingValidator', async: true })
 @Injectable()
 export class EmailResendingValidator implements ValidatorConstraintInterface {
   constructor(
       @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
-    protected queryUsersRepository: PgQueryUsersRepository,
+      @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
   ) {}
 
   async validate(email) {

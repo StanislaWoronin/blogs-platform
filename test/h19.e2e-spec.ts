@@ -21,7 +21,7 @@ import {Blogger} from "./request/blogger";
 
 describe('e2e tests', () => {
   const second = 1000;
-  jest.setTimeout(60 * second);
+  jest.setTimeout(5 * 60 * second);
 
   let app: INestApplication;
   let server;
@@ -774,5 +774,39 @@ describe('e2e tests', () => {
         expect(response.status).toBe(403)
       })
     })
+  })
+
+  describe('Fix mistakes', () => {
+    describe('DELETE, PUT -> "/comments/:id", GET, POST -> "posts/:postId/comments": should' +
+      'return error if :id from uri param not found; status 404;', () => {
+
+      it('Drop all data.', async () => {
+        await request(server)
+          .delete(endpoints.testingController.allData)
+          .expect(204);
+      });
+
+      it('Should return error if :id from uri param not found; status 404', async () => {
+        const [owner] = await factories.createAndLoginUsers(2)
+
+        const deleteRes = await request(server)
+          .delete('/comments/602afe92-7d97-4395-b1b9-6cf98b351bbe')
+          .auth(owner.accessToken, { type: 'bearer' })
+          .expect(404)
+
+        await request(server)
+          .put('/comments/602afe92-7d97-4395-b1b9-6cf98b351bbe')
+          .auth(owner.accessToken, { type: 'bearer' })
+          .send(preparedComment.valid)
+          .expect(404)
+
+        const postCommentRes = await request(server)
+          .post(`/posts/602afe92-7d97-4395-b1b9-6cf98b351bbe/comments`)
+          .auth(owner.accessToken, { type: 'bearer' })
+          .send({"content":"length_21-weqweqweqwq"})
+          .expect(404)
+      })
+    })
+
   })
 });

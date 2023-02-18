@@ -2,10 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreatedUserModel, UserDBModel } from '../entity/userDB.model';
+import { settings } from "../../../../settings";
+import { repositorySwitcher } from "../../../../repositories";
 
 @Injectable()
 export class PgUsersRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {
+  }
 
   async createUser(newUser: UserDBModel): Promise<CreatedUserModel | null> {
     const query = `
@@ -46,11 +49,6 @@ export class PgUsersRepository {
   }
 
   async deleteUserById(userId: string): Promise<boolean> {
-    // const query = `
-    //   DELETE FROM public.users
-    //    WHERE id = $1;
-    // `;
-
     const query = `
       DELETE FROM public.users u
        WHERE id = $1;

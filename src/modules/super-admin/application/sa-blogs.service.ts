@@ -1,15 +1,15 @@
 import {Inject, Injectable} from '@nestjs/common';
 import { BindBlogDto } from '../api/dto/bind-blog.dto';
-import { PgQueryPostsRepository } from '../../public/posts/infrastructure/pg-query-posts.repository';
 import {IBlogsRepository} from "../../public/blogs/infrastructure/i-blogs.repository";
 import {IQueryBlogsRepository} from "../../public/blogs/infrastructure/i-query-blogs.repository";
 import {IBanInfoRepository} from "../infrastructure/i-ban-info.repository";
+import { IQueryPostsRepository } from "../../public/posts/infrastructure/i-query-posts.repository";
 
 @Injectable()
 export class SaBlogsService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
-    protected queryPostsRepository: PgQueryPostsRepository,
+    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
     @Inject(IBlogsRepository) protected blogsRepository: IBlogsRepository,
     @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository
   ) {}

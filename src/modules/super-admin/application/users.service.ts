@@ -12,13 +12,14 @@ import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmati
 import { UserDto } from '../api/dto/user.dto';
 import {IBanInfoRepository} from "../infrastructure/i-ban-info.repository";
 import {IEmailConfirmationRepository} from "../infrastructure/i-email-confirmation.repository";
+import { IUsersRepository } from "../infrastructure/i-users.repository";
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
     @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
-    protected usersRepository: PgUsersRepository,
+    @Inject(IUsersRepository) protected usersRepository: IUsersRepository
   ) {}
 
   async createUser(

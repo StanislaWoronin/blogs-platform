@@ -1,28 +1,31 @@
 import {Inject, Injectable} from '@nestjs/common';
-import { PgLikesRepository } from '../../likes/infrastructure/pg-likes.repository';
 import { ReactionModel } from '../../../../global-model/reaction.model';
 import { PostDto } from '../../../blogger/api/dto/post.dto';
 import { PostViewModel } from '../api/dto/postsView.model';
 import { PostDBModel } from '../infrastructure/entity/post-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import { PgPostsRepository } from '../infrastructure/pg-posts.repository';
+import { PgPostsRepository } from '../infrastructure/pg.repository/pg-posts.repository';
 import {
   toCreatedPostsViewModel,
 } from '../../../../data-mapper/to-posts-view.model';
-import {PgQueryPostsRepository} from "../infrastructure/pg-query-posts.repository";
 import {IBanInfoRepository} from "../../../super-admin/infrastructure/i-ban-info.repository";
+import { IReactionsRepository } from "../../likes/infrastructure/i-reactions.repository";
+import { IQueryReactionRepository } from "../../likes/infrastructure/i-query-reaction.repository";
+import { IQueryPostsRepository } from "../infrastructure/i-query-posts.repository";
+import { IPostsRepository } from "../infrastructure/i-posts.repository";
 
 @Injectable()
 export class PostsService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
-    protected likesRepository: PgLikesRepository,
-    protected postsRepository: PgPostsRepository,
-    protected queryPostRepository: PgQueryPostsRepository
+    @Inject(IReactionsRepository) protected ReactionsRepository: IReactionsRepository,
+    @Inject(IQueryReactionRepository) protected queryReactionsRepository: IQueryReactionRepository,
+    @Inject(IPostsRepository) protected postsRepository: IPostsRepository,
+    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
   ) {}
 
   async checkUserBanStatus(userId: string, postId: string): Promise<boolean> {
-    const blogId = await this.queryPostRepository.getBlogIdByPostId(postId)
+    const blogId = await this.queryPostsRepository.getBlogIdByPostId(postId)
 
     return await this.banInfoRepository.youBanned(userId, blogId);
   }
@@ -50,7 +53,7 @@ export class PostsService {
     postId: string,
     likeStatus: string,
   ): Promise<boolean> {
-    const currentReaction = await this.likesRepository.getPostReaction(
+    const currentReaction = await this.queryReactionsRepository.getPostReaction(
       userId,
       postId,
     );
@@ -59,7 +62,7 @@ export class PostsService {
         return true;
       }
 
-      return await this.likesRepository.createPostReaction(
+      return await this.ReactionsRepository.createPostReaction(
         userId,
         postId,
         likeStatus,
@@ -68,10 +71,10 @@ export class PostsService {
     }
 
     if (likeStatus === ReactionModel.None) {
-      return await this.likesRepository.deletePostReaction(userId, postId);
+      return await this.ReactionsRepository.deletePostReaction(userId, postId);
     }
 
-    return await this.likesRepository.updatePostReaction(
+    return await this.ReactionsRepository.updatePostReaction(
       userId,
       postId,
       likeStatus,
