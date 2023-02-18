@@ -24,11 +24,6 @@ export class Posts {
   async getPostById(postId: string, accessToken?: string) {
     const url = getUrlWithId(endpoints.postController, postId);
 
-    if (!accessToken) {
-      const response = await request(this.server).get(url);
-      return { status: response.statusCode, body: response.body };
-    }
-
     const response = await request(this.server)
       .get(url)
       .auth(accessToken, { type: 'bearer' });

@@ -829,4 +829,80 @@ describe('e2e tests', () => {
       })
     })
   })
+
+  describe('PUT -> "/posts/:postId/like-status": create post then: like the post by user 1,' +
+    ' user 2, user 3, user 4. get the post after each like by user 1. NewestLikes should be sorted' +
+    ' in descending; status 204; used additional methods: POST => /blogger/blogs,' +
+    ' POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
+
+    it('Drop all data.', async () => {
+      await request(server)
+        .delete(endpoints.testingController.allData)
+        .expect(204);
+    });
+
+    it('Create data', async () => {
+      const [owner, user1, user2, user3, user4] = await factories.createAndLoginUsers(5)
+      const [blog] = await factories.createBlogs(owner.accessToken, 1)
+      const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+
+      expect.setState({postId: post.id, user1, user2, user3, user4})
+    })
+
+    it('User1 likes post', async () => {
+      const { postId, user1 } = expect.getState()
+
+      const request = await posts.addReaction(postId, ReactionModel.Like, user1.accessToken)
+      expect(request.status).toBe(204)
+
+      const post = await posts.getPostById(postId)
+      console.log(post.body.extendedLikesInfo.newestLikes[0])
+      expect(post.status).toBe(200)
+      expect(post.body.extendedLikesInfo.likesCount).toBe(1)
+      expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(1)
+      expect(post.body.extendedLikesInfo.newestLikes[0]).toStrictEqual({
+          userId: user1.user.id,
+          login: user1.user.login,
+          addedAt: expect.any(String)
+      })
+    })
+
+    it('User2 likes post', async () => {
+      const { postId, user2 } = expect.getState()
+
+      const request = await posts.addReaction(postId, ReactionModel.Like, user2.accessToken)
+      expect(request.status).toBe(204)
+
+      const post = await posts.getPostById(postId)
+      expect(post.status).toBe(200)
+      expect(post.body.extendedLikesInfo.likesCount).toBe(2)
+      expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(2)
+      expect(post.body.extendedLikesInfo.newestLikes[0]).toEqual(
+        {
+          userId: user2.user.id,
+          login: user2.user.login,
+          addedAt: expect.any(String)
+        }
+      )
+    })
+
+    it('User3 likes post', async () => {
+      const { postId, user3 } = expect.getState()
+
+      const request = await posts.addReaction(postId, ReactionModel.Like, user3.accessToken)
+      expect(request.status).toBe(204)
+
+      const post = await posts.getPostById(postId)
+      expect(post.status).toBe(200)
+      expect(post.body.extendedLikesInfo.likesCount).toBe(3)
+      expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(3)
+      expect(post.body.extendedLikesInfo.newestLikes[0]).toEqual(
+        {
+          userId: user3.user.id,
+          login: user3.user.login,
+          addedAt: expect.any(String)
+        }
+      )
+    })
+  })
 });

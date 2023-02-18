@@ -84,10 +84,7 @@ export class PgQueryPostsRepository {
                          WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
                        (SELECT COUNT("postId")
                           FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount",
-                       (SELECT "addedAt"
-                          FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id)
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
                        ${myStatusFilter}
                   FROM public.posts
                  WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)

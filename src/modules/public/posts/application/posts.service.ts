@@ -4,7 +4,6 @@ import { PostDto } from '../../../blogger/api/dto/post.dto';
 import { PostViewModel } from '../api/dto/postsView.model';
 import { PostDBModel } from '../infrastructure/entity/post-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import { PgPostsRepository } from '../infrastructure/pg.repository/pg-posts.repository';
 import {
   toCreatedPostsViewModel,
 } from '../../../../data-mapper/to-posts-view.model';
@@ -53,15 +52,17 @@ export class PostsService {
     postId: string,
     likeStatus: string,
   ): Promise<boolean> {
+    console.log('update');
     const currentReaction = await this.queryReactionsRepository.getPostReaction(
       userId,
       postId,
     );
+    console.log('currentReaction --->',currentReaction);
     if (!currentReaction) {
       if (likeStatus === ReactionModel.None) {
         return true;
       }
-
+      console.log('create');
       return await this.ReactionsRepository.createPostReaction(
         userId,
         postId,
