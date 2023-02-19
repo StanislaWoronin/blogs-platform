@@ -963,6 +963,54 @@ describe('e2e tests', () => {
     });
   })
 
+  describe('Shouldn`t return reactions for banned user', () => {
+    it('Drop all data.', async () => {
+      await request(server)
+        .delete(endpoints.testingController.allData)
+        .expect(204);
+    });
+
+    it('Create data', async () => {
+      const [owner, simpleUser1, simpleUser2] = await factories.createAndLoginUsers(3)
+      const [blog] = await factories.createBlogs(owner.accessToken, 1)
+      const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+      const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
+      const putLike1 = await comments.addReaction(comment.id, ReactionModel.Like, simpleUser1.accessToken)
+      expect(putLike1.status).toBe(204)
+      const putLike2 = await comments.addReaction(comment.id, ReactionModel.Like, simpleUser2.accessToken)
+      expect(putLike2.status).toBe(204)
+
+      expect.setState({
+        ownerToken: owner.accessToken,
+        simpleUser1Id: simpleUser1.user.id,
+        simpleUser2Id: simpleUser2.user.id,
+        blogId: blog.id,
+        postId: post.id,
+        commentId: comment.id
+      })
+    })
+
+    // it('Should return comment with two likes', async () => {
+    //   const {commentId} = expect.getState()
+    //
+    //   const comment = await comments.getCommentById(commentId)
+    //   expect(comment.body.likesInfo.likesCount).toBe(2)
+    // })
+
+    it('Ban users and get comment', async () => {
+      const {ownerToken, blogId, simpleUser1Id, simpleUser2Id, commentId} =expect.getState()
+
+      const banUser1 = await sa.saBannedUser(simpleUser1Id, true)
+      expect(banUser1.status).toBe(204)
+
+      const banUser2 = await blogger.banUser(ownerToken, simpleUser2Id, blogId, true)
+      expect(banUser2.status).toBe(204)
+
+      const comment = await comments.getCommentById(commentId)
+      expect(comment.body.likesInfo.likesCount).toBe(0)
+    })
+  })
+
   describe('Fix mistakes', () => {
     describe('DELETE, PUT -> "/comments/:id", GET, POST -> "posts/:postId/comments": should' +
       'return error if :id from uri param not found; status 404;', () => {

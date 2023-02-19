@@ -183,6 +183,7 @@ export class PgQueryCommentsRepository {
                                                        FROM public.user_ban_info
                                                       WHERE comments."userId" = user_ban_info."userId") != true;
         `;
+    console.log(query);
     const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
       await this.dataSource.query(query);
 
@@ -225,7 +226,7 @@ export class PgQueryCommentsRepository {
     return `
       (SELECT "banStatus"
          FROM public.user_ban_info 
-        WHERE user_ban_info."userId" = comments."userId") != true
+        WHERE user_ban_info."userId" = comment_reactions."userId") != true
           AND NOT EXISTS (SELECT "userId" 
                             FROM public.banned_users_for_blog
                            WHERE banned_users_for_blog."userId" = comment_reactions."userId"
