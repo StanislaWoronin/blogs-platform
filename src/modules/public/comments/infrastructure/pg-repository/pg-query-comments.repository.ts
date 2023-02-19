@@ -90,15 +90,16 @@ export class PgQueryCommentsRepository {
     userId: string,
   ): Promise<ContentPageModel | null> {
     const myStatusFilter = this.myStatusFilter(userId);
+    const reactionCountFilter = this.reactionCountFilter()
 
     const query = `
               SELECT id, content, "createdAt",
                      (SELECT COUNT("commentId") AS "likesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like'),
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like' AND ${reactionCountFilter}),
                      (SELECT COUNT("commentId") AS "dislikesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike'),
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike' AND ${reactionCountFilter}),
                      (SELECT id AS "userId"
                         FROM public.users
                        WHERE users.id = comments."userId"),
@@ -107,7 +108,7 @@ export class PgQueryCommentsRepository {
                        WHERE users.id = comments."userId")
                    ${myStatusFilter} 
               FROM public.comments 
-             WHERE comments."postId" = $1 AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE "postId" = $1)
+             WHERE comments."postId" = '${postId}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE "postId" = '${postId}')
                                           AND (SELECT "banStatus"
                                                  FROM public.user_ban_info
                                                 WHERE comments."userId" = user_ban_info."userId") != true
@@ -117,19 +118,19 @@ export class PgQueryCommentsRepository {
                                                                                                     FROM public.posts
                                                                                                    WHERE comments."postId" = posts.id))      
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-             LIMIT $2 OFFSET ${giveSkipNumber(
+             LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
                queryDto.pageSize,
              )};   
         `;
     const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
-      await this.dataSource.query(query, [postId, queryDto.pageSize]);
+      await this.dataSource.query(query, [ queryDto.pageSize]);
     if (!commentsDB.length) {
       return null
     }
 
     const comments = commentsDB.map((c) => toCommentsViewModel(c));
-    console.log(comments);
+
     const totalCountQuery = `
           SELECT COUNT(id)
             FROM public.comments c
@@ -157,15 +158,16 @@ export class PgQueryCommentsRepository {
     userId: string | undefined,
   ): Promise<CommentViewModel> {
     const myStatusFilter = this.myStatusFilter(userId);
+    const reactionCountFilter = this.reactionCountFilter()
 
     const query = `
               SELECT id, content, "createdAt",
                      (SELECT COUNT("commentId") AS "likesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like'),
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like' AND ${reactionCountFilter}),
                      (SELECT COUNT("commentId") AS "dislikesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike'),
+                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike' AND ${reactionCountFilter}),
                      (SELECT id AS "userId"
                         FROM public.users
                        WHERE users.id = comments."userId"),
@@ -217,5 +219,19 @@ export class PgQueryCommentsRepository {
                     AND comment_reactions."userId" = '${userId}')`;
     }
     return '';
+  }
+
+  private reactionCountFilter(): string {
+    return `
+      (SELECT "banStatus"
+         FROM public.user_ban_info 
+        WHERE user_ban_info."userId" = comments."userId") != true
+          AND NOT EXISTS (SELECT "userId" 
+                            FROM public.banned_users_for_blog
+                           WHERE banned_users_for_blog."userId" = comment_reactions."userId"
+                             AND banned_users_for_blog."blogId" = (SELECT "blogId"
+                            FROM public.posts
+                           WHERE posts.id = comments."postId"))
+    `
   }
 }

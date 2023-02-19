@@ -295,6 +295,8 @@ describe('e2e tests', () => {
           );
 
           expect.setState({
+            accessToken1: user1.accessToken,
+            blogId: blog.id,
             accessToken2: user2.accessToken,
             user2: user2.user,
             user3: user3.user,
@@ -396,6 +398,43 @@ describe('e2e tests', () => {
             ],
           });
         });
+
+        it('SA banned user2 and blogger banned user 3', async () => {
+          const {accessToken1, blogId, user2, user3, user5} = expect.getState()
+
+          const saBannedUser = await sa.saBannedUser(user2.id, true)
+          expect(saBannedUser.status).toBe(204)
+
+          const bloggerBannedUser3 = await blogger.banUser(accessToken1, user3.id, blogId, true)
+          expect(bloggerBannedUser3.status).toBe(204)
+
+          const response = await posts.getPosts();
+          expect(response.status).toBe(200)
+          expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
+            likesCount: 0,
+            dislikesCount: 2,
+            myStatus: ReactionModel.None,
+            newestLikes: [],
+          });
+          expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
+            likesCount: 1,
+            dislikesCount: 1,
+            myStatus: ReactionModel.None,
+            newestLikes: [
+              {
+                userId: expect.any(String),
+                login: user5.login,
+                addedAt: expect.any(String),
+              },
+            ],
+          });
+          expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
+            likesCount: 0,
+            dislikesCount: 2,
+            myStatus: ReactionModel.None,
+            newestLikes: [],
+          });
+        })
       });
     });
   });
@@ -1069,7 +1108,7 @@ describe('e2e tests', () => {
         const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
         const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
 
-        const response = await posts.getComments(post.id, owner.accessToken)
+        const response = await posts.getCommentsByPostId(post.id, owner.accessToken)
         expect(response.status).toBe(200)
         expect(response.body.items).toHaveLength(1)
         expect(response.body.items[0]).toStrictEqual({

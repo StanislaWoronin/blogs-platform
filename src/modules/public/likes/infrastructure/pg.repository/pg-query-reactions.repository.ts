@@ -38,15 +38,32 @@ export class PgQueryReactionsRepository {
   }
 
   async newestLikes(postId: string): Promise<NewestLikesModel[]> {
+    const reactionFilter = this.reactionFilter()
+
     const newestLikesQuery = `
       SELECT "userId", "addedAt",
              (SELECT login FROM public.users WHERE users.id = post_reactions."userId")
         FROM public.post_reactions
-       WHERE "postId" = '${postId}' AND status = 'Like'
+       WHERE "postId" = $1 AND status = 'Like' AND ${reactionFilter} 
        ORDER BY "addedAt" DESC
        LIMIT ${settings.newestLikes.limit};
     `;
+    console.log(newestLikesQuery);
 
-    return await this.dataSource.query(newestLikesQuery);
+    return await this.dataSource.query(newestLikesQuery, [postId]);
+  }
+
+  private reactionFilter(): string {
+    return `
+      (SELECT "banStatus"
+             FROM public.user_ban_info 
+            WHERE user_ban_info."userId" = post_reactions."userId") != true
+              AND NOT EXISTS (SELECT "userId" 
+                                FROM public.banned_users_for_blog
+                               WHERE banned_users_for_blog."userId" = post_reactions."userId"
+                                 AND banned_users_for_blog."blogId" = (SELECT "blogId" 
+                                FROM public.posts 
+                               WHERE id = $1))
+    `
   }
 }

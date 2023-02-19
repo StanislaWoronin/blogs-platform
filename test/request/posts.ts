@@ -39,7 +39,7 @@ export class Posts {
     return { status: response.statusCode, body: response.body };
   }
 
-  async getComments(postId: string, accessToken?: string) {
+  async getCommentsByPostId(postId: string, accessToken?: string) {
     const url = getUrlForComment(endpoints.postController, postId)
 
     const response = await request(this.server)

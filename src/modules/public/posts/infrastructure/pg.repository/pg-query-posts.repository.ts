@@ -30,16 +30,17 @@ export class PgQueryPostsRepository {
   ): Promise<ContentPageModel> {
     const blogIdFilter = this.getBlogIdFilter(blogId);
     const statusFilter = this.myStatusFilter(userId);
+    const reactionCountFilter = this.reactionCountFilter()
 
     const query = `
             SELECT id, title, "shortDescription", content, "createdAt", "blogId",
                        (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
                        (SELECT COUNT("postId") 
                           FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like' AND ${reactionCountFilter}) AS "likesCount",
                        (SELECT COUNT("postId")
                           FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike' AND ${reactionCountFilter}) AS "dislikesCount"
                        ${statusFilter}
                   FROM public.posts
                  ${blogIdFilter}   
@@ -49,6 +50,7 @@ export class PgQueryPostsRepository {
                     queryDto.pageSize,
                  )};      
         `;
+    console.log(query);
     const postsDB: DbPostModel[] = await this.dataSource.query(query);
 
     const posts = await Promise.all(
@@ -75,16 +77,17 @@ export class PgQueryPostsRepository {
     userId: string | undefined,
   ): Promise<PostViewModel | null> {
     const myStatusFilter = this.myStatusFilter(userId);
+    const reactionCountFilter = this.reactionCountFilter()
 
     const query = `
          SELECT id, title, "shortDescription", content, "createdAt", "blogId",
                        (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
                        (SELECT COUNT("postId") 
                           FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like') AS "likesCount",
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like' AND ${reactionCountFilter}) AS "likesCount",
                        (SELECT COUNT("postId")
                           FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike') AS "dislikesCount"
+                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike' AND ${reactionCountFilter}) AS "dislikesCount"
                        ${myStatusFilter}
                   FROM public.posts
                  WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
@@ -231,5 +234,17 @@ export class PgQueryPostsRepository {
       return `WHERE "blogId" = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')`;
     }
     return ``;
+  }
+
+  private reactionCountFilter(): string {
+    return `
+      (SELECT "banStatus"
+         FROM public.user_ban_info 
+        WHERE user_ban_info."userId" = post_reactions."userId") != true
+          AND NOT EXISTS (SELECT "userId" 
+                            FROM public.banned_users_for_blog
+                           WHERE banned_users_for_blog."userId" = post_reactions."userId"
+                             AND banned_users_for_blog."blogId" = posts."blogId")
+    `
   }
 }
