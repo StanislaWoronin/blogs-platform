@@ -112,10 +112,10 @@ export class PgQueryCommentsRepository {
                                                  FROM public.user_ban_info
                                                 WHERE comments."userId" = user_ban_info."userId") != true
                                           AND NOT EXISTS (SELECT "userId" 
-                                                            FROM public.banned_user_for_blog
-                                                           WHERE banned_user_for_blog."blogId" = (SELECT "blogId"
+                                                            FROM public.banned_users_for_blog
+                                                           WHERE banned_users_for_blog."blogId" = (SELECT "blogId"
                                                                                                     FROM public.posts
-                                                                                                   WHERE comment."postId" = posts.id) AND comments."userId" = user_ban_info."userId")      
+                                                                                                   WHERE comments."postId" = posts.id))      
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $2 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
@@ -129,16 +129,18 @@ export class PgQueryCommentsRepository {
     }
 
     const comments = commentsDB.map((c) => toCommentsViewModel(c));
-
+    console.log(comments);
     const totalCountQuery = `
           SELECT COUNT(id)
-            FROM public.comments
-           WHERE comments."postId" = $1 AND NOT EXISTS (SELECT "blogId"
-                                                      FROM public.banned_blog
-                                                     WHERE "blogId" = p."blogId")
-                                        AND (SELECT "banStatus"
-                                               FROM public.user_ban_info
-                                              WHERE c."userId" = user_ban_info."userId") != true;        
+            FROM public.comments c
+           WHERE c."postId" = $1 AND NOT EXISTS (SELECT "blogId"
+                                                   FROM public.banned_blog
+                                                  WHERE "blogId" = (SELECT "blogId"
+                                                                      FROM public.posts
+                                                                     WHERE c."postId" = posts.id))
+                                 AND (SELECT "banStatus"
+                                        FROM public.user_ban_info
+                                       WHERE c."userId" = user_ban_info."userId") != true;        
         `;
     const totalCount = await this.dataSource.query(totalCountQuery, [postId]);
 

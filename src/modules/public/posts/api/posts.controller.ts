@@ -32,7 +32,6 @@ import { IQueryPostsRepository } from "../infrastructure/i-query-posts.repositor
 export class PostsController {
   constructor(
     protected commentsService: CommentsService,
-    protected jwtService: JwtService,
     protected postsService: PostsService,
     @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
     @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,

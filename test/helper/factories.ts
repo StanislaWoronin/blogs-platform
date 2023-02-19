@@ -135,9 +135,7 @@ export class Factories {
     const comment = [];
 
     for (let i = 0; i < commentCount; i++) {
-      const inputPostData: CommentDTO = {
-        content: preparedComment.valid.content,
-      };
+      const inputPostData: CommentDTO = preparedComment.valid
 
       const url = getUrlForComment(endpoints.postController, postId);
 

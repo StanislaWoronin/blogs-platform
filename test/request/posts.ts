@@ -1,9 +1,9 @@
 import request from 'supertest';
 import {
-  endpoints,
+  endpoints, getUrlForComment,
   getUrlForReactionStatus,
-  getUrlWithId,
-} from '../helper/routing';
+  getUrlWithId
+} from "../helper/routing";
 
 export class Posts {
   constructor(private readonly server: any) {}
@@ -34,6 +34,16 @@ export class Posts {
   async getPosts(accessToken?: string) {
     const response = await request(this.server)
       .get(endpoints.postController)
+      .auth(accessToken, { type: 'bearer' });
+
+    return { status: response.statusCode, body: response.body };
+  }
+
+  async getComments(postId: string, accessToken?: string) {
+    const url = getUrlForComment(endpoints.postController, postId)
+
+    const response = await request(this.server)
+      .get(url)
       .auth(accessToken, { type: 'bearer' });
 
     return { status: response.statusCode, body: response.body };
