@@ -52,17 +52,16 @@ export class PostsService {
     postId: string,
     likeStatus: string,
   ): Promise<boolean> {
-    console.log('update');
     const currentReaction = await this.queryReactionsRepository.getPostReaction(
       userId,
       postId,
     );
-    console.log('currentReaction --->',currentReaction);
+
     if (!currentReaction) {
       if (likeStatus === ReactionModel.None) {
         return true;
       }
-      console.log('create');
+
       return await this.ReactionsRepository.createPostReaction(
         userId,
         postId,

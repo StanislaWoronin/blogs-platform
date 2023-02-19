@@ -675,7 +675,6 @@ describe('e2e tests', () => {
           expect(unBanPost.status).toBe(204)
 
           const tryGetComment2 = await comments.getCommentById(updatedComment.id)
-          console.log(tryGetComment2.body);
           expect(tryGetComment2.status).toBe(200)
         })
       })
@@ -854,7 +853,6 @@ describe('e2e tests', () => {
         .get(`/blogger/blogs/comments`)
         .auth(commentOwner.accessToken, {type: 'bearer'})
         .expect(200)
-      console.log(response.body.items[1]);
       expect(response.body.items).toHaveLength(4)
       expect(response.body).toEqual({
         pagesCount: 1,
@@ -923,9 +921,6 @@ describe('e2e tests', () => {
           blogName: blog1.name,
         }
       })
-
-      console.log(response.body.items[0]);
-
     });
   })
 
