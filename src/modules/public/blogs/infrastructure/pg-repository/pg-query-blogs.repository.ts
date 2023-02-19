@@ -24,9 +24,12 @@ export class PgQueryBlogsRepository {
     const query = `
             SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
               FROM public.blogs
-             WHERE ${filter} AND (NOT EXISTS (SELECT "blogId" 
-                                                FROM public.banned_blog
-                                               WHERE banned_blog."blogId" = blogs.id))
+             WHERE ${filter} AND NOT EXISTS (SELECT "blogId" 
+                                               FROM public.banned_blog
+                                              WHERE banned_blog."blogId" = blogs.id)
+                             AND (SELECT "banStatus"
+                                    FROM user_ban_info 
+                                   WHERE user_ban_info."userId" = blogs."userId") != true
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
@@ -96,7 +99,12 @@ export class PgQueryBlogsRepository {
     const query = `
             SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
               FROM public.blogs b
-             WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId" FROM public.banned_blog WHERE id = '${blogId}')
+             WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId"
+                                                      FROM public.banned_blog
+                                                     WHERE "blogId" = '${blogId}')
+                                    AND AND (SELECT "banStatus"
+                                    FROM user_ban_info 
+                                   WHERE user_ban_info."userId" = blogs."userId") != true;
         `;
     const result = await this.dataSource.query(query);
 

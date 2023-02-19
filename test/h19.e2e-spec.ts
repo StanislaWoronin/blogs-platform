@@ -13,11 +13,11 @@ import { Posts } from './request/posts';
 import { randomUUID } from 'crypto';
 import { getErrorMessage } from './helper/helpers';
 import { ReactionModel } from '../src/global-model/reaction.model';
-import { preparedComment, preparedStatus } from './helper/prepeared-data';
+import { preparedComment, preparedPost, preparedStatus } from "./helper/prepeared-data";
 import { Comments } from './request/comments';
-import { getExpectComment } from './helper/expect-comment-model';
 import {SA} from "./request/sa";
 import {Blogger} from "./request/blogger";
+import { getExpectComment } from "./helper/expect-comment-model";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -428,6 +428,7 @@ describe('e2e tests', () => {
           commentOwner: commentOwner.user,
           ownerToken: commentOwner.accessToken,
           userToken: justUser.accessToken,
+          blog,
           comment,
         });
       });
@@ -497,6 +498,7 @@ describe('e2e tests', () => {
           expect(response.status).toBe(204);
 
           const updatedComment = await comments.getCommentById(comment.id);
+
           expect(updatedComment.body).not.toEqual(comment);
           expect(updatedComment.body.content).toEqual(
             preparedComment.newValid.content,
@@ -643,6 +645,41 @@ describe('e2e tests', () => {
         });
       });
 
+      describe('Shouldn`t return comment if comment`s owner or this comment blog banned', () => {
+        it('Shouldn`t return comment if owner banned by sa', async () => {
+          const {commentOwner, updatedComment} = expect.getState()
+
+          const banUser = await sa.saBannedUser(commentOwner.id, true)
+          expect(banUser.status).toBe(204)
+
+          const tryGetComment1 = await comments.getCommentById(updatedComment.id)
+          expect(tryGetComment1.status).toBe(404)
+
+          const unBanUser = await sa.saBannedUser(commentOwner.id, false)
+          expect(unBanUser.status).toBe(204)
+
+          const tryGetComment2 = await comments.getCommentById(updatedComment.id)
+          expect(tryGetComment2.status).toBe(200)
+        })
+
+        it('Should`t return comment if comment owner banned for blog', async () => {
+          const { blog, updatedComment } = expect.getState()
+
+          const bannedPost = await sa.saBannedBlog(blog.id, true)
+          expect(bannedPost.status).toBe(204)
+
+          const tryGetComment1 = await comments.getCommentById(updatedComment.id)
+          expect(tryGetComment1.status).toBe(404)
+
+          const unBanPost = await sa.saBannedBlog(blog.id, false)
+          expect(unBanPost.status).toBe(204)
+
+          const tryGetComment2 = await comments.getCommentById(updatedComment.id)
+          console.log(tryGetComment2.body);
+          expect(tryGetComment2.status).toBe(200)
+        })
+      })
+
       describe('Delete comment "/comments/:commentsId"', () => {
         it('Shouldn`t delete comment if comment id not exists', async () => {
           const { ownerToken } = expect.getState();
@@ -774,6 +811,122 @@ describe('e2e tests', () => {
         expect(response.status).toBe(403)
       })
     })
+  })
+
+  describe('Return all comment specified user`s blog', () => {
+    it('Drop all data.', async () => {
+      await request(server)
+        .delete(endpoints.testingController.allData)
+        .expect(204);
+    });
+
+    it('Create data', async () => {
+      const [commentOwner, simpleUser] = await factories.createAndLoginUsers(2);
+      const [blog1, blog2] = await factories.createBlogs(commentOwner.accessToken, 2);
+      const [blogSimpleUser] = await factories.createBlogs(simpleUser.accessToken, 1)
+      const [post1, post2] = await factories.createPostsForBlog(
+        commentOwner.accessToken,
+        blog1.id,
+        2,
+      );
+      const [postSimpleUser] = await factories.createPostsForBlog(
+        simpleUser.accessToken,
+        blogSimpleUser.id,
+        1,
+      );
+      const [comment1, comment2] = await factories.createComments(
+        commentOwner.accessToken,
+        post1.id,
+        2,
+      );
+      const [comment3, comment4] = await factories.createComments(
+        commentOwner.accessToken,
+        post2.id,
+        2,
+      );
+      const [comment1SimpleUser, comment2SimpleUser] = await factories.createComments(
+        simpleUser.accessToken,
+        postSimpleUser.id,
+        2
+      )
+
+      const response = await request(server)
+        .get(`/blogger/blogs/comments`)
+        .auth(commentOwner.accessToken, {type: 'bearer'})
+        .expect(200)
+      console.log(response.body.items[1]);
+      expect(response.body.items).toHaveLength(4)
+      expect(response.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 4,
+        items: expect.any(Array)
+      })
+      expect(response.body.items[0]).toStrictEqual({
+        id: expect.any(String),
+        content: preparedComment.valid.content,
+        createdAt: expect.any(String),
+        commentatorInfo: {
+          userId: commentOwner.user.id,
+          userLogin: commentOwner.user.login
+        },
+        postInfo: {
+          id: post2.id,
+          title: post2.title,
+          blogId: blog1.id,
+          blogName: blog1.name,
+        }
+      })
+      expect(response.body.items[1]).toStrictEqual({
+        id: expect.any(String),
+        content: preparedComment.valid.content,
+        createdAt: expect.any(String),
+        commentatorInfo: {
+          userId: commentOwner.user.id,
+          userLogin: commentOwner.user.login
+        },
+        postInfo: {
+          id: post2.id,
+          title: post2.title,
+          blogId: blog1.id,
+          blogName: blog1.name,
+        }
+      })
+      expect(response.body.items[2]).toStrictEqual({
+        id: expect.any(String),
+        content: preparedComment.valid.content,
+        createdAt: expect.any(String),
+        commentatorInfo: {
+          userId: commentOwner.user.id,
+          userLogin: commentOwner.user.login
+        },
+        postInfo: {
+          id: post1.id,
+          title: post1.title,
+          blogId: blog1.id,
+          blogName: blog1.name,
+        }
+      })
+      expect(response.body.items[3]).toStrictEqual({
+        id: expect.any(String),
+        content: preparedComment.valid.content,
+        createdAt: expect.any(String),
+        commentatorInfo: {
+          userId: commentOwner.user.id,
+          userLogin: commentOwner.user.login
+        },
+        postInfo: {
+          id: post1.id,
+          title: post1.title,
+          blogId: blog1.id,
+          blogName: blog1.name,
+        }
+      })
+
+      console.log(response.body.items[0]);
+
+    });
   })
 
   describe('Fix mistakes', () => {

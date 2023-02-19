@@ -14,7 +14,7 @@ import { BanBlogDto } from './dto/ban-blog.dto';
 import { SaBlogsService } from '../application/sa-blogs.service';
 import { BindBlogDto } from './dto/bind-blog.dto';
 import { ContentPageModel } from '../../../global-model/contentPage.model';
-import {IQueryBlogsRepository} from "../../public/blogs/infrastructure/i-query-blogs.repository";
+import { IQueryBlogsRepository } from "../../public/blogs/infrastructure/i-query-blogs.repository";
 
 @UseGuards(AuthBasicGuard)
 @Controller('sa/blogs')

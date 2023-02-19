@@ -16,7 +16,6 @@ import { UsersService } from '../application/users.service';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
 import { BanUserDTO } from './dto/ban-user.dto';
 import { CreateUserBySaUseCase } from '../use-cases/create-user-by-sa.use-case';
-import { PgQueryUsersRepository } from '../infrastructure/pg.repository/pg-query-users.repository';
 import { UserDto } from './dto/user.dto';
 import { UserViewModelWithBanInfo } from './dto/user.view.model';
 import { IQueryUsersRepository } from "../infrastructure/i-query-users.repository";

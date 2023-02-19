@@ -9,23 +9,16 @@ export class DbCommentWithUserAndLikesInfoModel {
   myStatus?: string;
 }
 
-export class DbCommentInfoModel {
+export class DbCommentWithAdditionalInfo {
   id: string;
   content: string;
   createdAt: string;
-  likesCount: number;
-  dislikesCount: number;
-  commentatorInfo: {
-    userId: string;
-    userLogin: string;
-  };
-  postInfo: {
-    id: string;
-    title: string;
-    blogId: string;
-    blogName: string;
-  };
-  myStatus: string;
+  userId: string;
+  userLogin: string;
+  postId: string;
+  title: string;
+  blogId: string;
+  blogName: string;
 }
 
 export class CreatedComment {

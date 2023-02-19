@@ -1,11 +1,12 @@
 import {
-  CreatedComment,
-  DbCommentWithUserAndLikesInfoModel,
-} from '../modules/public/comments/infrastructure/entity/db_comment.model';
+  CreatedComment, DbCommentWithAdditionalInfo,
+  DbCommentWithUserAndLikesInfoModel
+} from "../modules/public/comments/infrastructure/entity/db_comment.model";
 import {
   CommentViewModel,
   CreatedCommentViewModel,
 } from '../modules/public/comments/api/dto/commentView.model';
+import { CommentWithAdditionalInfoModel } from "../modules/blogger/api/dto/comment-with-additional-info.model";
 
 export const toCommentsViewModel = (
   comment: DbCommentWithUserAndLikesInfoModel,
@@ -50,3 +51,23 @@ export const createdCommentViewModel = (
     },
   };
 };
+
+export const commentWithAdditionalInfo = (
+  comment: DbCommentWithAdditionalInfo
+): CommentWithAdditionalInfoModel => {
+  return {
+    id: comment.id,
+    content: comment.content,
+    createdAt: comment.createdAt,
+    commentatorInfo: {
+      userId: comment.userId,
+      userLogin: comment.userLogin,
+    },
+    postInfo: {
+      id: comment.postId,
+      title: comment.title,
+      blogId: comment.blogId,
+      blogName: comment.blogName,
+    },
+  }
+}

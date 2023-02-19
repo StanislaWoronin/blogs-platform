@@ -59,6 +59,7 @@ import { IQueryUsersRepository } from "./modules/super-admin/infrastructure/i-qu
 import { IUsersRepository } from "./modules/super-admin/infrastructure/i-users.repository";
 import { repositoryName, repositorySwitcher } from "./repositories";
 import { settings } from "./settings";
+import { BannedComment } from "./modules/super-admin/infrastructure/entity/banned-comment.entity";
 
 const controllers = [
   AuthController,
@@ -76,6 +77,7 @@ const controllers = [
 const entity = [
   Blogs,
   BannedBlog,
+  BannedComment,
   BannedPost,
   BannedUsersForBlog,
   Comments,
@@ -140,7 +142,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       url: process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: true,
+      //ssl: true,
     }),
     TypeOrmModule.forFeature([...entity]),
     // BlogModule,

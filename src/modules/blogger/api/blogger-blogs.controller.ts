@@ -12,19 +12,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthBearerGuard } from '../../../guards/auth.bearer.guard';
-import { BloggerBlogService } from '../application/blogger-blogs.service';
 import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
 import { User } from '../../../decorator/user.decorator';
 import { UserDBModel } from '../../super-admin/infrastructure/entity/userDB.model';
 import { BlogDto } from './dto/blog.dto';
-import { PgQueryBlogsRepository } from '../../public/blogs/infrastructure/pg-repository/pg-query-blogs.repository';
 import { ForbiddenGuard } from '../../../guards/forbidden.guard';
 import { PostDto } from './dto/post.dto';
 import { ContentPageModel } from '../../../global-model/contentPage.model';
 import { BlogViewModel } from '../../public/blogs/api/dto/blogView.model';
 import { PostsService } from '../../public/posts/application/posts.service';
 import { BlogsService } from '../../public/blogs/application/blogs.service';
-import { PgQueryCommentsRepository } from '../../public/comments/infrastructure/pg-repository/pg-query-comments.repository';
 import {IQueryBlogsRepository} from "../../public/blogs/infrastructure/i-query-blogs.repository";
 import {IQueryCommentsRepository} from "../../public/comments/infrastructure/i-query-comments.repository";
 

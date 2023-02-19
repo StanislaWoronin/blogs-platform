@@ -4,11 +4,6 @@ export class CommentWithAdditionalInfoModel {
   id: string;
   content: string;
   createdAt: string;
-  likesInfo: {
-    likesCount: number;
-    dislikesCount: number;
-    myStatus: string;
-  };
   commentatorInfo: {
     userId: string;
     userLogin: string;

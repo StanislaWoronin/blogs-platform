@@ -6,10 +6,8 @@ import {
   Get,
   HttpCode, Inject,
   NotFoundException,
-  NotImplementedException,
   Param,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from '../application/comments.service';

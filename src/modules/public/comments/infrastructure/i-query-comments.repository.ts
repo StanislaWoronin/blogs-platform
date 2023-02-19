@@ -4,9 +4,8 @@ import {CommentViewModel} from "../api/dto/commentView.model";
 
 export interface IQueryCommentsRepository {
     getComments(
-        blogId: string,
+        userId: string,
         queryDto: QueryParametersDto,
-        userId?: string | undefined,
     ): Promise<ContentPageModel>;
     getCommentByPostId(
         queryDto: QueryParametersDto,

@@ -61,6 +61,15 @@ export const banUserDto = {
   },
 };
 
+export const banBlogDto = {
+  validBan: {
+    isBanned: true,
+  },
+  validUnBan: {
+    isBanned: true,
+  }
+}
+
 export const preparedBlog = {
   valid: {
     name: 'valid name',
