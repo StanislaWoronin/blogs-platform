@@ -28,7 +28,7 @@ export class AccessTokenValidationGuard implements CanActivate {
         }
       }
     }
-    console.log('GET -> "/posts" --->', req.params);
+
     return true;
   }
 }

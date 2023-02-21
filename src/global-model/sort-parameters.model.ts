@@ -6,7 +6,7 @@ export enum SortParametersModel {
   Title = 'title',
   Content = 'content',
   BlogId = 'blogId',
-  // BlogName = 'blogName',
+  BlogName = 'blogName',
   Login = 'login',
   Email = 'email',
 }

@@ -50,7 +50,6 @@ export class PgQueryPostsRepository {
                     queryDto.pageSize,
                  )};      
         `;
-    console.log(query);
     const postsDB: DbPostModel[] = await this.dataSource.query(query);
 
     const posts = await Promise.all(

@@ -93,4 +93,30 @@ describe('e2e tests', () => {
       console.log(getCommentsByBlogger.body.items);
     })
   })
+
+  describe('GET -> "/posts": should return status 200; content: posts array with' +
+    'pagination; used additional methods: POST -> /blogger/blogs,' +
+    'POST => /blogger/blogs/:blogId/posts;', () => {
+
+    it('Drop all data.', async () => {
+      await request(server).delete('/testing/all-data').expect(204);
+    });
+
+    it('Create mistake', async () => {
+      const [owner] = await factories.createAndLoginUsers(1);
+      const [blog] = await factories.createBlogs(owner.accessToken, 1);
+      const [post] = await factories.createPostsForBlog(
+        owner.accessToken,
+        blog.id,
+        12,
+      );
+
+      const response = await request(server)
+        .get(`/posts?pageSize=9&pageNumber=1&sortBy=blogName&sortDirection=asc`)
+        .expect(200)
+
+      console.log(response.body)
+      // Errors messages: "sortBy must be a valid enum value",
+    })
+  })
 })
