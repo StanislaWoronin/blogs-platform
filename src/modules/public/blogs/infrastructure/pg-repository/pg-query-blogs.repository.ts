@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Like, ObjectLiteral, Repository } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
@@ -9,7 +9,7 @@ import {
 import { ContentPageModel } from '../../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from '../entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blog-with-additional-info.model';
-import { BlogViewModelWithBanStatus } from '../../api/dto/blogView.model';
+import { CreatedBlogModel } from "../../api/dto/blogView.model";
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -95,16 +95,16 @@ export class PgQueryBlogsRepository {
     );
   }
 
-  async getBlog(blogId: string): Promise<BlogViewModelWithBanStatus | null> {
+  async getBlog(blogId: string): Promise<CreatedBlogModel | null> {
     const query = `
             SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
               FROM public.blogs b
              WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId"
                                                       FROM public.banned_blog
                                                      WHERE "blogId" = '${blogId}')
-                                    AND AND (SELECT "banStatus"
+                                    AND (SELECT "banStatus"
                                     FROM user_ban_info 
-                                   WHERE user_ban_info."userId" = blogs."userId") != true;
+                                   WHERE user_ban_info."userId" = b."userId") != true;
         `;
     const result = await this.dataSource.query(query);
 

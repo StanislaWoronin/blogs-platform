@@ -537,7 +537,7 @@ describe('e2e tests', () => {
           expect(response.status).toBe(204);
 
           const updatedComment = await comments.getCommentById(comment.id);
-
+          expect(updatedComment.status).toBe(200)
           expect(updatedComment.body).not.toEqual(comment);
           expect(updatedComment.body.content).toEqual(
             preparedComment.newValid.content,

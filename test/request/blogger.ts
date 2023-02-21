@@ -20,4 +20,12 @@ export class Blogger {
 
         return { status: response.status, errorsMessages: response.body }
     }
+
+    async getComments(accessToken?: string) {
+      const response = await request(this.server)
+        .get(`${endpoints.bloggerController.blogs}/comments`)
+        .auth(accessToken, {type: "bearer"})
+
+      return { status: response.status, body: response.body }
+    }
 }
