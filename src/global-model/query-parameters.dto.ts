@@ -14,15 +14,6 @@ export class QueryParametersDto {
 
   @IsEnum(SortDirections)
   @IsOptional()
-  // @Transform(({ value }) => {
-  //   if (!value) return;
-  //   switch (value) {
-  //     case 'asc':
-  //       return (value = SortDirections.Ascending);
-  //     default:
-  //       return SortDirections.Distending;
-  //   }
-  // })
   sortDirection: string = SortDirections.Distending;
 
   @Transform(({ value }) => Number(value))

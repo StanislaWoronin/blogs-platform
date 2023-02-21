@@ -52,7 +52,6 @@ export class PgQueryCommentsRepository {
                queryDto.pageSize,
              )};         
         `;
-    console.log(query);
     const commentDB: DbCommentWithAdditionalInfo[] =
       await this.dataSource.query(query, [queryDto.pageSize]);
 
