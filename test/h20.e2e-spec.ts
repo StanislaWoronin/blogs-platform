@@ -114,6 +114,7 @@ describe('e2e tests', () => {
       );
 
       const getCommentsByBlogger = await blogger.getComments(commentOwner.accessToken)
+      expect(getCommentsByBlogger.status).toBe(200)
       console.log(getCommentsByBlogger.body.items);
     })
   })
