@@ -99,8 +99,8 @@ export const commentWithAdditionalInfoPlus = (
       blogName: comment.blogName,
     },
     likesInfo: {
-      likesCount: comment.likesCount,
-      dislikesCount: comment.dislikesCount,
+      likesCount: Number(comment.likesCount),
+      dislikesCount: Number(comment.dislikesCount),
       myStatus: myStatus
     }
   }
