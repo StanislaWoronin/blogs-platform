@@ -6,7 +6,11 @@ import {
   CommentViewModel,
   CreatedCommentViewModel,
 } from '../modules/public/comments/api/dto/commentView.model';
-import { CommentWithAdditionalInfoModel } from "../modules/blogger/api/dto/comment-with-additional-info.model";
+import {
+  CommentWithAdditionalInfoModel,
+  CommentWithAdditionalInfoModelPlus
+} from "../modules/blogger/api/dto/comment-with-additional-info.model";
+import { CommentDbWithAdditionalInfoModel } from "../modules/public/comments/infrastructure/entity/commentDB.model";
 
 export const toCommentsViewModel = (
   comment: DbCommentWithUserAndLikesInfoModel,
@@ -69,5 +73,35 @@ export const commentWithAdditionalInfo = (
       blogId: comment.blogId,
       blogName: comment.blogName,
     },
+  }
+}
+
+export const commentWithAdditionalInfoPlus = (
+  comment: CommentDbWithAdditionalInfoModel
+): CommentWithAdditionalInfoModelPlus => {
+  let myStatus = 'None'
+  if (comment.myStatus) {
+    myStatus = comment.myStatus;
+  }
+
+  return {
+    id: comment.id,
+    content: comment.content,
+    createdAt: comment.createdAt,
+    commentatorInfo: {
+      userId: comment.userId,
+      userLogin: comment.userLogin,
+    },
+    postInfo: {
+      id: comment.postId,
+      title: comment.title,
+      blogId: comment.blogId,
+      blogName: comment.blogName,
+    },
+    likesInfo: {
+      likesCount: comment.likesCount,
+      dislikesCount: comment.dislikesCount,
+      myStatus: myStatus
+    }
   }
 }

@@ -15,3 +15,24 @@ export class CommentWithAdditionalInfoModel {
     blogName: string;
   };
 }
+
+export class CommentWithAdditionalInfoModelPlus {
+  id: string;
+  content: string;
+  createdAt: string;
+  commentatorInfo: {
+    userId: string;
+    userLogin: string;
+  };
+  postInfo: {
+    id: string;
+    title: string;
+    blogId: string;
+    blogName: string;
+  };
+  likesInfo: {
+    likesCount: number,
+    dislikesCount: number,
+    myStatus: string
+  }
+}

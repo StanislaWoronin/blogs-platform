@@ -70,23 +70,47 @@ describe('e2e tests', () => {
     })
   })
 
-  describe('', () => {
+  describe('GET -> "GET => blogger/blogs/comments": should return status 200;' +
+    'content: all comments for all posts inside all current user blogs with pagination;' +
+    'used additional methods: POST -> /sa/users, POST => /auth/login, POST => /blogger/blogs,' +
+    'POST => /blogger/blogs/:blogId/posts, POST => /posts/:postId/comments;', () => {
+
     it('Drop all data.', async () => {
       await request(server).delete('/testing/all-data').expect(204);
     });
 
     it('', async () => {
-      const [commentOwner] = await factories.createAndLoginUsers(2);
-      const [blog] = await factories.createBlogs(commentOwner.accessToken, 1);
-      const [post] = await factories.createPostsForBlog(
+      const [commentOwner, user1, user2] = await factories.createAndLoginUsers(3);
+      const [blog1, blog2] = await factories.createBlogs(commentOwner.accessToken, 2);
+      const [post1] = await factories.createPostsForBlog(
         commentOwner.accessToken,
-        blog.id,
+        blog1.id,
         1,
       );
-      const comments = await factories.createComments(
+      const [post2] = await factories.createPostsForBlog(
         commentOwner.accessToken,
-        post.id,
-        12,
+        blog2.id,
+        1,
+      );
+      const [comment1] = await factories.createComments(
+        user1.accessToken,
+        post1.id,
+        1,
+      );
+      const [comment2] = await factories.createComments(
+        user2.accessToken,
+        post2.id,
+        1,
+      );
+      const [comment3] = await factories.createComments(
+        user1.accessToken,
+        post1.id,
+        1,
+      );
+      const [comment4] = await factories.createComments(
+        user2.accessToken,
+        post2.id,
+        1,
       );
 
       const getCommentsByBlogger = await blogger.getComments(commentOwner.accessToken)

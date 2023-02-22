@@ -1,6 +1,6 @@
 import {QueryParametersDto} from "../../../../global-model/query-parameters.dto";
 import {ContentPageModel} from "../../../../global-model/contentPage.model";
-import {CommentViewModel} from "../api/dto/commentView.model";
+import { CommentViewModel, CommentWithAdditionalInfo } from "../api/dto/commentView.model";
 
 export interface IQueryCommentsRepository {
     getComments(
@@ -16,6 +16,9 @@ export interface IQueryCommentsRepository {
         commentId: string,
         userId: string | undefined,
     ): Promise<CommentViewModel>;
+    bloggerGetComments(
+      userId: string, query: QueryParametersDto
+    ): Promise<CommentWithAdditionalInfo>
     commentExists(commentId: string): Promise<{ userId: string } | null>;
 }
 

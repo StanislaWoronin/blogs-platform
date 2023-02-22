@@ -10,12 +10,17 @@ import {
   DbCommentWithAdditionalInfo,
   DbCommentWithUserAndLikesInfoModel
 } from "../entity/db_comment.model";
-import { commentWithAdditionalInfo, toCommentsViewModel } from "../../../../../data-mapper/to_comments_view.model";
+import {
+  commentWithAdditionalInfo,
+  commentWithAdditionalInfoPlus,
+  toCommentsViewModel
+} from "../../../../../data-mapper/to_comments_view.model";
 import { ContentPageModel } from '../../../../../global-model/contentPage.model';
 import {
-  CommentViewModel,
-} from '../../api/dto/commentView.model';
+  CommentViewModel, CommentWithAdditionalInfo
+} from "../../api/dto/commentView.model";
 import { CommentWithAdditionalInfoModel } from "../../../../blogger/api/dto/comment-with-additional-info.model";
+import { CommentDbWithAdditionalInfoModel } from "../entity/commentDB.model";
 
 @Injectable()
 export class PgQueryCommentsRepository {
@@ -37,15 +42,16 @@ export class PgQueryCommentsRepository {
               FROM public.comments c
               LEFT JOIN public.posts p
                 ON c."postId" = p.id
-             WHERE c."userId" = '${userId}' AND NOT EXISTS (SELECT "blogId"
-                                                      FROM public.banned_blog
-                                                     WHERE "blogId" = p."blogId")
-                                   AND (SELECT "banStatus"
-                                          FROM public.user_ban_info
-                                         WHERE c."userId" = user_ban_info."userId") != true
-                                   AND NOT EXISTS (SELECT "userId" 
-                                                     FROM public.banned_users_for_blog
-                                                    WHERE "blogId" = p."blogId" AND c."userId" = banned_users_for_blog."userId")                       
+             WHERE (SELECT "userId" FROM public.blogs WHERE blogs.id = p."blogId") = '${userId}'
+               AND NOT EXISTS (SELECT "blogId"
+              FROM public.banned_blog
+             WHERE "blogId" = p."blogId")
+               AND (SELECT "banStatus"
+              FROM public.user_ban_info
+             WHERE c."userId" = user_ban_info."userId") != true
+               AND NOT EXISTS (SELECT "userId" 
+              FROM public.banned_users_for_blog
+             WHERE "blogId" = p."blogId" AND c."userId" = banned_users_for_blog."userId")                       
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
@@ -96,27 +102,27 @@ export class PgQueryCommentsRepository {
               SELECT id, content, "createdAt",
                      (SELECT COUNT("commentId") AS "likesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like' AND ${reactionCountFilter}),
+                       WHERE comment_reactions."commentId" = c.id AND status = 'Like' AND ${reactionCountFilter}),
                      (SELECT COUNT("commentId") AS "dislikesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike' AND ${reactionCountFilter}),
+                       WHERE comment_reactions."commentId" = c.id AND status = 'Dislike' AND ${reactionCountFilter}),
                      (SELECT id AS "userId"
                         FROM public.users
-                       WHERE users.id = comments."userId"),
+                       WHERE users.id = c."userId"),
                      (SELECT login AS "userLogin"
                         FROM public.users
-                       WHERE users.id = comments."userId")
+                       WHERE users.id = c."userId")
                    ${myStatusFilter} 
-              FROM public.comments 
-             WHERE comments."postId" = '${postId}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE "postId" = '${postId}')
+              FROM public.comments c
+             WHERE c."postId" = '${postId}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE "postId" = '${postId}')
                                           AND (SELECT "banStatus"
                                                  FROM public.user_ban_info
-                                                WHERE comments."userId" = user_ban_info."userId") != true
+                                                WHERE c."userId" = user_ban_info."userId") != true
                                           AND NOT EXISTS (SELECT "userId" 
                                                             FROM public.banned_users_for_blog
                                                            WHERE banned_users_for_blog."blogId" = (SELECT "blogId"
                                                                                                     FROM public.posts
-                                                                                                   WHERE comments."postId" = posts.id))      
+                                                                                                   WHERE c."postId" = posts.id))      
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,
@@ -164,26 +170,25 @@ export class PgQueryCommentsRepository {
               SELECT id, content, "createdAt",
                      (SELECT COUNT("commentId") AS "likesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Like' AND ${reactionCountFilter}),
+                       WHERE comment_reactions."commentId" = c.id AND status = 'Like' AND ${reactionCountFilter}),
                      (SELECT COUNT("commentId") AS "dislikesCount"
                         FROM public.comment_reactions
-                       WHERE comment_reactions."commentId" = comments.id AND status = 'Dislike' AND ${reactionCountFilter}),
+                       WHERE comment_reactions."commentId" = c.id AND status = 'Dislike' AND ${reactionCountFilter}),
                      (SELECT id AS "userId"
                         FROM public.users
-                       WHERE users.id = comments."userId"),
+                       WHERE users.id = c."userId"),
                      (SELECT login AS "userLogin"
                         FROM public.users
-                       WHERE users.id = comments."userId")
+                       WHERE users.id = c."userId")
                    ${myStatusFilter} 
-              FROM public.comments
-             WHERE comments.id = '${commentId}' AND NOT EXISTS (SELECT "postId"
+              FROM public.comments c
+             WHERE c.id = '${commentId}' AND NOT EXISTS (SELECT "postId"
                                                                   FROM public.banned_post 
-                                                                 WHERE "postId" = comments."postId")
+                                                                 WHERE "postId" = c."postId")
                                                 AND (SELECT "banStatus"
                                                        FROM public.user_ban_info
-                                                      WHERE comments."userId" = user_ban_info."userId") != true;
+                                                      WHERE c."userId" = user_ban_info."userId") != true;
         `;
-    console.log(query);
     const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
       await this.dataSource.query(query);
 
@@ -191,6 +196,75 @@ export class PgQueryCommentsRepository {
       return null;
     }
     return toCommentsViewModel(commentsDB[0]);
+  }
+
+  async bloggerGetComments(userId: string, queryDto: QueryParametersDto): Promise<ContentPageModel> {
+    const myStatusFilter = this.myStatusFilter(userId);
+    const reactionCountFilter = this.reactionCountFilter()
+
+    const query = `
+      SELECT c.id, c.content, c."createdAt", p.id AS "postId", p.title, p."blogId",
+                   (SELECT id AS "userId"
+                      FROM public.users u
+                     WHERE u.id = c."userId"),
+                   (SELECT login AS "userLogin"
+                      FROM public.users u
+                     WHERE u.id = c."userId"),
+                   (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = p."blogId"),
+                   (SELECT COUNT("commentId") AS "likesCount"
+                      FROM public.comment_reactions
+                     WHERE comment_reactions."commentId" = c.id AND status = 'Like' AND ${reactionCountFilter}),
+                   (SELECT COUNT("commentId") AS "dislikesCount"
+                      FROM public.comment_reactions
+                     WHERE comment_reactions."commentId" = c.id AND status = 'Dislike' AND ${reactionCountFilter})
+                   ${myStatusFilter}  
+              FROM public.comments c
+              LEFT JOIN public.posts p
+                ON c."postId" = p.id
+             WHERE (SELECT "userId" FROM public.blogs WHERE blogs.id = p."blogId") = '${userId}'
+               AND NOT EXISTS (SELECT "blogId"
+              FROM public.banned_blog
+             WHERE banned_blog."blogId" = p."blogId")
+               AND (SELECT "banStatus"
+              FROM public.user_ban_info
+             WHERE c."userId" = user_ban_info."userId") != true
+               AND NOT EXISTS (SELECT "userId" 
+              FROM public.banned_users_for_blog
+             WHERE (SELECT "blogId" FROM public.posts WHERE p.id = c."postId") = p."blogId" AND c."userId" = banned_users_for_blog."userId")                       
+             ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+             LIMIT $1 OFFSET ${giveSkipNumber(
+               queryDto.pageNumber,
+               queryDto.pageSize,
+             )};         
+    `
+    const commentDb: CommentDbWithAdditionalInfoModel[] = await this.dataSource.query(query, [queryDto.pageSize])
+
+    const comments = commentDb.map(c => commentWithAdditionalInfoPlus(c))
+
+    const totalCountQuery = `
+        SELECT COUNT(c.id)
+          FROM public.comments c
+          LEFT JOIN public.posts p
+            ON c."postId" = p.id
+         WHERE (SELECT "userId" FROM public.blogs WHERE blogs.id = p."blogId") = '${userId}'
+           AND NOT EXISTS (SELECT "blogId"
+          FROM public.banned_blog
+         WHERE banned_blog."blogId" = p."blogId")
+           AND (SELECT "banStatus"
+          FROM public.user_ban_info
+         WHERE c."userId" = user_ban_info."userId") != true
+           AND NOT EXISTS (SELECT "userId" 
+          FROM public.banned_users_for_blog
+         WHERE (SELECT "blogId" FROM public.posts WHERE p.id = c."postId") = p."blogId" AND c."userId" = banned_users_for_blog."userId")                                
+    `
+    const totalCount = await this.dataSource.query(totalCountQuery)
+
+    return paginationContentPage(
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      comments,
+      Number(totalCount[0].count),
+    );
   }
 
   async commentExists(commentId: string): Promise<{ userId: string } | null> {
@@ -216,7 +290,7 @@ export class PgQueryCommentsRepository {
     if (userId) {
       return `, (SELECT status AS "myStatus" 
                    FROM public.comment_reactions
-                  WHERE comment_reactions."commentId" = comments.id
+                  WHERE comment_reactions."commentId" = c.id
                     AND comment_reactions."userId" = '${userId}')`;
     }
     return '';
@@ -232,7 +306,7 @@ export class PgQueryCommentsRepository {
                            WHERE banned_users_for_blog."userId" = comment_reactions."userId"
                              AND banned_users_for_blog."blogId" = (SELECT "blogId"
                             FROM public.posts
-                           WHERE posts.id = comments."postId"))
+                           WHERE posts.id = c."postId"))
     `
   }
 }

@@ -142,7 +142,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       url: process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: true,
+      //ssl: true,
     }),
     TypeOrmModule.forFeature([...entity]),
     // BlogModule,
