@@ -16,6 +16,8 @@ import { EmailManagerMock } from './mock/emailAdapter.mock';
 import { randomUUID } from 'crypto';
 import { ExpectAuthModel } from './helper/expect-auth.model';
 import { endpoints } from './helper/routing';
+import { factory } from "ts-jest/dist/transformers/hoist-jest";
+import { Factories } from "./helper/factories";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -23,6 +25,7 @@ describe('e2e tests', () => {
 
   let app: INestApplication;
   let server;
+  let factories: Factories;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -36,6 +39,7 @@ describe('e2e tests', () => {
     app = createApp(rawApp);
     await app.init();
     server = await app.getHttpServer();
+    factories = new Factories(server);
   });
 
   afterAll(async () => {
@@ -481,5 +485,22 @@ describe('e2e tests', () => {
           .expect(401);
       });
     });
+  });
+
+  describe('Try create user with exist login or email', () => {
+    it('Drop all data.', async () => {
+      await request(server)
+        .delete(endpoints.testingController.allData)
+        .expect(204);
+    });
+
+    it('Try', async () => {
+      const errorsMessages = getErrorMessage(['login', 'email']
+      )
+      await factories.createUsers(1)
+
+      const errors = await factories.createUsers(1)
+      expect(errors[0]).toStrictEqual({ errorsMessages })
+    })
   });
 });

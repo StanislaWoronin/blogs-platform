@@ -1,6 +1,4 @@
 import { PgBanInfoRepository } from "./modules/super-admin/infrastructure/pg.repository/pg-ban-info.repository";
-import { OrmBanInfoRepository } from "./modules/super-admin/infrastructure/orm.repository/orm-ban-info.repository";
-import { settings } from "./settings";
 import { PgBlogsRepository } from "./modules/public/blogs/infrastructure/pg-repository/pg-blogs.repository";
 import {
   PgQueryBlogsRepository
@@ -27,6 +25,9 @@ import {
 } from "./modules/public/security/infrastructure/pg.repository/pg-query-security.repository";
 import { PgUsersRepository } from "./modules/super-admin/infrastructure/pg.repository/pg-users.repository";
 import { PgQueryUsersRepository } from "./modules/super-admin/infrastructure/pg.repository/pg-query-users.repository";
+import { PgTestingRepository } from "./modules/testing/infrastructure/pg/pg-testing.repository";
+import { OrmTestingRepository } from "./modules/testing/infrastructure/orm/orm-testing.repository";
+import { OrmUsersRepository } from "./modules/super-admin/infrastructure/orm.repository/orm-users.repository";
 
 export const repositoryName = {
   BanInfo: 'banInfo',
@@ -43,7 +44,8 @@ export const repositoryName = {
   Security: 'security',
   QuerySecurity: 'querySecurity',
   Users: 'users',
-  QueryUsers: 'queryUsers'
+  QueryUsers: 'queryUsers',
+  Testing: 'testing'
 }
 
 export const repository = {
@@ -62,25 +64,27 @@ export const repository = {
     security: PgSecurityRepository,
     querySecurity: PgQuerySecurityRepository,
     users: PgUsersRepository,
-    queryUsers: PgQueryUsersRepository
+    queryUsers: PgQueryUsersRepository,
+    testing: PgTestingRepository
   },
-  // orm: {
-  //   banInfo: OrmBanInfoRepository,
-  //   blogs: OrmBlogsRepository,
-  //   queryBlogs: OrmQueryBlogsRepository,
-  //   comments: OrmCommentsRepository,
-  //   queryComments: OrmQueryCommentsRepository,
-  //   emailConfirmation: OrmEmailConfirmationRepository,
-  //   reactions: OrmLikesRepository,
-  //   queryReactions: OrmQueryReactionsRepository,
-  //   jwt: OrmJwtRepository,
-  //   posts: OrmPostsRepository,
-  //   queryPosts: OrmQueryPostsRepository,
-  //   security: OrmSecurityRepository,
-  //   querySecurity: OrmQuerySecurityRepository,
-  //   users: OrmUsersRepository,
-  //   queryUsers: OrmQueryUsersRepository
-  // }
+  orm: {
+    // banInfo: OrmBanInfoRepository,
+    // blogs: OrmBlogsRepository,
+    // queryBlogs: OrmQueryBlogsRepository,
+    // comments: OrmCommentsRepository,
+    // queryComments: OrmQueryCommentsRepository,
+    // emailConfirmation: OrmEmailConfirmationRepository,
+    // reactions: OrmLikesRepository,
+    // queryReactions: OrmQueryReactionsRepository,
+    // jwt: OrmJwtRepository,
+    // posts: OrmPostsRepository,
+    // queryPosts: OrmQueryPostsRepository,
+    // security: OrmSecurityRepository,
+    // querySecurity: OrmQuerySecurityRepository,
+    users: OrmUsersRepository,
+    // queryUsers: OrmQueryUsersRepository,
+    testing: OrmTestingRepository
+  }
 }
 
 export const repositorySwitcher = (repositoryType: string, repositoryName: string) => {

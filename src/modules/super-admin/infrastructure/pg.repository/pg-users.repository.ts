@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreatedUserModel, UserDBModel } from '../entity/userDB.model';
-import { settings } from "../../../../settings";
-import { repositorySwitcher } from "../../../../repositories";
+import { Users } from "../entity/users.entity";
 
 @Injectable()
 export class PgUsersRepository {
@@ -15,7 +14,7 @@ export class PgUsersRepository {
       INSERT INTO public.users
              (id, login, email, "passwordSalt", "passwordHash", "createdAt")
       VALUES ($1, $2, $3, $4, $5, $6)
-             RETURNING id, login, email, "createdAt"; 
+             RETURNING id, login, email, "createdAt";
     `;
 
     const result = await this.dataSource.query(query, [

@@ -80,15 +80,15 @@ describe('e2e tests', () => {
     });
 
     it('', async () => {
-      const [commentOwner, user1, user2] = await factories.createAndLoginUsers(3);
-      const [blog1, blog2] = await factories.createBlogs(commentOwner.accessToken, 2);
+      const [blogOwner, user1, user2] = await factories.createAndLoginUsers(3);
+      const [blog1, blog2] = await factories.createBlogs(blogOwner.accessToken, 2);
       const [post1] = await factories.createPostsForBlog(
-        commentOwner.accessToken,
+        blogOwner.accessToken,
         blog1.id,
         1,
       );
       const [post2] = await factories.createPostsForBlog(
-        commentOwner.accessToken,
+        blogOwner.accessToken,
         blog2.id,
         1,
       );
@@ -113,35 +113,14 @@ describe('e2e tests', () => {
         1,
       );
 
-      const getCommentsByBlogger = await blogger.getComments(commentOwner.accessToken)
+      const [anotherBlog] = await factories.createBlogs(user1.accessToken, 1)
+      const [anotherPost] = await factories.createPostsForBlog(user1.accessToken, anotherBlog.id, 1)
+      const [anotherСomment1] = await factories.createComments(user1.accessToken, anotherPost.id, 1)
+      const [anotherСomment2] = await factories.createComments(blogOwner.accessToken, anotherPost.id, 1)
+
+      const getCommentsByBlogger = await blogger.getComments(blogOwner.accessToken)
       expect(getCommentsByBlogger.status).toBe(200)
-      console.log(getCommentsByBlogger.body.items);
-    })
-  })
-
-  describe('GET -> "/posts": should return status 200; content: posts array with' +
-    'pagination; used additional methods: POST -> /blogger/blogs,' +
-    'POST => /blogger/blogs/:blogId/posts;', () => {
-
-    it('Drop all data.', async () => {
-      await request(server).delete('/testing/all-data').expect(204);
-    });
-
-    it('Create mistake', async () => {
-      const [owner] = await factories.createAndLoginUsers(1);
-      const [blog] = await factories.createBlogs(owner.accessToken, 1);
-      const [post] = await factories.createPostsForBlog(
-        owner.accessToken,
-        blog.id,
-        12,
-      );
-
-      const response = await request(server)
-        .get(`/posts?pageSize=9&pageNumber=1&sortBy=blogName&sortDirection=asc`)
-        .expect(200)
-
-      console.log(response.body)
-      // Errors messages: "sortBy must be a valid enum value",
+      expect(getCommentsByBlogger.body.items).toHaveLength(4)
     })
   })
 })

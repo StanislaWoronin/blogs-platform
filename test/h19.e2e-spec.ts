@@ -13,7 +13,7 @@ import { Posts } from './request/posts';
 import { randomUUID } from 'crypto';
 import { getErrorMessage } from './helper/helpers';
 import { ReactionModel } from '../src/global-model/reaction.model';
-import { preparedComment, preparedPost, preparedStatus } from "./helper/prepeared-data";
+import { preparedComment, preparedStatus } from "./helper/prepeared-data";
 import { Comments } from './request/comments';
 import {SA} from "./request/sa";
 import {Blogger} from "./request/blogger";
@@ -851,118 +851,6 @@ describe('e2e tests', () => {
     })
   })
 
-  describe('Return all comment specified user`s blog', () => {
-    it('Drop all data.', async () => {
-      await request(server)
-        .delete(endpoints.testingController.allData)
-        .expect(204);
-    });
-
-    it('Create data', async () => {
-      const [commentOwner, simpleUser] = await factories.createAndLoginUsers(2);
-      const [blog1, blog2] = await factories.createBlogs(commentOwner.accessToken, 2);
-      const [blogSimpleUser] = await factories.createBlogs(simpleUser.accessToken, 1)
-      const [post1, post2] = await factories.createPostsForBlog(
-        commentOwner.accessToken,
-        blog1.id,
-        2,
-      );
-      const [postSimpleUser] = await factories.createPostsForBlog(
-        simpleUser.accessToken,
-        blogSimpleUser.id,
-        1,
-      );
-      const [comment1, comment2] = await factories.createComments(
-        commentOwner.accessToken,
-        post1.id,
-        2,
-      );
-      const [comment3, comment4] = await factories.createComments(
-        commentOwner.accessToken,
-        post2.id,
-        2,
-      );
-      const [comment1SimpleUser, comment2SimpleUser] = await factories.createComments(
-        simpleUser.accessToken,
-        postSimpleUser.id,
-        2
-      )
-
-      const response = await request(server)
-        .get(`/blogger/blogs/comments`)
-        .auth(commentOwner.accessToken, {type: 'bearer'})
-        .expect(200)
-      expect(response.body.items).toHaveLength(4)
-      expect(response.body).toEqual({
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: 4,
-        items: expect.any(Array)
-      })
-      expect(response.body.items[0]).toStrictEqual({
-        id: expect.any(String),
-        content: preparedComment.valid.content,
-        createdAt: expect.any(String),
-        commentatorInfo: {
-          userId: commentOwner.user.id,
-          userLogin: commentOwner.user.login
-        },
-        postInfo: {
-          id: post2.id,
-          title: post2.title,
-          blogId: blog1.id,
-          blogName: blog1.name,
-        }
-      })
-      expect(response.body.items[1]).toStrictEqual({
-        id: expect.any(String),
-        content: preparedComment.valid.content,
-        createdAt: expect.any(String),
-        commentatorInfo: {
-          userId: commentOwner.user.id,
-          userLogin: commentOwner.user.login
-        },
-        postInfo: {
-          id: post2.id,
-          title: post2.title,
-          blogId: blog1.id,
-          blogName: blog1.name,
-        }
-      })
-      expect(response.body.items[2]).toStrictEqual({
-        id: expect.any(String),
-        content: preparedComment.valid.content,
-        createdAt: expect.any(String),
-        commentatorInfo: {
-          userId: commentOwner.user.id,
-          userLogin: commentOwner.user.login
-        },
-        postInfo: {
-          id: post1.id,
-          title: post1.title,
-          blogId: blog1.id,
-          blogName: blog1.name,
-        }
-      })
-      expect(response.body.items[3]).toStrictEqual({
-        id: expect.any(String),
-        content: preparedComment.valid.content,
-        createdAt: expect.any(String),
-        commentatorInfo: {
-          userId: commentOwner.user.id,
-          userLogin: commentOwner.user.login
-        },
-        postInfo: {
-          id: post1.id,
-          title: post1.title,
-          blogId: blog1.id,
-          blogName: blog1.name,
-        }
-      })
-    });
-  })
-
   describe('Shouldn`t return reactions for banned user', () => {
     it('Drop all data.', async () => {
       await request(server)
@@ -1044,27 +932,6 @@ describe('e2e tests', () => {
     })
 
     describe('PUT -> "/posts/:postId/like-status": create post then: like the post by user 1,' +
-      'user 2, user 3, user 4. get the post after each like by user 1. NewestLikes should be sorted' +
-      'in descending; status 204; used additional methods: POST => /blogger/blogs,' +
-      'POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
-
-      it('Drop all data.', async () => {
-        await request(server)
-          .delete(endpoints.testingController.allData)
-          .expect(204);
-      });
-
-      it('get "/post/:id"', async () => {
-        const [owner] = await factories.createAndLoginUsers(1)
-        const [blog] = await factories.createBlogs(owner.accessToken, 1)
-        const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
-
-        const response = await posts.getPostById(post.id)
-        console.log(response);
-      })
-    })
-
-    describe('PUT -> "/posts/:postId/like-status": create post then: like the post by user 1,' +
       ' user 2, user 3, user 4. get the post after each like by user 1. NewestLikes should be sorted' +
       ' in descending; status 204; used additional methods: POST => /blogger/blogs,' +
       ' POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
@@ -1090,7 +957,6 @@ describe('e2e tests', () => {
         expect(request.status).toBe(204)
 
         const post = await posts.getPostById(postId)
-        console.log(post.body.extendedLikesInfo.newestLikes[0])
         expect(post.status).toBe(200)
         expect(post.body.extendedLikesInfo.likesCount).toBe(1)
         expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(1)
@@ -1175,9 +1041,5 @@ describe('e2e tests', () => {
         })
       })
     })
-
-
   })
-
-
 });

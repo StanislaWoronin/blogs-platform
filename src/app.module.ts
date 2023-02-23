@@ -4,7 +4,6 @@ import { UsersController } from './modules/super-admin/api/users.controller';
 import { JwtService } from './modules/public/auth/application/jwt.service';
 import { AuthController } from './modules/public/auth/api/auth.controller';
 import { SecurityController } from './modules/public/security/api/security.controller';
-import { TestingController } from './modules/testing/testingController';
 import { AuthService } from './modules/public/auth/application/auth.service';
 import { EmailAdapters } from './modules/public/auth/email-transfer/email.adapter';
 import { EmailManager } from './modules/public/auth/email-transfer/email.manager';
@@ -60,6 +59,8 @@ import { IUsersRepository } from "./modules/super-admin/infrastructure/i-users.r
 import { repositoryName, repositorySwitcher } from "./repositories";
 import { settings } from "./settings";
 import { BannedComment } from "./modules/super-admin/infrastructure/entity/banned-comment.entity";
+import { ITestingRepository } from "./modules/testing/infrastructure/i-testing.repository";
+import { TestingController } from "./modules/testing/api/testingController";
 
 const controllers = [
   AuthController,
@@ -107,6 +108,7 @@ const repositories = [
   { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QuerySecurity) },
   { provide: IUsersRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Users) },
   { provide: IQueryUsersRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.QueryUsers) },
+  { provide: ITestingRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Testing) }
 ];
 
 const services = [
@@ -134,15 +136,21 @@ const validators = [
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
 
+// let url = settings.POSTGRES_URI
+// if (settings.environment === Environment.Development) {
+//   url = settings.local
+// }
+// console.log(url);
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.POSTGRES_URI,
+      url: process.env.LOCAL_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: true,
+      //ssl: false,
     }),
     TypeOrmModule.forFeature([...entity]),
     // BlogModule,

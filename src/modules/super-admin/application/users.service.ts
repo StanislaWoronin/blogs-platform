@@ -4,8 +4,6 @@ import {
   UserDBModel,
 } from '../infrastructure/entity/userDB.model';
 import { BanUserDTO } from '../api/dto/ban-user.dto';
-import { PgUsersRepository } from '../infrastructure/pg.repository/pg-users.repository';
-import { PgEmailConfirmationRepository } from '../infrastructure/pg.repository/pg-email-confirmation.repository';
 import { _generateHash } from '../../../helper.functions';
 import { BanInfoModel } from '../infrastructure/entity/banInfo.model';
 import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
