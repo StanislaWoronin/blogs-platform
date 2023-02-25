@@ -34,6 +34,7 @@ import {
 import {
   OrmQuerySecurityRepository
 } from "./modules/public/security/infrastructure/orm.repository/orm-query-security.repository";
+import { OrmSecurityRepository } from "./modules/public/security/infrastructure/orm.repository/orm-security.repository";
 
 export const repositoryName = {
   BanInfo: 'banInfo',
@@ -85,7 +86,7 @@ export const repository = {
     // jwt: OrmJwtRepository,
     // posts: OrmPostsRepository,
     // queryPosts: OrmQueryPostsRepository,
-    // security: OrmSecurityRepository,
+    security: OrmSecurityRepository,
     querySecurity: OrmQuerySecurityRepository,
     users: OrmUsersRepository,
     queryUsers: OrmQueryUsersRepository,

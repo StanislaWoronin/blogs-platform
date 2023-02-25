@@ -3,8 +3,6 @@ import { JwtService } from '../../auth/application/jwt.service';
 import { ViewSecurityDeviseModel } from '../api/dto/viewSecurityDeviseModel';
 import { UserDeviceModel } from '../infrastructure/entity/userDevice.model';
 import { toActiveSessionsViewModel } from '../../../../data-mapper/to-active-session-view.model';
-import { PgSecurityRepository } from '../infrastructure/pg.repository/pg-security.repository';
-import { PgQuerySecurityRepository } from '../infrastructure/pg.repository/pg-query-security.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
 import { ISecurityRepository } from "../infrastructure/i-security.repository";
@@ -58,8 +56,8 @@ export class SecurityService {
       tokenPayload.deviceId,
       title,
       ipAddress,
-      tokenPayload.iat,
-      tokenPayload.exp,
+      tokenPayload.iat.toString(),
+      tokenPayload.exp.toString(),
     );
 
     await this.securityRepository.createUserDevice(userDevice);

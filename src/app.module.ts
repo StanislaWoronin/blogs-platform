@@ -104,7 +104,7 @@ const repositories = [
   { provide: IJwtRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Jwt) },
   { provide: IPostsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Posts) },
   { provide: IQueryPostsRepository, useClass:  repositorySwitcher(settings.currentRepository, repositoryName.QueryPosts) },
-  { provide: ISecurityRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Security) },
+  { provide: ISecurityRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Security) },
   { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.QuerySecurity) },
   { provide: IUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Users) },
   { provide: IQueryUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.QueryUsers) },

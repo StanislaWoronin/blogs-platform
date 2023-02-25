@@ -7,7 +7,6 @@ import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
 import { preparedUser } from './helper/prepeared-data';
 import { getAllDevices } from './helper/expect-seurity.model';
-import { randomUUID } from 'crypto';
 
 describe('e2e tests', () => {
   const second = 1000;

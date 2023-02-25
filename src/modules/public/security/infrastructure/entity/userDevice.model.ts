@@ -4,7 +4,7 @@ export class UserDeviceModel {
     public deviceId: string,
     public deviceTitle: string,
     public ipAddress: string,
-    public iat: number,
-    public exp: number,
+    public iat: string,
+    public exp: string,
   ) {}
 }
