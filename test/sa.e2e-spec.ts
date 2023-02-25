@@ -221,6 +221,7 @@ describe('e2e tests', () => {
         });
       });
 
+
       it('Get users without query, should return all users', async () => {
         const response = await request(server)
           .get(endpoints.sa.users)
@@ -301,7 +302,7 @@ describe('e2e tests', () => {
         });
       });
 
-      it('Should return users with pagination and search login term', async () => {
+      it('Should return users with pagination and search login term1', async () => {
         const response = await request(server)
           .get(`${endpoints.sa.users}?searchLoginTerm=1`)
           .auth(superUser.valid.login, superUser.valid.password, {
@@ -320,7 +321,8 @@ describe('e2e tests', () => {
         });
       });
 
-      it('Should return users with pagination and search email term', async () => {
+      it('Should return users with pagination and search email term2', async () => {
+
         const response = await request(server)
           .get(`${endpoints.sa.users}?searchEmailTerm=1`)
           .auth(superUser.valid.login, superUser.valid.password, {
@@ -339,7 +341,7 @@ describe('e2e tests', () => {
         });
       });
 
-      it('Should return users with pagination and search login or email term', async () => {
+      it('Should return users with pagination and search login or email term3', async () => {
         const response = await request(server)
           .get(`${endpoints.sa.users}?searchLoginTerm=1&searchEmailTerm=1`)
           .auth(superUser.valid.login, superUser.valid.password, {

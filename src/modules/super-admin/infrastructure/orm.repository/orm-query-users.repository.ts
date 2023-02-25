@@ -1,15 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource, ILike, ObjectLiteral, Repository } from "typeorm";
+import { DataSource } from "typeorm";
 import { Users } from "../entity/users.entity";
 import { UserDBModel } from "../entity/userDB.model";
-import { UserBanInfo } from "../entity/user-ban-info.entity";
 import { QueryParametersDto } from "../../../../global-model/query-parameters.dto";
 import { ContentPageModel } from "../../../../global-model/contentPage.model";
 import { BannedUsersForBlog } from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
 import { toBannedUsersModel } from "../../../../data-mapper/to-banned-users.model";
 import { giveSkipNumber, paginationContentPage } from "../../../../helper.functions";
-import { Blogs } from "../../../public/blogs/infrastructure/entity/blogs.entity";
+import { toUserViewModel } from "../../../../data-mapper/to-create-user-view.model";
+import { BanStatusModel } from "../../../../global-model/ban-status.model";
 
 @Injectable()
 export class OrmQueryUsersRepository {
@@ -17,14 +17,14 @@ export class OrmQueryUsersRepository {
   }
 
   async isLoginOrEmailExistForValidation(loginOrEmail: string): Promise<{id: string} | null> {
-    const result = await this.dataSource.createQueryBuilder()
+    const builder = this.dataSource.createQueryBuilder()
       .select("u.id")
       .from(Users, "u")
       .where([
         { login: loginOrEmail },
         { email: loginOrEmail }
       ])
-      .getOne()
+    const result = await builder.getOne()
 
     return result
   }
@@ -32,106 +32,145 @@ export class OrmQueryUsersRepository {
   async getUserByLoginOrEmail(
     loginOrEmail: string,
   ): Promise<UserDBModel | null> {
-    const result = await this.dataSource.createQueryBuilder()
+    const builder = this.dataSource.createQueryBuilder()
       .select("u")
       .from(Users, "u")
       .where([
         { login: loginOrEmail },
         { email: loginOrEmail }
       ])
-      .getOne()
+    const result = await builder.getOne()
 
     return result
   }
 
   async getUserById(userId: string): Promise<UserDBModel | null> {
-    const result = await this.dataSource.createQueryBuilder()
+    const builder = this.dataSource.createQueryBuilder()
       .select("u")
       .from(Users, "u")
       .leftJoin("u.banInfo", "bi")
       .where("u.id = :id", { id: userId })
       .andWhere("bi.banStatus = :banStatus", { banStatus: false })
-      .getOne()
+    const result = await builder.getOne()
 
     return result
   }
 
   async getBannedUsers(
     blogId: string,
-    query: QueryParametersDto,
+    queryDto: QueryParametersDto,
   ): Promise<ContentPageModel> {
-    const searchTermFilter = this.searchTermFilter(query)
+    const searchTermFilter = this.searchTermFilter(queryDto)
 
-    const filter: ObjectLiteral = {};
-    if (query.searchLoginTerm) filter.login = ILike(`%${query.searchLoginTerm}%`)
-    if (query.searchEmailTerm) filter.login = ILike(`%${query.searchEmailTerm}%`)
-    filter.blogId = {blogId: blogId}
-
-    // const [blogs, count] = await this.dataSource.getRepository(BannedUsersForBlog)
-    //   .findAndCount({
-    //     select: {
-    //       banReason: true,
-    //       banDate: true,
-    //     },
-    //     relations: {
-    //       user: {
-    //         id: true,
-    //         login: true
-    //       },
-    //     },
-    //     where: filter,
-    //     order: {
-    //       [query.sortBy]: query.sortDirection === 'asc' ? 'asc' : 'desc',
-    //     },
-    //     skip: giveSkipNumber(query.pageNumber, query.pageSize),
-    //     take: query.pageSize,
-    //   });
-
-    const bannedUsersDb = await this.dataSource.createQueryBuilder()
-      .select("bu.banDate", "bu.banReason")
-      .addSelect("u.id", "u.login")
+    const builder = this.dataSource
+      .createQueryBuilder()
+      .select("bu.banDate", "banDate")
+      .addSelect("bu.banReason", "banReason")
+      .addSelect("u.id", "id")
+      .addSelect("u.login", "login")
+      .addSelect("bu.blogId", "blogId")
       .from(BannedUsersForBlog, "bu")
-      .leftJoinAndSelect("bu.user", "u")
-      .where("bu.userId = u.id" )
-      .andWhere("bu.blogId = :blogId", { blogId: blogId})
+      .leftJoin("bu.user", "u")
+      .where("bu.blogId = :blogId", { blogId: blogId})
       .andWhere(searchTermFilter)
-      .orderBy(`u.${query.sortBy}`, query.sortDirection === 'asc' ? "ASC" : "DESC")
-      .limit(query.pageSize)
-      .skip(giveSkipNumber(query.pageNumber, query.pageSize))
-      .getMany();
+      .orderBy(`u.${queryDto.sortBy}`, queryDto.sortDirection === 'asc' ? "ASC" : "DESC")
+      .offset(giveSkipNumber(queryDto.pageNumber, queryDto.pageSize))
+      .limit(queryDto.pageSize)
 
-    console.log(bannedUsersDb);
-    const bannedUsers = bannedUsersDb.map((u) => toBannedUsersModel(u));
+    const rawUsers = await builder.getRawMany()
+    const users = rawUsers.map((u) => toBannedUsersModel(u));
 
-    const totalCount = await this.dataSource.createQueryBuilder()
-      .select("bu.banDate")
-      .from(BannedUsersForBlog, "bu")
-      .leftJoinAndSelect("bu.user", "u")
-      .where("bu.userId = u.id" )
-      .andWhere("bu.blogId = :blogId", { blogId: blogId})
+    const countBuilder = this.dataSource
+      .getRepository(BannedUsersForBlog)
+      .createQueryBuilder("bu")
+      .leftJoin("bu.user", "u")
+      .where("bu.blogId = :blogId", { blogId: blogId})
       .andWhere(searchTermFilter)
-      .getCount()
+    const totalCount = await countBuilder.getCount()
 
     return paginationContentPage(
-      query.pageNumber,
-      query.pageSize,
-      bannedUsers,
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      users,
       Number(totalCount),
     );
   }
 
-  private searchTermFilter(query: QueryParametersDto): Array {
-    const { searchLoginTerm } = query;
-    const { searchEmailTerm } = query;
+  async getUsers(query: QueryParametersDto): Promise<ContentPageModel> {
+    const filter = this.getFilter(query)
 
-    let filter = []
+    const builder = this.dataSource
+      .createQueryBuilder()
+      .select("u.id", "id")
+      .addSelect("u.login", "login")
+      .addSelect("u.email", "email")
+      .addSelect("u.createdAt", "createdAt")
+      .addSelect("bi.banStatus", "isBanned")
+      .addSelect("bi.banDate", "banDate")
+      .addSelect("bi.banReason", "banReason")
+      .from(Users, "u")
+      .innerJoin("u.banInfo", "bi")
+      .where(filter)
+      .orderBy(`u.${query.sortBy}`, query.sortDirection === 'asc' ? "ASC" : "DESC")
+      .offset(giveSkipNumber(query.pageNumber, query.pageSize))
+      .limit(query.pageSize)
+    const rawUsers = await builder.getRawMany()
+
+    const users = rawUsers.map((u) => toUserViewModel(u));
+
+    const countBuilder = this.dataSource
+      .getRepository(Users)
+      .createQueryBuilder("u")
+      .innerJoin("u.banInfo", "bi")
+      .where(filter)
+    const totalCount = await countBuilder.getCount()
+
+    return paginationContentPage(
+      query.pageNumber,
+      query.pageSize,
+      users,
+      Number(totalCount),
+    );
+  }
+
+  private searchTermFilter(query: QueryParametersDto): string {
+    const { searchLoginTerm, searchEmailTerm } = query;
+
+    if (searchLoginTerm && searchEmailTerm) {
+      return `u.login ILIKE '%${searchLoginTerm}%' OR u.email ILIKE '%${searchEmailTerm}%'`
+    }
     if (searchLoginTerm) {
-      filter.push(`login ILIKE '%${searchLoginTerm}%'`)
+      return `u.login ILIKE '%${searchLoginTerm}%'`
     }
     if (searchEmailTerm) {
-      filter.push(`email ILIKE '%${searchEmailTerm}%'`)
+      return `u.email ILIKE '%${searchEmailTerm}%'`
     }
 
-    return filter
+    return '1 = 1'
+  }
+
+  private banStatusFilter(query: QueryParametersDto): string {
+    const {banStatus} = query
+    if (banStatus === BanStatusModel.Banned) {
+      return `bi."banStatus" = true`;
+    }
+    if (banStatus === BanStatusModel.NotBanned) {
+      return `bi."banStatus" = false`;
+    }
+
+    return ''
+  }
+
+  private getFilter(query: QueryParametersDto): string {
+    const searchTermFilter = this.searchTermFilter(query)
+    const banStatusFilter = this.banStatusFilter(query)
+
+    if (searchTermFilter && banStatusFilter) {
+      return `${searchTermFilter} AND ${banStatusFilter}`
+    }
+    if (searchTermFilter) return searchTermFilter
+    if (banStatusFilter) return banStatusFilter
+
+    return ''
   }
 }

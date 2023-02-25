@@ -36,7 +36,6 @@ export class BloggerBlogService {
         banDate,
       );
     }
-
     return await this.banInfoRepository.deleteUserBanForBlogStatus(
       userId,
       dto.blogId,

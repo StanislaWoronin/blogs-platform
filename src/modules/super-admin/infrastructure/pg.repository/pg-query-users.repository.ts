@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, ILike, ObjectLiteral } from "typeorm";
+import { DataSource, ILike } from "typeorm";
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
@@ -11,9 +11,10 @@ import { BanStatusModel } from '../../../../global-model/ban-status.model';
 import { toUserViewModel } from '../../../../data-mapper/to-create-user-view.model';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { toBannedUsersModel } from '../../../../data-mapper/to-banned-users.model';
-import { DbBannedUsersModel } from '../entity/db-banned-users.model';
-import { Users } from "../entity/users.entity";
 import { BannedUsersForBlog } from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
+import { rawToView } from "../../../../data-mapper/raw-to-view";
+import { DbBannedUsersModel } from "../entity/db-banned-users.model";
+import { Users } from "../entity/users.entity";
 
 @Injectable()
 export class PgQueryUsersRepository {
@@ -55,124 +56,44 @@ export class PgQueryUsersRepository {
     blogId: string,
     queryDto: QueryParametersDto,
   ): Promise<ContentPageModel> {
-    const filter: ObjectLiteral = {};
-    if (queryDto.searchLoginTerm) filter.login = ILike(`%${queryDto.searchLoginTerm}%`)
-    if (queryDto.searchEmailTerm) filter.login = ILike(`%${queryDto.searchEmailTerm}%`)
-    filter.blogId = {blogId: blogId}
+    const filter = this.bannedUserFilter(blogId, queryDto);
 
-    const [bannedUsers, count] = await this.dataSource.getRepository(BannedUsersForBlog)
-      .findAndCount({
-        select: {
-          banReason: true,
-          banDate: true,
-        },
-        relations: {
-          user: true,
-        },
-        where: filter,
-        order: {
-          [queryDto.sortBy]: queryDto.sortDirection === 'asc' ? 'asc' : 'desc',
-        },
-        skip: giveSkipNumber(queryDto.pageNumber, queryDto.pageSize),
-        take: queryDto.pageSize,
-      });
-    console.log(bannedUsers);
+    const usersQuery = `
+      SELECT b."banDate", b."banReason",
+             u.id, u.login
+        FROM public.banned_users_for_blog b
+        LEFT JOIN public.users u
+          ON b."userId" = u.id
+       ${filter}
+       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+       LIMIT $1 OFFSET ${giveSkipNumber(
+         queryDto.pageNumber,
+         queryDto.pageSize,
+       )};
+    `;
+    const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(
+      usersQuery,
+      [queryDto.pageSize],
+    );
+
+    const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
+
+    const totalCountQuery = `
+      SELECT COUNT("blogId")
+        FROM public.banned_users_for_blog b
+        LEFT JOIN public.users u
+          ON b."userId" = u.id
+        ${filter}
+    `;
+    const totalCount = await this.dataSource.query(totalCountQuery);
+
     return paginationContentPage(
       queryDto.pageNumber,
       queryDto.pageSize,
       bannedUsers,
-      count,
+      Number(totalCount[0].count),
     );
-    // const searchTermFilter = this.searchTermFilter(queryDto)
-    //
-    // const bannedUsersDb = await this.dataSource.createQueryBuilder()
-    //   .select("bu.banDate", "bu.banReason")
-    //   .addSelect("u.id", "u.login")
-    //   .from(BannedUsersForBlog, "bu")
-    //   .leftJoinAndSelect("bu.user", "u")
-    //   .where("bu.userId = u.id" )
-    //   .andWhere("bu.blogId = :blogId", { blogId: blogId})
-    //   .andWhere(searchTermFilter)
-    //   .orderBy(`u.${queryDto.sortBy}`, queryDto.sortDirection === 'asc' ? "ASC" : "DESC")
-    //   .limit(queryDto.pageSize)
-    //   .skip(giveSkipNumber(queryDto.pageNumber, queryDto.pageSize))
-    //   .getMany();
-    //
-    // console.log(bannedUsersDb);
-    // const bannedUsers = bannedUsersDb.map((u) => toBannedUsersModel(u));
-    //
-    // const totalCount = await this.dataSource.createQueryBuilder()
-    //   .select("u.id")
-    //   .from(Users, "u")
-    //   .leftJoin("u.bannedForBlog", "bfb")
-    //   .where("bu.userId = u.id" )
-    //   .andWhere("bu.blogId = :blogId", { blogId: blogId})
-    //   .andWhere(searchTermFilter)
-    //   .getCount()
-    //
-    // return paginationContentPage(
-    //   queryDto.pageNumber,
-    //   queryDto.pageSize,
-    //   bannedUsers,
-    //   Number(totalCount),
-    // );
   }
-  private searchTermFilter(query: QueryParametersDto) {
-    const { searchLoginTerm } = query;
-    const { searchEmailTerm } = query;
-
-    let filter = []
-    if (searchLoginTerm) {
-      filter.push(`login ILIKE '%${searchLoginTerm}%'`)
-    }
-    if (searchEmailTerm) {
-      filter.push(`email ILIKE '%${searchEmailTerm}%'`)
-    }
-
-    return filter
-  }
-  // async getBannedUsers(
-  //   blogId: string,
-  //   queryDto: QueryParametersDto,
-  // ): Promise<ContentPageModel> {
-  //   const filter = this.bannedUserFilter(blogId, queryDto);
-  //
-  //   const usersQuery = `
-  //     SELECT b."banDate", b."banReason",
-  //            u.id, u.login
-  //       FROM public.banned_users_for_blog b
-  //       LEFT JOIN public.users u
-  //         ON b."userId" = u.id
-  //      ${filter}
-  //      ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-  //      LIMIT $1 OFFSET ${giveSkipNumber(
-  //        queryDto.pageNumber,
-  //        queryDto.pageSize,
-  //      )};
-  //   `;
-  //   const bannedUsersDB: DbBannedUsersModel[] = await this.dataSource.query(
-  //     usersQuery,
-  //     [queryDto.pageSize],
-  //   );
-  //
-  //   const bannedUsers = bannedUsersDB.map((u) => toBannedUsersModel(u));
-  //
-  //   const totalCountQuery = `
-  //     SELECT COUNT("blogId")
-  //       FROM public.banned_users_for_blog b
-  //       LEFT JOIN public.users u
-  //         ON b."userId" = u.id
-  //       ${filter}
-  //   `;
-  //   const totalCount = await this.dataSource.query(totalCountQuery);
-  //
-  //   return paginationContentPage(
-  //     queryDto.pageNumber,
-  //     queryDto.pageSize,
-  //     bannedUsers,
-  //     Number(totalCount[0].count),
-  //   );
-  // }
 
   async getUsers(queryDto: QueryParametersDto): Promise<ContentPageModel> {
     const filter = this.getFilter(queryDto);
@@ -183,7 +104,7 @@ export class PgQueryUsersRepository {
         FROM public.users u
         LEFT JOIN public.user_ban_info b
           ON u.id = b."userId"
-       ${filter} 
+       ${filter}
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
        LIMIT $1 OFFSET ${giveSkipNumber(
          queryDto.pageNumber,
@@ -218,7 +139,7 @@ export class PgQueryUsersRepository {
     const userFilter = this.userFilter(query);
 
     if (banFilter && userFilter) {
-      return `WHERE ${banFilter} AND ${userFilter}`;
+      return ` ${banFilter} AND ${userFilter}`;
     }
     if (banFilter) return `WHERE ${banFilter}`;
     if (userFilter) return `WHERE ${userFilter}`;

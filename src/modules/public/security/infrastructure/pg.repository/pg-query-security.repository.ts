@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserDeviceModel } from '../entity/userDevice.model';
+import { Security } from "../entity/security";
 
 @Injectable()
 export class PgQuerySecurityRepository {
@@ -15,6 +16,7 @@ export class PgQuerySecurityRepository {
     `;
     try {
       const result = await this.dataSource.query(query, [userId]);
+
       return result;
     } catch (e) {
       return null;

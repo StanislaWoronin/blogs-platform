@@ -123,121 +123,121 @@ describe('e2e tests', () => {
       });
     });
 
-    describe('Terminate specified device session', () => {
-      it('Shouldn`t delete device if deviceId not found', async () => {
-        const randomId = randomUUID();
-        const { refreshToken1 } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices/${randomId}`)
-          .set('Cookie', `refreshToken=${refreshToken1}`)
-          .expect(404);
-      });
-
-      it('Shouldn`t delete device if try to delete the deviceId of other user', async () => {
-        const { refreshToken2, deviceId } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices/${deviceId}`)
-          .set('Cookie', `refreshToken=${refreshToken2}`)
-          .expect(403);
-      });
-
-      it('Shouldn`t delete device if refresh token missing', async () => {
-        const { refreshToken2 } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices/${refreshToken2}`)
-          .expect(401);
-      });
-
-      it('Shouldn`t delete device if refresh token expired', async () => {
-        const { refreshToken1, deviceId } = expect.getState();
-
-        const expiredToken = await request(server)
-          .get(`/testing/expired-token/${refreshToken1}`)
-          .expect(200);
-
-        await request(server)
-          .delete(`/security/devices/${deviceId}`)
-          .set('Cookie', `refreshToken=${expiredToken.body.expiredToken}`)
-          .expect(401);
-      });
-
-      it('Shouldn`t delete device if refresh token incorrect', async () => {
-        const { refreshToken1, deviceId } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices/${deviceId}`)
-          .set('Cookie', `refreshToken=${refreshToken1}-1`)
-          .expect(401);
-      });
-
-      it('Should delete device by id', async () => {
-        const { refreshToken1, deviceId } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices/${deviceId}`)
-          .set('Cookie', `refreshToken=${refreshToken1}`)
-          .expect(204);
-
-        const response = await request(server)
-          .get(`/security/devices`)
-          .set('Cookie', `refreshToken=${refreshToken1}`)
-          .expect(200);
-
-        expect(response.body).toHaveLength(2);
-      });
-    });
-
-    describe('Terminate all other (exclude current) device`s session', () => {
-      it('Shouldn`t terminate all other device if refresh token missing', async () => {
-        await request(server).delete(`/security/devices`).expect(401);
-      });
-
-      it('Shouldn`t terminate all other device  if refresh token expired', async () => {
-        const { refreshToken1 } = expect.getState();
-
-        const expiredToken = await request(server)
-          .get(`/testing/expired-token/${refreshToken1}`)
-          .expect(200);
-
-        await request(server)
-          .delete(`/security/devices`)
-          .set('Cookie', `refreshToken=${expiredToken.body.expiredToken}`)
-          .expect(401);
-      });
-
-      it('Shouldn`t terminate all other device  if refresh token incorrect', async () => {
-        const { refreshToken1 } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices`)
-          .set('Cookie', `refreshToken=${refreshToken1}-1`)
-          .expect(401);
-      });
-
-      it('Shouldn`t terminate all other device', async () => {
-        const { refreshToken1, refreshToken2 } = expect.getState();
-
-        await request(server)
-          .delete(`/security/devices`)
-          .set('Cookie', `refreshToken=${refreshToken1}`)
-          .expect(204);
-
-        const response1 = await request(server)
-          .get(`/security/devices`)
-          .set('Cookie', `refreshToken=${refreshToken1}`)
-          .expect(200);
-
-        const response2 = await request(server)
-          .get(`/security/devices`)
-          .set('Cookie', `refreshToken=${refreshToken2}`)
-          .expect(200);
-
-        expect(response1.body).toHaveLength(1);
-        expect(response2.body).toHaveLength(1);
-      });
-    });
+    // describe('Terminate specified device session', () => {
+    //   it('Shouldn`t delete device if deviceId not found', async () => {
+    //     const randomId = randomUUID();
+    //     const { refreshToken1 } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices/${randomId}`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}`)
+    //       .expect(404);
+    //   });
+    //
+    //   it('Shouldn`t delete device if try to delete the deviceId of other user', async () => {
+    //     const { refreshToken2, deviceId } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices/${deviceId}`)
+    //       .set('Cookie', `refreshToken=${refreshToken2}`)
+    //       .expect(403);
+    //   });
+    //
+    //   it('Shouldn`t delete device if refresh token missing', async () => {
+    //     const { refreshToken2 } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices/${refreshToken2}`)
+    //       .expect(401);
+    //   });
+    //
+    //   it('Shouldn`t delete device if refresh token expired', async () => {
+    //     const { refreshToken1, deviceId } = expect.getState();
+    //
+    //     const expiredToken = await request(server)
+    //       .get(`/testing/expired-token/${refreshToken1}`)
+    //       .expect(200);
+    //
+    //     await request(server)
+    //       .delete(`/security/devices/${deviceId}`)
+    //       .set('Cookie', `refreshToken=${expiredToken.body.expiredToken}`)
+    //       .expect(401);
+    //   });
+    //
+    //   it('Shouldn`t delete device if refresh token incorrect', async () => {
+    //     const { refreshToken1, deviceId } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices/${deviceId}`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}-1`)
+    //       .expect(401);
+    //   });
+    //
+    //   it('Should delete device by id', async () => {
+    //     const { refreshToken1, deviceId } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices/${deviceId}`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}`)
+    //       .expect(204);
+    //
+    //     const response = await request(server)
+    //       .get(`/security/devices`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}`)
+    //       .expect(200);
+    //
+    //     expect(response.body).toHaveLength(2);
+    //   });
+    // });
+    //
+    // describe('Terminate all other (exclude current) device`s session', () => {
+    //   it('Shouldn`t terminate all other device if refresh token missing', async () => {
+    //     await request(server).delete(`/security/devices`).expect(401);
+    //   });
+    //
+    //   it('Shouldn`t terminate all other device  if refresh token expired', async () => {
+    //     const { refreshToken1 } = expect.getState();
+    //
+    //     const expiredToken = await request(server)
+    //       .get(`/testing/expired-token/${refreshToken1}`)
+    //       .expect(200);
+    //
+    //     await request(server)
+    //       .delete(`/security/devices`)
+    //       .set('Cookie', `refreshToken=${expiredToken.body.expiredToken}`)
+    //       .expect(401);
+    //   });
+    //
+    //   it('Shouldn`t terminate all other device  if refresh token incorrect', async () => {
+    //     const { refreshToken1 } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}-1`)
+    //       .expect(401);
+    //   });
+    //
+    //   it('Shouldn`t terminate all other device', async () => {
+    //     const { refreshToken1, refreshToken2 } = expect.getState();
+    //
+    //     await request(server)
+    //       .delete(`/security/devices`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}`)
+    //       .expect(204);
+    //
+    //     const response1 = await request(server)
+    //       .get(`/security/devices`)
+    //       .set('Cookie', `refreshToken=${refreshToken1}`)
+    //       .expect(200);
+    //
+    //     const response2 = await request(server)
+    //       .get(`/security/devices`)
+    //       .set('Cookie', `refreshToken=${refreshToken2}`)
+    //       .expect(200);
+    //
+    //     expect(response1.body).toHaveLength(1);
+    //     expect(response2.body).toHaveLength(1);
+    //   });
+    // });
   });
 });

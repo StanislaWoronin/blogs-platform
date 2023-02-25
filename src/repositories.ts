@@ -28,6 +28,12 @@ import { PgQueryUsersRepository } from "./modules/super-admin/infrastructure/pg.
 import { PgTestingRepository } from "./modules/testing/infrastructure/pg/pg-testing.repository";
 import { OrmTestingRepository } from "./modules/testing/infrastructure/orm/orm-testing.repository";
 import { OrmUsersRepository } from "./modules/super-admin/infrastructure/orm.repository/orm-users.repository";
+import {
+  OrmQueryUsersRepository
+} from "./modules/super-admin/infrastructure/orm.repository/orm-query-users.repository";
+import {
+  OrmQuerySecurityRepository
+} from "./modules/public/security/infrastructure/orm.repository/orm-query-security.repository";
 
 export const repositoryName = {
   BanInfo: 'banInfo',
@@ -80,9 +86,9 @@ export const repository = {
     // posts: OrmPostsRepository,
     // queryPosts: OrmQueryPostsRepository,
     // security: OrmSecurityRepository,
-    // querySecurity: OrmQuerySecurityRepository,
+    querySecurity: OrmQuerySecurityRepository,
     users: OrmUsersRepository,
-    // queryUsers: OrmQueryUsersRepository,
+    queryUsers: OrmQueryUsersRepository,
     testing: OrmTestingRepository
   }
 }

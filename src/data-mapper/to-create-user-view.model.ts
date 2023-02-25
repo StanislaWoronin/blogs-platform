@@ -21,7 +21,7 @@ export const toCreateUserViewModel = (
   };
 };
 
-export const toUserViewModel = (user: UserWithBanInfo) => {
+export const toUserViewModel = (user: any) => {
   return {
     id: user.id,
     login: user.login,
