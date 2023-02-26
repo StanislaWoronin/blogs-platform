@@ -3,6 +3,8 @@ import { NewestLikesModel } from '../entity/newestLikes.model';
 import { LikesModel } from '../entity/likes.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { CommentReactions } from "../entity/comment-reactions.entity";
+import { PostReactions } from "../entity/post-reactions.entity";
 
 @Injectable()
 export class PgLikesRepository {
@@ -17,7 +19,7 @@ export class PgLikesRepository {
     const query = `
       INSERT INTO public.comment_reactions
              (status, "addedAt", "userId", "commentId")
-      VALUES ($1, $2, $3, $4)  
+      VALUES ($1, $2, $3, $4)
              RETURNING status, "addedAt", "userId", "commentId"
     `;
     const result = await this.dataSource.query(query, [
@@ -82,7 +84,7 @@ export class PgLikesRepository {
     const query = `
       INSERT INTO public.post_reactions
              (status, "addedAt", "userId", "postId")
-      VALUES ($1, $2, $3, $4)  
+      VALUES ($1, $2, $3, $4)
              RETURNING status, "addedAt", "userId", "postId"
     `;
     const result = await this.dataSource.query(
@@ -118,6 +120,7 @@ export class PgLikesRepository {
     }
     return true;
   }
+
 
   async deletePostReaction(userId: string, postId: string): Promise<boolean> {
     const query = `

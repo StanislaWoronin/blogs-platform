@@ -4,6 +4,7 @@ import { DataSource } from 'typeorm';
 import { EmailConfirmationModel } from '../entity/emailConfirmation.model';
 import { v4 as uuidv4 } from 'uuid';
 import { log } from 'util';
+import { EmailConfirmation } from "../entity/email-confirmation.entity";
 
 @Injectable()
 export class PgEmailConfirmationRepository {
@@ -41,7 +42,7 @@ export class PgEmailConfirmationRepository {
   ): Promise<EmailConfirmationModel | null> {
     const filter = this.getCreateFilter(emailConfirmation);
     const query = `
-      INSERT INTO public.email_confirmation 
+      INSERT INTO public.email_confirmation
              ("userId", "confirmationCode", "expirationDate", "isConfirmed")
       VALUES (${filter})
     `;
@@ -101,9 +102,9 @@ export class PgEmailConfirmationRepository {
   }
 
   private getCreateFilter(emailConfirmation: EmailConfirmationModel): string {
-    let filter = `'${emailConfirmation.id}', null, null, '${emailConfirmation.isConfirmed}'`;
+    let filter = `'${emailConfirmation.userId}', null, null, '${emailConfirmation.isConfirmed}'`;
     if (emailConfirmation.confirmationCode !== null) {
-      return (filter = `'${emailConfirmation.id}', '${emailConfirmation.confirmationCode}', '${emailConfirmation.expirationDate}', '${emailConfirmation.isConfirmed}'`);
+      return (filter = `'${emailConfirmation.userId}', '${emailConfirmation.confirmationCode}', '${emailConfirmation.expirationDate}', '${emailConfirmation.isConfirmed}'`);
     }
     return filter;
   }

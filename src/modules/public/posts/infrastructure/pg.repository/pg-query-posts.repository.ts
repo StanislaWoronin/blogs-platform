@@ -1,20 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
-import {
-  giveSkipNumber,
-  paginationContentPage,
-} from '../../../../../helper.functions';
-import { ContentPageModel } from '../../../../../global-model/contentPage.model';
-import { DbPostModel } from '../entity/db-post.model';
-import {
-  PostForBlogViewModel,
-  PostViewModel,
-} from '../../api/dto/postsView.model';
-import { settings } from '../../../../../settings';
-import { NewestLikesModel } from '../../../likes/infrastructure/entity/newestLikes.model';
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
+import { QueryParametersDto } from "../../../../../global-model/query-parameters.dto";
+import { giveSkipNumber, paginationContentPage } from "../../../../../helper.functions";
+import { ContentPageModel } from "../../../../../global-model/contentPage.model";
+import { DbPostModel } from "../entity/db-post.model";
+import { PostViewModel } from "../../api/dto/postsView.model";
 import { IQueryReactionRepository } from "../../../likes/infrastructure/i-query-reaction.repository";
+import { ReactionModel } from "../../../../../global-model/reaction.model";
 
 @Injectable()
 export class PgQueryPostsRepository {
@@ -30,25 +23,20 @@ export class PgQueryPostsRepository {
   ): Promise<ContentPageModel> {
     const blogIdFilter = this.getBlogIdFilter(blogId);
     const statusFilter = this.myStatusFilter(userId);
-    const reactionCountFilter = this.reactionCountFilter()
+    const reactions = this.reactions()
 
     const query = `
             SELECT id, title, "shortDescription", content, "createdAt", "blogId",
                        (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
-                       (SELECT COUNT("postId") 
-                          FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like' AND ${reactionCountFilter}) AS "likesCount",
-                       (SELECT COUNT("postId")
-                          FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike' AND ${reactionCountFilter}) AS "dislikesCount"
+                       ${reactions}
                        ${statusFilter}
                   FROM public.posts
-                 ${blogIdFilter}   
+                 ${blogIdFilter}
                  ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                  LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
                     queryDto.pageNumber,
                     queryDto.pageSize,
-                 )};      
+                 )};
         `;
     const postsDB: DbPostModel[] = await this.dataSource.query(query);
 
@@ -76,17 +64,12 @@ export class PgQueryPostsRepository {
     userId: string | undefined,
   ): Promise<PostViewModel | null> {
     const myStatusFilter = this.myStatusFilter(userId);
-    const reactionCountFilter = this.reactionCountFilter()
+    const reactions = this.reactions()
 
     const query = `
          SELECT id, title, "shortDescription", content, "createdAt", "blogId",
                        (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
-                       (SELECT COUNT("postId") 
-                          FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Like' AND ${reactionCountFilter}) AS "likesCount",
-                       (SELECT COUNT("postId")
-                          FROM public.post_reactions
-                         WHERE post_reactions."postId" = posts.id AND post_reactions.status = 'Dislike' AND ${reactionCountFilter}) AS "dislikesCount"
+                       ${reactions}
                        ${myStatusFilter}
                   FROM public.posts
                  WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
@@ -235,15 +218,21 @@ export class PgQueryPostsRepository {
     return ``;
   }
 
-  private reactionCountFilter(): string {
-    return `
-      (SELECT "banStatus"
-         FROM public.user_ban_info 
-        WHERE user_ban_info."userId" = post_reactions."userId") != true
-          AND NOT EXISTS (SELECT "userId" 
-                            FROM public.banned_users_for_blog
-                           WHERE banned_users_for_blog."userId" = post_reactions."userId"
-                             AND banned_users_for_blog."blogId" = posts."blogId")
-    `
+  private reactions(): string {
+    return `${this.reactionCount("likesCount", ReactionModel.Like)}, ${this.reactionCount("dislikesCount", ReactionModel.Dislike)}`
+  }
+
+  private reactionCount(fieldName: string, reaction: ReactionModel): string {
+    return `(SELECT COUNT("postId")
+                 FROM public.post_reactions
+                WHERE post_reactions."postId" = posts.id 
+                  AND post_reactions.status = '${reaction}'
+                  AND (SELECT "banStatus"
+                         FROM public.user_ban_info 
+                        WHERE user_ban_info."userId" = post_reactions."userId") != true
+                          AND NOT EXISTS (SELECT "userId" 
+                                            FROM public.banned_users_for_blog
+                                           WHERE banned_users_for_blog."userId" = post_reactions."userId"
+                                             AND banned_users_for_blog."blogId" = posts."blogId")) AS "${fieldName}"`
   }
 }

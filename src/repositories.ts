@@ -16,7 +16,7 @@ import { PgLikesRepository } from "./modules/public/likes/infrastructure/pg.repo
 import {
   PgQueryReactionsRepository
 } from "./modules/public/likes/infrastructure/pg.repository/pg-query-reactions.repository";
-import { PgJwtRepository } from "./modules/public/auth/infrastructure/orm.repository/pg-jwt.repository";
+import { PgJwtRepository } from "./modules/public/auth/infrastructure/pg.repository/pg-jwt.repository";
 import { PgPostsRepository } from "./modules/public/posts/infrastructure/pg.repository/pg-posts.repository";
 import { PgQueryPostsRepository } from "./modules/public/posts/infrastructure/pg.repository/pg-query-posts.repository";
 import { PgSecurityRepository } from "./modules/public/security/infrastructure/pg.repository/pg-security.repository";
@@ -35,6 +35,12 @@ import {
   OrmQuerySecurityRepository
 } from "./modules/public/security/infrastructure/orm.repository/orm-query-security.repository";
 import { OrmSecurityRepository } from "./modules/public/security/infrastructure/orm.repository/orm-security.repository";
+import { OrmPostsRepository } from "./modules/public/posts/infrastructure/orm.repository/orm-posts.repository";
+import { OrmJwtRepository } from "./modules/public/auth/infrastructure/orm.repository/orm-jwt.repository";
+import { OrmReactionsRepository } from "./modules/public/likes/infrastructure/orm.repository/orm-reactions.repository";
+import {
+  OrmEmailConfirmationRepository
+} from "./modules/super-admin/infrastructure/orm.repository/orm-email-confirmation.repository";
 
 export const repositoryName = {
   BanInfo: 'banInfo',
@@ -80,11 +86,11 @@ export const repository = {
     // queryBlogs: OrmQueryBlogsRepository,
     // comments: OrmCommentsRepository,
     // queryComments: OrmQueryCommentsRepository,
-    // emailConfirmation: OrmEmailConfirmationRepository,
-    // reactions: OrmLikesRepository,
+    emailConfirmation: OrmEmailConfirmationRepository,
+    reactions: OrmReactionsRepository,
     // queryReactions: OrmQueryReactionsRepository,
-    // jwt: OrmJwtRepository,
-    // posts: OrmPostsRepository,
+    jwt: OrmJwtRepository,
+    posts: OrmPostsRepository,
     // queryPosts: OrmQueryPostsRepository,
     security: OrmSecurityRepository,
     querySecurity: OrmQuerySecurityRepository,

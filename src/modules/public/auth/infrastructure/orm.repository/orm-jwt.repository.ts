@@ -1,12 +1,11 @@
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { TokenBlackList } from '../entity/tokenBlackList';
+import { Injectable } from "@nestjs/common";
+import { InjectDataSource } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
+import { TokenBlackList } from "../entity/tokenBlackList";
 
-export class PgJwtRepository {
-  constructor(
-    //@InjectRepository(TokenBlackList) private blackList: Repository<TokenBlackList>,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+@Injectable()
+export class OrmJwtRepository {
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async checkTokenInBlackList(refreshToken: string): Promise<boolean> {
     const result = await this.dataSource

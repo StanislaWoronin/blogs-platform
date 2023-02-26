@@ -16,7 +16,6 @@ import { EmailManagerMock } from './mock/emailAdapter.mock';
 import { randomUUID } from 'crypto';
 import { ExpectAuthModel } from './helper/expect-auth.model';
 import { endpoints } from './helper/routing';
-import { factory } from "ts-jest/dist/transformers/hoist-jest";
 import { Factories } from "./helper/factories";
 
 describe('e2e tests', () => {

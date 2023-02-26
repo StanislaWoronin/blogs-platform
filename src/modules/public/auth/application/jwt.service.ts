@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { settings } from '../../../../settings';
-import { PgJwtRepository } from '../infrastructure/orm.repository/pg-jwt.repository';
+import { PgJwtRepository } from '../infrastructure/pg.repository/pg-jwt.repository';
 import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
 import {IJwtRepository} from "../infrastructure/i-jwt.repository";
 
