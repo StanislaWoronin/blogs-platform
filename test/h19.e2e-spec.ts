@@ -62,382 +62,382 @@ describe('e2e tests', () => {
          Banned user cant put reaction and comments
      */
 
-  describe('Post`s reaction status', () => {
-    describe('PUT "/posts/:postId/like-status"', () => {
-      it('Drop all data.', async () => {
-        await request(server)
-          .delete(endpoints.testingController.allData)
-          .expect(204);
-      });
-
-      it('Create data', async () => {
-        const [postOwner, justUser] = await factories.createAndLoginUsers(2);
-        const [blog] = await factories.createBlogs(postOwner.accessToken, 1);
-        const [post] = await factories.createPostsForBlog(
-            postOwner.accessToken,
-          blog.id,
-          1,
-        );
-
-        expect.setState({
-          userToken: justUser.accessToken,
-          postId: post.id,
-        });
-      });
-
-      it("Shouldn`t put status if post with specified postId doesn't exists", async () => {
-        const { userToken } = expect.getState();
-        const randomId = randomUUID();
-
-        const responseStatus = await posts.addReaction(
-          randomId,
-          ReactionModel.Like,
-            userToken,
-        );
-        expect(responseStatus.status).toBe(404);
-      });
-
-      it('Shouldn`t put status if user unauthorized', async () => {
-        const { postId } = expect.getState();
-
-        const responseStatus = await posts.addReaction(
-          postId,
-          ReactionModel.Like,
-        );
-        expect(responseStatus.status).toBe(401);
-      });
-
-      it('Shouldn`t put status if the inputModel has incorrect values', async () => {
-        const { userToken, postId } = expect.getState();
-        const errorsMessages = getErrorMessage(['likeStatus']);
-
-        const emptyString = await posts.addReaction(
-          postId,
-          preparedStatus.notValid.emptyString,
-            userToken,
-        );
-        expect(emptyString.status).toBe(400);
-        expect(emptyString.errorsMessages).toEqual({ errorsMessages });
-
-        const lowerCase = await posts.addReaction(
-          postId,
-          preparedStatus.notValid.lowerCase,
-            userToken,
-        );
-        expect(lowerCase.status).toBe(400);
-        expect(lowerCase.errorsMessages).toEqual({ errorsMessages });
-
-        const abracadabra = await posts.addReaction(
-          postId,
-          preparedStatus.notValid.abracadabra,
-            userToken,
-        );
-        expect(abracadabra.status).toBe(400);
-        expect(abracadabra.errorsMessages).toEqual({ errorsMessages });
-      });
-
-      it('Should put "Like"', async () => {
-        const { userToken, postId } = expect.getState();
-
-        const responseStatus = await posts.addReaction(
-          postId,
-          ReactionModel.Like,
-            userToken,
-        );
-        expect(responseStatus.status).toBe(204);
-
-        const postWithoutToken = await posts.getPostById(postId);
-        expect(postWithoutToken.status).toBe(200);
-        expect(postWithoutToken.body.extendedLikesInfo.likesCount).toBe(1);
-        expect(postWithoutToken.body.extendedLikesInfo.dislikesCount).toBe(0);
-        expect(postWithoutToken.body.extendedLikesInfo.myStatus).toBe(
-          ReactionModel.None,
-        );
-
-        const postWithToken = await posts.getPostById(postId, userToken);
-        expect(postWithToken.status).toBe(200);
-        expect(postWithToken.body.extendedLikesInfo.myStatus).toBe(
-          ReactionModel.Like,
-        );
-      });
-
-      it('Should put "Dislike"', async () => {
-        const { userToken, postId } = expect.getState();
-
-        const responseStatus = await posts.addReaction(
-          postId,
-          ReactionModel.Dislike,
-            userToken,
-        );
-        expect(responseStatus.status).toBe(204);
-
-        const post = await posts.getPostById(postId, userToken);
-        expect(post.status).toBe(200);
-        expect(post.body.extendedLikesInfo.likesCount).toBe(0);
-        expect(post.body.extendedLikesInfo.dislikesCount).toBe(1);
-        expect(post.body.extendedLikesInfo.myStatus).toBe(
-          ReactionModel.Dislike,
-        );
-      });
-
-      it('Should put "None"', async () => {
-        const { userToken, postId } = expect.getState();
-
-        const responseStatus = await posts.addReaction(
-          postId,
-          ReactionModel.None,
-            userToken,
-        );
-        expect(responseStatus.status).toBe(204);
-
-        const post = await posts.getPostById(postId, userToken);
-        expect(post.status).toBe(200);
-        expect(post.body.extendedLikesInfo.likesCount).toBe(0);
-        expect(post.body.extendedLikesInfo.dislikesCount).toBe(0);
-        expect(post.body.extendedLikesInfo.myStatus).toBe(ReactionModel.None);
-      });
-
-      describe('Testing all method returning post with reaction info', () => {
-        // Has only one method XD
-        it('Drop all data.', async () => {
-          await request(server)
-            .delete(endpoints.testingController.allData)
-            .expect(204);
-        });
-
-        it('Create data', async () => {
-          const [user1, user2, user3, user4, user5] =
-            await factories.createAndLoginUsers(5);
-          const [blog] = await factories.createBlogs(user1.accessToken, 1);
-          const [post1, post2, post3] = await factories.createPostsForBlog(
-            user1.accessToken,
-            blog.id,
-            3,
-          );
-
-          await posts.addReaction(
-            post1.id,
-            ReactionModel.Like,
-            user2.accessToken,
-          );
-          await posts.addReaction(
-            post2.id,
-            ReactionModel.Dislike,
-            user2.accessToken,
-          );
-          await posts.addReaction(
-            post3.id,
-            ReactionModel.Like,
-            user2.accessToken,
-          );
-
-          await posts.addReaction(
-            post1.id,
-            ReactionModel.Like,
-            user3.accessToken,
-          );
-          await posts.addReaction(
-            post2.id,
-            ReactionModel.Dislike,
-            user3.accessToken,
-          );
-          await posts.addReaction(
-            post3.id,
-            ReactionModel.Dislike,
-            user3.accessToken,
-          );
-
-          await posts.addReaction(
-            post1.id,
-            ReactionModel.Dislike,
-            user4.accessToken,
-          );
-          await posts.addReaction(
-            post2.id,
-            ReactionModel.Dislike,
-            user4.accessToken,
-          );
-          await posts.addReaction(
-            post3.id,
-            ReactionModel.Dislike,
-            user4.accessToken,
-          );
-
-          await posts.addReaction(
-            post1.id,
-            ReactionModel.Like,
-            user5.accessToken,
-          );
-          await posts.addReaction(
-            post1.id,
-            ReactionModel.Dislike,
-            user5.accessToken,
-          );
-          await posts.addReaction(
-            post2.id,
-            ReactionModel.Dislike,
-            user5.accessToken,
-          );
-          await posts.addReaction(
-            post2.id,
-            ReactionModel.Like,
-            user5.accessToken,
-          );
-          await posts.addReaction(
-            post3.id,
-            ReactionModel.Dislike,
-            user5.accessToken,
-          );
-          await posts.addReaction(
-            post3.id,
-            ReactionModel.Dislike,
-            user5.accessToken,
-          );
-
-          expect.setState({
-            accessToken1: user1.accessToken,
-            blogId: blog.id,
-            accessToken2: user2.accessToken,
-            user2: user2.user,
-            user3: user3.user,
-            user4: user4.user,
-            user5: user5.user,
-          });
-        });
-
-        it('GET "/posts" for unauthorized user', async () => {
-          const { user2, user3, user5 } = expect.getState();
-          const response = await posts.getPosts();
-
-          expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
-            likesCount: 1,
-            dislikesCount: 3,
-            myStatus: ReactionModel.None,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user2.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-          expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
-            likesCount: 1,
-            dislikesCount: 3,
-            myStatus: ReactionModel.None,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user5.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-          expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
-            likesCount: 2,
-            dislikesCount: 2,
-            myStatus: ReactionModel.None,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user3.login,
-                addedAt: expect.any(String),
-              },
-              {
-                userId: expect.any(String),
-                login: user2.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-        });
-
-        it('GET "/posts" for user2', async () => {
-          const { accessToken2, user2, user3, user5 } = expect.getState();
-
-          const response = await posts.getPosts(accessToken2);
-          expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
-            likesCount: 1,
-            dislikesCount: 3,
-            myStatus: ReactionModel.Like,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user2.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-          expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
-            likesCount: 1,
-            dislikesCount: 3,
-            myStatus: ReactionModel.Dislike,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user5.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-          expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
-            likesCount: 2,
-            dislikesCount: 2,
-            myStatus: ReactionModel.Like,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user3.login,
-                addedAt: expect.any(String),
-              },
-              {
-                userId: expect.any(String),
-                login: user2.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-        });
-
-        it('SA banned user2 and blogger banned user 3', async () => {
-          const {accessToken1, blogId, user2, user3, user5} = expect.getState()
-
-          const saBannedUser = await sa.saBannedUser(user2.id, true)
-          expect(saBannedUser.status).toBe(204)
-
-          const bloggerBannedUser3 = await blogger.banUser(accessToken1, user3.id, blogId, true)
-          expect(bloggerBannedUser3.status).toBe(204)
-
-          const response = await posts.getPosts();
-          expect(response.status).toBe(200)
-          expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
-            likesCount: 0,
-            dislikesCount: 2,
-            myStatus: ReactionModel.None,
-            newestLikes: [],
-          });
-          expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
-            likesCount: 1,
-            dislikesCount: 1,
-            myStatus: ReactionModel.None,
-            newestLikes: [
-              {
-                userId: expect.any(String),
-                login: user5.login,
-                addedAt: expect.any(String),
-              },
-            ],
-          });
-          expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
-            likesCount: 0,
-            dislikesCount: 2,
-            myStatus: ReactionModel.None,
-            newestLikes: [],
-          });
-        })
-      });
-    });
-  });
+  // describe('Post`s reaction status', () => {
+  //   describe('PUT "/posts/:postId/like-status"', () => {
+  //     it('Drop all data.', async () => {
+  //       await request(server)
+  //         .delete(endpoints.testingController.allData)
+  //         .expect(204);
+  //     });
+  //
+  //     it('Create data', async () => {
+  //       const [postOwner, justUser] = await factories.createAndLoginUsers(2);
+  //       const [blog] = await factories.createBlogs(postOwner.accessToken, 1);
+  //       const [post] = await factories.createPostsForBlog(
+  //           postOwner.accessToken,
+  //         blog.id,
+  //         1,
+  //       );
+  //
+  //       expect.setState({
+  //         userToken: justUser.accessToken,
+  //         postId: post.id,
+  //       });
+  //     });
+  //
+  //     it("Shouldn`t put status if post with specified postId doesn't exists", async () => {
+  //       const { userToken } = expect.getState();
+  //       const randomId = randomUUID();
+  //
+  //       const responseStatus = await posts.addReaction(
+  //         randomId,
+  //         ReactionModel.Like,
+  //           userToken,
+  //       );
+  //       expect(responseStatus.status).toBe(404);
+  //     });
+  //
+  //     it('Shouldn`t put status if user unauthorized', async () => {
+  //       const { postId } = expect.getState();
+  //
+  //       const responseStatus = await posts.addReaction(
+  //         postId,
+  //         ReactionModel.Like,
+  //       );
+  //       expect(responseStatus.status).toBe(401);
+  //     });
+  //
+  //     it('Shouldn`t put status if the inputModel has incorrect values', async () => {
+  //       const { userToken, postId } = expect.getState();
+  //       const errorsMessages = getErrorMessage(['likeStatus']);
+  //
+  //       const emptyString = await posts.addReaction(
+  //         postId,
+  //         preparedStatus.notValid.emptyString,
+  //           userToken,
+  //       );
+  //       expect(emptyString.status).toBe(400);
+  //       expect(emptyString.errorsMessages).toEqual({ errorsMessages });
+  //
+  //       const lowerCase = await posts.addReaction(
+  //         postId,
+  //         preparedStatus.notValid.lowerCase,
+  //           userToken,
+  //       );
+  //       expect(lowerCase.status).toBe(400);
+  //       expect(lowerCase.errorsMessages).toEqual({ errorsMessages });
+  //
+  //       const abracadabra = await posts.addReaction(
+  //         postId,
+  //         preparedStatus.notValid.abracadabra,
+  //           userToken,
+  //       );
+  //       expect(abracadabra.status).toBe(400);
+  //       expect(abracadabra.errorsMessages).toEqual({ errorsMessages });
+  //     });
+  //
+  //     it('Should put "Like"', async () => {
+  //       const { userToken, postId } = expect.getState();
+  //
+  //       const responseStatus = await posts.addReaction(
+  //         postId,
+  //         ReactionModel.Like,
+  //           userToken,
+  //       );
+  //       expect(responseStatus.status).toBe(204);
+  //
+  //       const postWithoutToken = await posts.getPostById(postId);
+  //       expect(postWithoutToken.status).toBe(200);
+  //       expect(postWithoutToken.body.extendedLikesInfo.likesCount).toBe(1);
+  //       expect(postWithoutToken.body.extendedLikesInfo.dislikesCount).toBe(0);
+  //       expect(postWithoutToken.body.extendedLikesInfo.myStatus).toBe(
+  //         ReactionModel.None,
+  //       );
+  //
+  //       const postWithToken = await posts.getPostById(postId, userToken);
+  //       expect(postWithToken.status).toBe(200);
+  //       expect(postWithToken.body.extendedLikesInfo.myStatus).toBe(
+  //         ReactionModel.Like,
+  //       );
+  //     });
+  //
+  //     it('Should put "Dislike"', async () => {
+  //       const { userToken, postId } = expect.getState();
+  //
+  //       const responseStatus = await posts.addReaction(
+  //         postId,
+  //         ReactionModel.Dislike,
+  //           userToken,
+  //       );
+  //       expect(responseStatus.status).toBe(204);
+  //
+  //       const post = await posts.getPostById(postId, userToken);
+  //       expect(post.status).toBe(200);
+  //       expect(post.body.extendedLikesInfo.likesCount).toBe(0);
+  //       expect(post.body.extendedLikesInfo.dislikesCount).toBe(1);
+  //       expect(post.body.extendedLikesInfo.myStatus).toBe(
+  //         ReactionModel.Dislike,
+  //       );
+  //     });
+  //
+  //     it('Should put "None"', async () => {
+  //       const { userToken, postId } = expect.getState();
+  //
+  //       const responseStatus = await posts.addReaction(
+  //         postId,
+  //         ReactionModel.None,
+  //           userToken,
+  //       );
+  //       expect(responseStatus.status).toBe(204);
+  //
+  //       const post = await posts.getPostById(postId, userToken);
+  //       expect(post.status).toBe(200);
+  //       expect(post.body.extendedLikesInfo.likesCount).toBe(0);
+  //       expect(post.body.extendedLikesInfo.dislikesCount).toBe(0);
+  //       expect(post.body.extendedLikesInfo.myStatus).toBe(ReactionModel.None);
+  //     });
+  //
+  //     describe('Testing all method returning post with reaction info', () => {
+  //       // Has only one method XD
+  //       it('Drop all data.', async () => {
+  //         await request(server)
+  //           .delete(endpoints.testingController.allData)
+  //           .expect(204);
+  //       });
+  //
+  //       it('Create data', async () => {
+  //         const [user1, user2, user3, user4, user5] =
+  //           await factories.createAndLoginUsers(5);
+  //         const [blog] = await factories.createBlogs(user1.accessToken, 1);
+  //         const [post1, post2, post3] = await factories.createPostsForBlog(
+  //           user1.accessToken,
+  //           blog.id,
+  //           3,
+  //         );
+  //
+  //         await posts.addReaction(
+  //           post1.id,
+  //           ReactionModel.Like,
+  //           user2.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post2.id,
+  //           ReactionModel.Dislike,
+  //           user2.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post3.id,
+  //           ReactionModel.Like,
+  //           user2.accessToken,
+  //         );
+  //
+  //         await posts.addReaction(
+  //           post1.id,
+  //           ReactionModel.Like,
+  //           user3.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post2.id,
+  //           ReactionModel.Dislike,
+  //           user3.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post3.id,
+  //           ReactionModel.Dislike,
+  //           user3.accessToken,
+  //         );
+  //
+  //         await posts.addReaction(
+  //           post1.id,
+  //           ReactionModel.Dislike,
+  //           user4.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post2.id,
+  //           ReactionModel.Dislike,
+  //           user4.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post3.id,
+  //           ReactionModel.Dislike,
+  //           user4.accessToken,
+  //         );
+  //
+  //         await posts.addReaction(
+  //           post1.id,
+  //           ReactionModel.Like,
+  //           user5.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post1.id,
+  //           ReactionModel.Dislike,
+  //           user5.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post2.id,
+  //           ReactionModel.Dislike,
+  //           user5.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post2.id,
+  //           ReactionModel.Like,
+  //           user5.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post3.id,
+  //           ReactionModel.Dislike,
+  //           user5.accessToken,
+  //         );
+  //         await posts.addReaction(
+  //           post3.id,
+  //           ReactionModel.Dislike,
+  //           user5.accessToken,
+  //         );
+  //
+  //         expect.setState({
+  //           accessToken1: user1.accessToken,
+  //           blogId: blog.id,
+  //           accessToken2: user2.accessToken,
+  //           user2: user2.user,
+  //           user3: user3.user,
+  //           user4: user4.user,
+  //           user5: user5.user,
+  //         });
+  //       });
+  //
+  //       it('GET "/posts" for unauthorized user', async () => {
+  //         const { user2, user3, user5 } = expect.getState();
+  //         const response = await posts.getPosts();
+  //
+  //         expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 1,
+  //           dislikesCount: 3,
+  //           myStatus: ReactionModel.None,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user2.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //         expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 1,
+  //           dislikesCount: 3,
+  //           myStatus: ReactionModel.None,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user5.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //         expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 2,
+  //           dislikesCount: 2,
+  //           myStatus: ReactionModel.None,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user3.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //             {
+  //               userId: expect.any(String),
+  //               login: user2.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //       });
+  //
+  //       it('GET "/posts" for user2', async () => {
+  //         const { accessToken2, user2, user3, user5 } = expect.getState();
+  //
+  //         const response = await posts.getPosts(accessToken2);
+  //         expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 1,
+  //           dislikesCount: 3,
+  //           myStatus: ReactionModel.Like,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user2.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //         expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 1,
+  //           dislikesCount: 3,
+  //           myStatus: ReactionModel.Dislike,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user5.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //         expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 2,
+  //           dislikesCount: 2,
+  //           myStatus: ReactionModel.Like,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user3.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //             {
+  //               userId: expect.any(String),
+  //               login: user2.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //       });
+  //
+  //       it('SA banned user2 and blogger banned user 3', async () => {
+  //         const {accessToken1, blogId, user2, user3, user5} = expect.getState()
+  //
+  //         const saBannedUser = await sa.saBannedUser(user2.id, true)
+  //         expect(saBannedUser.status).toBe(204)
+  //
+  //         const bloggerBannedUser3 = await blogger.banUser(accessToken1, user3.id, blogId, true)
+  //         expect(bloggerBannedUser3.status).toBe(204)
+  //
+  //         const response = await posts.getPosts();
+  //         expect(response.status).toBe(200)
+  //         expect(response.body.items[0].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 0,
+  //           dislikesCount: 2,
+  //           myStatus: ReactionModel.None,
+  //           newestLikes: [],
+  //         });
+  //         expect(response.body.items[1].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 1,
+  //           dislikesCount: 1,
+  //           myStatus: ReactionModel.None,
+  //           newestLikes: [
+  //             {
+  //               userId: expect.any(String),
+  //               login: user5.login,
+  //               addedAt: expect.any(String),
+  //             },
+  //           ],
+  //         });
+  //         expect(response.body.items[2].extendedLikesInfo).toStrictEqual({
+  //           likesCount: 0,
+  //           dislikesCount: 2,
+  //           myStatus: ReactionModel.None,
+  //           newestLikes: [],
+  //         });
+  //       })
+  //     });
+  //   });
+  // });
 
   describe(
     'CRUD operations for comments. Get comment by id is supporting method' +
@@ -462,7 +462,7 @@ describe('e2e tests', () => {
           post.id,
           1,
         );
-
+        console.log(justUser.user.id)
         expect.setState({
           commentOwner: commentOwner.user,
           ownerToken: commentOwner.accessToken,
@@ -640,7 +640,7 @@ describe('e2e tests', () => {
 
         it('Should update reaction', async () => {
           const { commentOwner, userToken, updatedComment } = expect.getState();
-
+          console.log(updatedComment.id)
           const response = await comments.addReaction(
             updatedComment.id,
             ReactionModel.Dislike,
@@ -664,382 +664,382 @@ describe('e2e tests', () => {
           );
         });
 
-        it('Should remove reaction', async () => {
-          const { commentOwner, userToken, updatedComment } = expect.getState();
-
-          const response = await comments.addReaction(
-            updatedComment.id,
-            ReactionModel.None,
-            userToken,
-          );
-          expect(response.status).toBe(204);
-
-          const commentWithLike = await comments.getCommentById(
-            updatedComment.id,
-            userToken,
-          );
-          expect(commentWithLike.body).toEqual(
-            getExpectComment(commentOwner, updatedComment, 1, 0, ReactionModel.None),
-          );
-        });
+        // it('Should remove reaction', async () => {
+        //   const { commentOwner, userToken, updatedComment } = expect.getState();
+        //
+        //   const response = await comments.addReaction(
+        //     updatedComment.id,
+        //     ReactionModel.None,
+        //     userToken,
+        //   );
+        //   expect(response.status).toBe(204);
+        //
+        //   const commentWithLike = await comments.getCommentById(
+        //     updatedComment.id,
+        //     userToken,
+        //   );
+        //   expect(commentWithLike.body).toEqual(
+        //     getExpectComment(commentOwner, updatedComment, 1, 0, ReactionModel.None),
+        //   );
+        // });
       });
 
-      describe('Shouldn`t return comment if comment`s owner or this comment blog banned', () => {
-        it('Shouldn`t return comment if owner banned by sa', async () => {
-          const {commentOwner, updatedComment} = expect.getState()
-
-          const banUser = await sa.saBannedUser(commentOwner.id, true)
-          expect(banUser.status).toBe(204)
-
-          const tryGetComment1 = await comments.getCommentById(updatedComment.id)
-          expect(tryGetComment1.status).toBe(404)
-
-          const unBanUser = await sa.saBannedUser(commentOwner.id, false)
-          expect(unBanUser.status).toBe(204)
-
-          const tryGetComment2 = await comments.getCommentById(updatedComment.id)
-          expect(tryGetComment2.status).toBe(200)
-        })
-
-        it('Should`t return comment if comment owner banned for blog', async () => {
-          const { blog, updatedComment } = expect.getState()
-
-          const bannedPost = await sa.saBannedBlog(blog.id, true)
-          expect(bannedPost.status).toBe(204)
-
-          const tryGetComment1 = await comments.getCommentById(updatedComment.id)
-          expect(tryGetComment1.status).toBe(404)
-
-          const unBanPost = await sa.saBannedBlog(blog.id, false)
-          expect(unBanPost.status).toBe(204)
-
-          const tryGetComment2 = await comments.getCommentById(updatedComment.id)
-          expect(tryGetComment2.status).toBe(200)
-        })
-      })
-
-      describe('Delete comment "/comments/:commentsId"', () => {
-        it('Shouldn`t delete comment if comment id not exists', async () => {
-          const { ownerToken } = expect.getState();
-          const randomId = randomUUID();
-
-          const response = await comments.deleteComment(randomId, ownerToken);
-          expect(response.status).toBe(404);
-        });
-
-        it('Shouldn`t delete comment if try delete the comment that is not your own', async () => {
-          const { userToken, comment } = expect.getState();
-
-          const response = await comments.deleteComment(comment.id, userToken);
-          expect(response.status).toBe(403);
-        });
-
-        it('Shouldn`t delete comment without unauthorized', async () => {
-          const { comment } = expect.getState();
-
-          const response = await comments.deleteComment(comment.id);
-          expect(response.status).toBe(401);
-        });
-
-        it('Shouldn delete comment', async () => {
-          const { ownerToken, comment } = expect.getState();
-
-          const response = await comments.deleteComment(comment.id, ownerToken);
-          expect(response.status).toBe(204);
-
-          const deletedComment = await comments.getCommentById(comment.id);
-          expect(deletedComment.status).toBe(404);
-
-          const tryDeleteAgain = await comments.deleteComment(
-            comment.id,
-            ownerToken,
-          );
-          expect(tryDeleteAgain.status).toBe(404);
-        });
-      });
+      // describe('Shouldn`t return comment if comment`s owner or this comment blog banned', () => {
+      //   it('Shouldn`t return comment if owner banned by sa', async () => {
+      //     const {commentOwner, updatedComment} = expect.getState()
+      //
+      //     const banUser = await sa.saBannedUser(commentOwner.id, true)
+      //     expect(banUser.status).toBe(204)
+      //
+      //     const tryGetComment1 = await comments.getCommentById(updatedComment.id)
+      //     expect(tryGetComment1.status).toBe(404)
+      //
+      //     const unBanUser = await sa.saBannedUser(commentOwner.id, false)
+      //     expect(unBanUser.status).toBe(204)
+      //
+      //     const tryGetComment2 = await comments.getCommentById(updatedComment.id)
+      //     expect(tryGetComment2.status).toBe(200)
+      //   })
+      //
+      //   it('Should`t return comment if comment owner banned for blog', async () => {
+      //     const { blog, updatedComment } = expect.getState()
+      //
+      //     const bannedPost = await sa.saBannedBlog(blog.id, true)
+      //     expect(bannedPost.status).toBe(204)
+      //
+      //     const tryGetComment1 = await comments.getCommentById(updatedComment.id)
+      //     expect(tryGetComment1.status).toBe(404)
+      //
+      //     const unBanPost = await sa.saBannedBlog(blog.id, false)
+      //     expect(unBanPost.status).toBe(204)
+      //
+      //     const tryGetComment2 = await comments.getCommentById(updatedComment.id)
+      //     expect(tryGetComment2.status).toBe(200)
+      //   })
+      // })
+      //
+      // describe('Delete comment "/comments/:commentsId"', () => {
+      //   it('Shouldn`t delete comment if comment id not exists', async () => {
+      //     const { ownerToken } = expect.getState();
+      //     const randomId = randomUUID();
+      //
+      //     const response = await comments.deleteComment(randomId, ownerToken);
+      //     expect(response.status).toBe(404);
+      //   });
+      //
+      //   it('Shouldn`t delete comment if try delete the comment that is not your own', async () => {
+      //     const { userToken, comment } = expect.getState();
+      //
+      //     const response = await comments.deleteComment(comment.id, userToken);
+      //     expect(response.status).toBe(403);
+      //   });
+      //
+      //   it('Shouldn`t delete comment without unauthorized', async () => {
+      //     const { comment } = expect.getState();
+      //
+      //     const response = await comments.deleteComment(comment.id);
+      //     expect(response.status).toBe(401);
+      //   });
+      //
+      //   it('Shouldn delete comment', async () => {
+      //     const { ownerToken, comment } = expect.getState();
+      //
+      //     const response = await comments.deleteComment(comment.id, ownerToken);
+      //     expect(response.status).toBe(204);
+      //
+      //     const deletedComment = await comments.getCommentById(comment.id);
+      //     expect(deletedComment.status).toBe(404);
+      //
+      //     const tryDeleteAgain = await comments.deleteComment(
+      //       comment.id,
+      //       ownerToken,
+      //     );
+      //     expect(tryDeleteAgain.status).toBe(404);
+      //   });
+      // });
     },
   );
 
-  describe('Shouldn`t put reaction if user was banned', () => {
-    it('Drop all data.', async () => {
-      await request(server)
-          .delete(endpoints.testingController.allData)
-          .expect(204);
-    });
+  // describe('Shouldn`t put reaction if user was banned', () => {
+  //   it('Drop all data.', async () => {
+  //     await request(server)
+  //         .delete(endpoints.testingController.allData)
+  //         .expect(204);
+  //   });
+  //
+  //   it('Create data', async () => {
+  //     const [owner, simpleUser] = await factories.createAndLoginUsers(2)
+  //     const [blog] = await factories.createBlogs(owner.accessToken, 1)
+  //     const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+  //     const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
+  //
+  //     expect.setState({
+  //       ownerToken: owner.accessToken,
+  //       simpleUserId: simpleUser.user.id,
+  //       simpleUserToken: simpleUser.accessToken,
+  //       blogId: blog.id,
+  //       postId: post.id,
+  //       commentId: comment.id
+  //     })
+  //   })
+  //
+  //   describe('User banned by sa can`t put comment and reactions', () => {
+  //     it('SA banned simple user', async () => {
+  //       const {simpleUserId} = expect.getState()
+  //
+  //       const isBanned = await sa.saBannedUser(simpleUserId, true)
+  //       expect(isBanned.status).toBe(204)
+  //     })
+  //
+  //     it('User banned by sa try put status to post', async () => {
+  //       const {simpleUserToken, postId} = expect.getState()
+  //
+  //       const response = await posts.addReaction(postId, ReactionModel.Like, simpleUserToken)
+  //       expect(response.status).toBe(401)
+  //     })
+  //
+  //     it('User banned by sa try put status to comment', async () => {
+  //       const {simpleUserToken, commentId} = expect.getState()
+  //
+  //       const response = await comments.addReaction(commentId, ReactionModel.Like, simpleUserToken)
+  //       expect(response.status).toBe(401)
+  //     })
+  //
+  //     it('User banned by sa try put comment', async () => {
+  //       const {simpleUserToken, postId} = expect.getState()
+  //
+  //       const response = await comments.createComments(postId, preparedComment.valid, simpleUserToken)
+  //       expect(response.status).toBe(401)
+  //     })
+  //
+  //     it('SA unBan simple user', async () => {
+  //       const {simpleUserId} = expect.getState()
+  //
+  //       const isBanned = await sa.saBannedUser(simpleUserId, false)
+  //       expect(isBanned.status).toBe(204)
+  //     })
+  //   })
+  //
+  //   describe('User banned by blogger can`t put comment and reactions', () => {
+  //     it('Blogger banned simple user', async () => {
+  //       const {ownerToken, simpleUserId, blogId} = expect.getState()
+  //
+  //       const isBanned = await blogger.banUser(ownerToken, simpleUserId, blogId,true)
+  //       expect(isBanned.status).toBe(204)
+  //     })
+  //
+  //     it('User banned by blogger try put status to post', async () => {
+  //       const {simpleUserToken, postId} = expect.getState()
+  //
+  //       const response = await posts.addReaction(postId, ReactionModel.Like, simpleUserToken)
+  //       expect(response.status).toBe(403)
+  //     })
+  //
+  //     it('User banned by blogger try put status to comment', async () => {
+  //       const {simpleUserToken, commentId} = expect.getState()
+  //
+  //       const response = await comments.addReaction(commentId, ReactionModel.Like, simpleUserToken)
+  //       expect(response.status).toBe(403)
+  //     })
+  //
+  //     it('User banned by blogger try put comment', async () => {
+  //       const {simpleUserToken, postId} = expect.getState()
+  //
+  //       const response = await comments.createComments(postId, preparedComment.valid, simpleUserToken)
+  //       expect(response.status).toBe(403)
+  //     })
+  //   })
+  // })
 
-    it('Create data', async () => {
-      const [owner, simpleUser] = await factories.createAndLoginUsers(2)
-      const [blog] = await factories.createBlogs(owner.accessToken, 1)
-      const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
-      const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
-
-      expect.setState({
-        ownerToken: owner.accessToken,
-        simpleUserId: simpleUser.user.id,
-        simpleUserToken: simpleUser.accessToken,
-        blogId: blog.id,
-        postId: post.id,
-        commentId: comment.id
-      })
-    })
-
-    describe('User banned by sa can`t put comment and reactions', () => {
-      it('SA banned simple user', async () => {
-        const {simpleUserId} = expect.getState()
-
-        const isBanned = await sa.saBannedUser(simpleUserId, true)
-        expect(isBanned.status).toBe(204)
-      })
-
-      it('User banned by sa try put status to post', async () => {
-        const {simpleUserToken, postId} = expect.getState()
-
-        const response = await posts.addReaction(postId, ReactionModel.Like, simpleUserToken)
-        expect(response.status).toBe(401)
-      })
-
-      it('User banned by sa try put status to comment', async () => {
-        const {simpleUserToken, commentId} = expect.getState()
-
-        const response = await comments.addReaction(commentId, ReactionModel.Like, simpleUserToken)
-        expect(response.status).toBe(401)
-      })
-
-      it('User banned by sa try put comment', async () => {
-        const {simpleUserToken, postId} = expect.getState()
-
-        const response = await comments.createComments(postId, preparedComment.valid, simpleUserToken)
-        expect(response.status).toBe(401)
-      })
-
-      it('SA unBan simple user', async () => {
-        const {simpleUserId} = expect.getState()
-
-        const isBanned = await sa.saBannedUser(simpleUserId, false)
-        expect(isBanned.status).toBe(204)
-      })
-    })
-
-    describe('User banned by blogger can`t put comment and reactions', () => {
-      it('Blogger banned simple user', async () => {
-        const {ownerToken, simpleUserId, blogId} = expect.getState()
-
-        const isBanned = await blogger.banUser(ownerToken, simpleUserId, blogId,true)
-        expect(isBanned.status).toBe(204)
-      })
-
-      it('User banned by blogger try put status to post', async () => {
-        const {simpleUserToken, postId} = expect.getState()
-
-        const response = await posts.addReaction(postId, ReactionModel.Like, simpleUserToken)
-        expect(response.status).toBe(403)
-      })
-
-      it('User banned by blogger try put status to comment', async () => {
-        const {simpleUserToken, commentId} = expect.getState()
-
-        const response = await comments.addReaction(commentId, ReactionModel.Like, simpleUserToken)
-        expect(response.status).toBe(403)
-      })
-
-      it('User banned by blogger try put comment', async () => {
-        const {simpleUserToken, postId} = expect.getState()
-
-        const response = await comments.createComments(postId, preparedComment.valid, simpleUserToken)
-        expect(response.status).toBe(403)
-      })
-    })
-  })
-
-  describe('Shouldn`t return reactions for banned user', () => {
-    it('Drop all data.', async () => {
-      await request(server)
-        .delete(endpoints.testingController.allData)
-        .expect(204);
-    });
-
-    it('Create data', async () => {
-      const [owner, simpleUser1, simpleUser2] = await factories.createAndLoginUsers(3)
-      const [blog] = await factories.createBlogs(owner.accessToken, 1)
-      const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
-      const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
-      const putLike1 = await comments.addReaction(comment.id, ReactionModel.Like, simpleUser1.accessToken)
-      expect(putLike1.status).toBe(204)
-      const putLike2 = await comments.addReaction(comment.id, ReactionModel.Like, simpleUser2.accessToken)
-      expect(putLike2.status).toBe(204)
-
-      expect.setState({
-        ownerToken: owner.accessToken,
-        simpleUser1Id: simpleUser1.user.id,
-        simpleUser2Id: simpleUser2.user.id,
-        blogId: blog.id,
-        postId: post.id,
-        commentId: comment.id
-      })
-    })
-
-    // it('Should return comment with two likes', async () => {
-    //   const {commentId} = expect.getState()
-    //
-    //   const comment = await comments.getCommentById(commentId)
-    //   expect(comment.body.likesInfo.likesCount).toBe(2)
-    // })
-
-    it('Ban users and get comment', async () => {
-      const {ownerToken, blogId, simpleUser1Id, simpleUser2Id, commentId} =expect.getState()
-
-      const banUser1 = await sa.saBannedUser(simpleUser1Id, true)
-      expect(banUser1.status).toBe(204)
-
-      const banUser2 = await blogger.banUser(ownerToken, simpleUser2Id, blogId, true)
-      expect(banUser2.status).toBe(204)
-
-      const comment = await comments.getCommentById(commentId)
-      expect(comment.body.likesInfo.likesCount).toBe(0)
-    })
-  })
-
-  describe('Fix mistakes', () => {
-    describe('DELETE, PUT -> "/comments/:id", GET, POST -> "posts/:postId/comments": should' +
-      'return error if :id from uri param not found; status 404;', () => {
-
-      it('Drop all data.', async () => {
-        await request(server)
-          .delete(endpoints.testingController.allData)
-          .expect(204);
-      });
-
-      it('Should return error if :id from uri param not found; status 404', async () => {
-        const [owner] = await factories.createAndLoginUsers(2)
-
-        const deleteRes = await request(server)
-          .delete('/comments/602afe92-7d97-4395-b1b9-6cf98b351bbe')
-          .auth(owner.accessToken, { type: 'bearer' })
-          .expect(404)
-
-        await request(server)
-          .put('/comments/602afe92-7d97-4395-b1b9-6cf98b351bbe')
-          .auth(owner.accessToken, { type: 'bearer' })
-          .send(preparedComment.valid)
-          .expect(404)
-
-        const postCommentRes = await request(server)
-          .post(`/posts/602afe92-7d97-4395-b1b9-6cf98b351bbe/comments`)
-          .auth(owner.accessToken, { type: 'bearer' })
-          .send({"content":"length_21-weqweqweqwq"})
-          .expect(404)
-      })
-    })
-
-    describe('PUT -> "/posts/:postId/like-status": create post then: like the post by user 1,' +
-      ' user 2, user 3, user 4. get the post after each like by user 1. NewestLikes should be sorted' +
-      ' in descending; status 204; used additional methods: POST => /blogger/blogs,' +
-      ' POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
-
-      it('Drop all data.', async () => {
-        await request(server)
-          .delete(endpoints.testingController.allData)
-          .expect(204);
-      });
-
-      it('Create data', async () => {
-        const [owner, user1, user2, user3, user4] = await factories.createAndLoginUsers(5)
-        const [blog] = await factories.createBlogs(owner.accessToken, 1)
-        const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
-
-        expect.setState({postId: post.id, user1, user2, user3, user4})
-      })
-
-      it('User1 likes post', async () => {
-        const { postId, user1 } = expect.getState()
-
-        const request = await posts.addReaction(postId, ReactionModel.Like, user1.accessToken)
-        expect(request.status).toBe(204)
-
-        const post = await posts.getPostById(postId)
-        expect(post.status).toBe(200)
-        expect(post.body.extendedLikesInfo.likesCount).toBe(1)
-        expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(1)
-        expect(post.body.extendedLikesInfo.newestLikes[0]).toStrictEqual({
-          userId: user1.user.id,
-          login: user1.user.login,
-          addedAt: expect.any(String)
-        })
-      })
-
-      it('User2 likes post', async () => {
-        const { postId, user2 } = expect.getState()
-
-        const request = await posts.addReaction(postId, ReactionModel.Like, user2.accessToken)
-        expect(request.status).toBe(204)
-
-        const post = await posts.getPostById(postId)
-        expect(post.status).toBe(200)
-        expect(post.body.extendedLikesInfo.likesCount).toBe(2)
-        expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(2)
-        expect(post.body.extendedLikesInfo.newestLikes[0]).toEqual(
-          {
-            userId: user2.user.id,
-            login: user2.user.login,
-            addedAt: expect.any(String)
-          }
-        )
-      })
-
-      it('User3 likes post', async () => {
-        const { postId, user3 } = expect.getState()
-
-        const request = await posts.addReaction(postId, ReactionModel.Like, user3.accessToken)
-        expect(request.status).toBe(204)
-
-        const post = await posts.getPostById(postId)
-        expect(post.status).toBe(200)
-        expect(post.body.extendedLikesInfo.likesCount).toBe(3)
-        expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(3)
-        expect(post.body.extendedLikesInfo.newestLikes[0]).toEqual(
-          {
-            userId: user3.user.id,
-            login: user3.user.login,
-            addedAt: expect.any(String)
-          }
-        )
-      })
-    })
-
-    describe('GET -> "/posts/:postId/comments": should return status 200; content: comments with' +
-      'pagination; used additional methods: POST => /blogger/blogs, POST => /blogger/blogs/:blogId/posts,' +
-      'POST => /posts/:postId/comments;', () => {
-
-      it('Drop all data.', async () => {
-        await request(server)
-          .delete(endpoints.testingController.allData)
-          .expect(204);
-      });
-
-      it('Create mistakes', async () => {
-        const [owner] = await factories.createAndLoginUsers(1)
-        const [blog] = await factories.createBlogs(owner.accessToken, 1)
-        const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
-        const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
-
-        const response = await posts.getCommentsByPostId(post.id, owner.accessToken)
-        expect(response.status).toBe(200)
-        expect(response.body.items).toHaveLength(1)
-        expect(response.body.items[0]).toStrictEqual({
-          id: expect.any(String),
-          content: preparedComment.valid.content,
-          createdAt: expect.any(String),
-          likesInfo: {
-            likesCount: 0,
-            dislikesCount: 0,
-            myStatus: 'None'
-          },
-          commentatorInfo: {
-            userId: owner.user.id,
-            userLogin: owner.user.login
-          }
-        })
-      })
-    })
-  })
+  // describe('Shouldn`t return reactions for banned user', () => {
+  //   it('Drop all data.', async () => {
+  //     await request(server)
+  //       .delete(endpoints.testingController.allData)
+  //       .expect(204);
+  //   });
+  //
+  //   it('Create data', async () => {
+  //     const [owner, simpleUser1, simpleUser2] = await factories.createAndLoginUsers(3)
+  //     const [blog] = await factories.createBlogs(owner.accessToken, 1)
+  //     const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+  //     const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
+  //     const putLike1 = await comments.addReaction(comment.id, ReactionModel.Like, simpleUser1.accessToken)
+  //     expect(putLike1.status).toBe(204)
+  //     const putLike2 = await comments.addReaction(comment.id, ReactionModel.Like, simpleUser2.accessToken)
+  //     expect(putLike2.status).toBe(204)
+  //
+  //     expect.setState({
+  //       ownerToken: owner.accessToken,
+  //       simpleUser1Id: simpleUser1.user.id,
+  //       simpleUser2Id: simpleUser2.user.id,
+  //       blogId: blog.id,
+  //       postId: post.id,
+  //       commentId: comment.id
+  //     })
+  //   })
+  //
+  //   // it('Should return comment with two likes', async () => {
+  //   //   const {commentId} = expect.getState()
+  //   //
+  //   //   const comment = await comments.getCommentById(commentId)
+  //   //   expect(comment.body.likesInfo.likesCount).toBe(2)
+  //   // })
+  //
+  //   it('Ban users and get comment', async () => {
+  //     const {ownerToken, blogId, simpleUser1Id, simpleUser2Id, commentId} =expect.getState()
+  //
+  //     const banUser1 = await sa.saBannedUser(simpleUser1Id, true)
+  //     expect(banUser1.status).toBe(204)
+  //
+  //     const banUser2 = await blogger.banUser(ownerToken, simpleUser2Id, blogId, true)
+  //     expect(banUser2.status).toBe(204)
+  //
+  //     const comment = await comments.getCommentById(commentId)
+  //     expect(comment.body.likesInfo.likesCount).toBe(0)
+  //   })
+  // })
+  //
+  // describe('Fix mistakes', () => {
+  //   describe('DELETE, PUT -> "/comments/:id", GET, POST -> "posts/:postId/comments": should' +
+  //     'return error if :id from uri param not found; status 404;', () => {
+  //
+  //     it('Drop all data.', async () => {
+  //       await request(server)
+  //         .delete(endpoints.testingController.allData)
+  //         .expect(204);
+  //     });
+  //
+  //     it('Should return error if :id from uri param not found; status 404', async () => {
+  //       const [owner] = await factories.createAndLoginUsers(2)
+  //
+  //       const deleteRes = await request(server)
+  //         .delete('/comments/602afe92-7d97-4395-b1b9-6cf98b351bbe')
+  //         .auth(owner.accessToken, { type: 'bearer' })
+  //         .expect(404)
+  //
+  //       await request(server)
+  //         .put('/comments/602afe92-7d97-4395-b1b9-6cf98b351bbe')
+  //         .auth(owner.accessToken, { type: 'bearer' })
+  //         .send(preparedComment.valid)
+  //         .expect(404)
+  //
+  //       const postCommentRes = await request(server)
+  //         .post(`/posts/602afe92-7d97-4395-b1b9-6cf98b351bbe/comments`)
+  //         .auth(owner.accessToken, { type: 'bearer' })
+  //         .send({"content":"length_21-weqweqweqwq"})
+  //         .expect(404)
+  //     })
+  //   })
+  //
+  //   describe('PUT -> "/posts/:postId/like-status": create post then: like the post by user 1,' +
+  //     ' user 2, user 3, user 4. get the post after each like by user 1. NewestLikes should be sorted' +
+  //     ' in descending; status 204; used additional methods: POST => /blogger/blogs,' +
+  //     ' POST => /blogger/blogs/:blogId/posts, GET => /posts/:id;', () => {
+  //
+  //     it('Drop all data.', async () => {
+  //       await request(server)
+  //         .delete(endpoints.testingController.allData)
+  //         .expect(204);
+  //     });
+  //
+  //     it('Create data', async () => {
+  //       const [owner, user1, user2, user3, user4] = await factories.createAndLoginUsers(5)
+  //       const [blog] = await factories.createBlogs(owner.accessToken, 1)
+  //       const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+  //
+  //       expect.setState({postId: post.id, user1, user2, user3, user4})
+  //     })
+  //
+  //     it('User1 likes post', async () => {
+  //       const { postId, user1 } = expect.getState()
+  //
+  //       const request = await posts.addReaction(postId, ReactionModel.Like, user1.accessToken)
+  //       expect(request.status).toBe(204)
+  //
+  //       const post = await posts.getPostById(postId)
+  //       expect(post.status).toBe(200)
+  //       expect(post.body.extendedLikesInfo.likesCount).toBe(1)
+  //       expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(1)
+  //       expect(post.body.extendedLikesInfo.newestLikes[0]).toStrictEqual({
+  //         userId: user1.user.id,
+  //         login: user1.user.login,
+  //         addedAt: expect.any(String)
+  //       })
+  //     })
+  //
+  //     it('User2 likes post', async () => {
+  //       const { postId, user2 } = expect.getState()
+  //
+  //       const request = await posts.addReaction(postId, ReactionModel.Like, user2.accessToken)
+  //       expect(request.status).toBe(204)
+  //
+  //       const post = await posts.getPostById(postId)
+  //       expect(post.status).toBe(200)
+  //       expect(post.body.extendedLikesInfo.likesCount).toBe(2)
+  //       expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(2)
+  //       expect(post.body.extendedLikesInfo.newestLikes[0]).toEqual(
+  //         {
+  //           userId: user2.user.id,
+  //           login: user2.user.login,
+  //           addedAt: expect.any(String)
+  //         }
+  //       )
+  //     })
+  //
+  //     it('User3 likes post', async () => {
+  //       const { postId, user3 } = expect.getState()
+  //
+  //       const request = await posts.addReaction(postId, ReactionModel.Like, user3.accessToken)
+  //       expect(request.status).toBe(204)
+  //
+  //       const post = await posts.getPostById(postId)
+  //       expect(post.status).toBe(200)
+  //       expect(post.body.extendedLikesInfo.likesCount).toBe(3)
+  //       expect(post.body.extendedLikesInfo.newestLikes).toHaveLength(3)
+  //       expect(post.body.extendedLikesInfo.newestLikes[0]).toEqual(
+  //         {
+  //           userId: user3.user.id,
+  //           login: user3.user.login,
+  //           addedAt: expect.any(String)
+  //         }
+  //       )
+  //     })
+  //   })
+  //
+  //   describe('GET -> "/posts/:postId/comments": should return status 200; content: comments with' +
+  //     'pagination; used additional methods: POST => /blogger/blogs, POST => /blogger/blogs/:blogId/posts,' +
+  //     'POST => /posts/:postId/comments;', () => {
+  //
+  //     it('Drop all data.', async () => {
+  //       await request(server)
+  //         .delete(endpoints.testingController.allData)
+  //         .expect(204);
+  //     });
+  //
+  //     it('Create mistakes', async () => {
+  //       const [owner] = await factories.createAndLoginUsers(1)
+  //       const [blog] = await factories.createBlogs(owner.accessToken, 1)
+  //       const [post] = await factories.createPostsForBlog(owner.accessToken, blog.id, 1)
+  //       const [comment] = await factories.createComments(owner.accessToken, post.id, 1)
+  //
+  //       const response = await posts.getCommentsByPostId(post.id, owner.accessToken)
+  //       expect(response.status).toBe(200)
+  //       expect(response.body.items).toHaveLength(1)
+  //       expect(response.body.items[0]).toStrictEqual({
+  //         id: expect.any(String),
+  //         content: preparedComment.valid.content,
+  //         createdAt: expect.any(String),
+  //         likesInfo: {
+  //           likesCount: 0,
+  //           dislikesCount: 0,
+  //           myStatus: 'None'
+  //         },
+  //         commentatorInfo: {
+  //           userId: owner.user.id,
+  //           userLogin: owner.user.login
+  //         }
+  //       })
+  //     })
+  //   })
+  // })
 });

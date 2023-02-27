@@ -34,30 +34,55 @@ export class PgLikesRepository {
     }
     return true;
   }
-
   async updateCommentReaction(
     commentId: string,
     userId: string,
     likeStatus: string,
     addedAt: string,
   ): Promise<boolean> {
-    const query = `
-      UPDATE public.comment_reactions
-         SET status = $1, "addedAt" = $2
-       WHERE "userId" = $3 AND "commentId" = $4
-    `;
-    const result = await this.dataSource.query(query, [
-      likeStatus,
-      addedAt,
-      userId,
-      commentId,
-    ]);
+    const builder = this.dataSource
+      .createQueryBuilder()
+      .update(CommentReactions)
+      .set({
+        status: likeStatus,
+        addedAt
+      })
+      .where("userId = :id", {id: userId})
+      .andWhere("commentId = :id", {id: commentId})
 
-    if (result[1] !== 1) {
-      return false;
+    const sql = builder.getSql()
+    console.log(sql)
+    console.log('likeStatus: ', likeStatus,  'addedAt: ', addedAt, 'userId: ', userId, 'commentId: ', commentId)
+    const result = await builder.execute()
+
+    if (result.affected != 1) {
+      return false
     }
-    return true;
+    return true
   }
+  // async updateCommentReaction(
+  //   commentId: string,
+  //   userId: string,
+  //   likeStatus: string,
+  //   addedAt: string,
+  // ): Promise<boolean> {
+  //   const query = `
+  //     UPDATE public.comment_reactions
+  //        SET status = $1, "addedAt" = $2
+  //      WHERE "userId" = $3 AND "commentId" = $4
+  //   `;
+  //   const result = await this.dataSource.query(query, [
+  //     likeStatus,
+  //     addedAt,
+  //     userId,
+  //     commentId,
+  //   ]);
+  //
+  //   if (result[1] !== 1) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   async deleteCommentReaction(
     userId: string,
