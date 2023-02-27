@@ -41,6 +41,9 @@ import { OrmReactionsRepository } from "./modules/public/likes/infrastructure/or
 import {
   OrmEmailConfirmationRepository
 } from "./modules/super-admin/infrastructure/orm.repository/orm-email-confirmation.repository";
+import {OrmCommentsRepository} from "./modules/public/comments/infrastructure/orm.repository/orm-comments.repository";
+import {OrmBlogsRepository} from "./modules/public/blogs/infrastructure/orm-repository/orm-blogs.repository";
+import {OrmBanInfoRepository} from "./modules/super-admin/infrastructure/orm.repository/orm-ban-info.repository";
 
 export const repositoryName = {
   BanInfo: 'banInfo',
@@ -81,10 +84,10 @@ export const repository = {
     testing: PgTestingRepository
   },
   orm: {
-    // banInfo: OrmBanInfoRepository,
-    // blogs: OrmBlogsRepository,
+    banInfo: OrmBanInfoRepository,
+    blogs: OrmBlogsRepository,
     // queryBlogs: OrmQueryBlogsRepository,
-    // comments: OrmCommentsRepository,
+    comments: OrmCommentsRepository,
     // queryComments: OrmQueryCommentsRepository,
     emailConfirmation: OrmEmailConfirmationRepository,
     reactions: OrmReactionsRepository,

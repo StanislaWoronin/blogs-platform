@@ -6,6 +6,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentViewModel } from '../../api/dto/commentView.model';
 import { CreatedComment } from '../entity/db_comment.model';
+import {Comments} from "../entity/comments.entity";
+import {Users} from "../../../../super-admin/infrastructure/entity/users.entity";
 
 @Injectable()
 export class PgCommentsRepository {
@@ -21,7 +23,7 @@ export class PgCommentsRepository {
              RETURNING id, content, "userId", "createdAt",
                        (SELECT login AS "userLogin"
                           FROM public.users
-                         WHERE users.id = '${newComment.userId}');       
+                         WHERE users.id = '${newComment.userId}');
     `;
     const result: CreatedComment[] = await this.dataSource.query(query, [
       newComment.id,

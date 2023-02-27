@@ -3,6 +3,7 @@ import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { CreatedUserModel, UserDBModel } from "../entity/userDB.model";
 import { Users } from "../entity/users.entity";
+import {Comments} from "../../../public/comments/infrastructure/entity/comments.entity";
 
 @Injectable()
 export class OrmUsersRepository {

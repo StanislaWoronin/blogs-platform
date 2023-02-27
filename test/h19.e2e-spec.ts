@@ -662,7 +662,7 @@ describe('e2e tests', () => {
               ReactionModel.Dislike,
             ),
           );
-        });
+        }); // TODO need fix trabl2
 
         // it('Should remove reaction', async () => {
         //   const { commentOwner, userToken, updatedComment } = expect.getState();

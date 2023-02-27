@@ -94,9 +94,9 @@ const entity = [
 
 const repositories = [
   { provide: IBanInfoRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.BanInfo) },
-  { provide: IBlogsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Blogs) },
+  { provide: IBlogsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Blogs) },
   { provide: IQueryBlogsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryBlogs) },
-  { provide: ICommentsRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.Comments) },
+  { provide: ICommentsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Comments) },
   { provide: IQueryCommentsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryComments) },
   { provide: IEmailConfirmationRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.EmailConfirmation) },
   { provide: IReactionsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.Reactions) },

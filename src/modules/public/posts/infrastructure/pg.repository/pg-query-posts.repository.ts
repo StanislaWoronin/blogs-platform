@@ -68,11 +68,16 @@ export class PgQueryPostsRepository {
 
     const query = `
          SELECT id, title, "shortDescription", content, "createdAt", "blogId",
-                       (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
-                       ${reactions}
-                       ${myStatusFilter}
-                  FROM public.posts
-                 WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
+                (SELECT name AS "blogName" 
+                   FROM public.blogs 
+                  WHERE blogs.id = posts."blogId"),
+                  ${reactions}
+                  ${myStatusFilter}
+                   FROM public.posts
+                  WHERE id = '${id}' 
+                    AND NOT EXISTS (SELECT "postId" 
+                                      FROM public.banned_post 
+                                     WHERE banned_post."postId" = posts.id)
         `;
     const postDB: DbPostModel[] = await this.dataSource.query(query);
 
@@ -143,7 +148,10 @@ export class PgQueryPostsRepository {
   async postExist(id: string): Promise<boolean> {
     const query = `
             SELECT id FROM public.posts
-             WHERE id = '${id}' AND NOT EXISTS (SELECT "postId" FROM public.banned_post WHERE banned_post."postId" = posts.id)
+             WHERE id = '${id}' 
+               AND NOT EXISTS (SELECT "postId" 
+                                 FROM public.banned_post 
+                                WHERE banned_post."postId" = posts.id)
         `;
     const result = await this.dataSource.query(query);
 
@@ -223,16 +231,18 @@ export class PgQueryPostsRepository {
   }
 
   private reactionCount(fieldName: string, reaction: ReactionModel): string {
-    return `(SELECT COUNT("postId")
-                 FROM public.post_reactions
-                WHERE post_reactions."postId" = posts.id 
-                  AND post_reactions.status = '${reaction}'
-                  AND (SELECT "banStatus"
-                         FROM public.user_ban_info 
-                        WHERE user_ban_info."userId" = post_reactions."userId") != true
-                          AND NOT EXISTS (SELECT "userId" 
-                                            FROM public.banned_users_for_blog
-                                           WHERE banned_users_for_blog."userId" = post_reactions."userId"
-                                             AND banned_users_for_blog."blogId" = posts."blogId")) AS "${fieldName}"`
+    return `
+    (SELECT COUNT("postId")
+       FROM public.post_reactions
+      WHERE post_reactions."postId" = posts.id 
+        AND post_reactions.status = '${reaction}'
+        AND (SELECT "banStatus"
+               FROM public.user_ban_info 
+              WHERE user_ban_info."userId" = post_reactions."userId") != true
+                AND NOT EXISTS (SELECT "userId" 
+                                  FROM public.banned_users_for_blog
+                                 WHERE banned_users_for_blog."userId" = post_reactions."userId"
+                                   AND banned_users_for_blog."blogId" = posts."blogId")) AS "${fieldName}"
+    `
   }
 }

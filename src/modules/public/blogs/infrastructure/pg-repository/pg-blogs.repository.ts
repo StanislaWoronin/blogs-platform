@@ -4,7 +4,7 @@ import { BindBlogDto } from '../../../../super-admin/api/dto/bind-blog.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogDBModel } from '../entity/blog-db.model';
-import { CreatedBlogModel } from '../../api/dto/blogView.model';
+import {BlogViewModel, CreatedBlogModel} from '../../api/dto/blogView.model';
 import { Blogs } from '../entity/blogs.entity';
 
 @Injectable()
@@ -13,53 +13,38 @@ export class PgBlogsRepository {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async createBlog(newBlog: BlogDBModel): Promise<CreatedBlogModel | null> {
-    const result = await this.dataSource
-      .getRepository('blogs')
-      .createQueryBuilder()
-      .insert()
-      .into(Blogs)
-      .values([
-        {
-          id: newBlog.id,
-          name: newBlog.name,
-          description: newBlog.description,
-          websiteUrl: newBlog.websiteUrl,
-          createdAt: newBlog.createdAt,
-          userId: newBlog.userId,
-          isMembership: newBlog.isMembership,
-        },
-      ])
-      .returning(
-        'id, name, description, "websiteUrl", "createdAt", "isMembership"',
-      )
-      .execute();
+  async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
+    const query = `
+      INSERT INTO public.blogs
+             (id, name, description, "websiteUrl", "createdAt", "userId", "isMembership")
+      VAlUES ($1, $2, $3, $4, $5, $6, $7)  
+             RETURNING id, name, description, "websiteUrl", "createdAt", "isMembership"
+    `;
+    const result = await this.dataSource.query(query, [
+      newBlog.id,
+      newBlog.name,
+      newBlog.description,
+      newBlog.websiteUrl,
+      newBlog.createdAt,
+      newBlog.userId,
+      newBlog.isMembership
+    ]);
 
-    return result.raw[0];
-
-    // await this.blogsRepository.create(newBlog)
-    // return {
-    //     id: newBlog.id,
-    //     name: newBlog.name,
-    //     description: newBlog.description,
-    //     websiteUrl: newBlog.websiteUrl,
-    //     createdAt: newBlog.createdAt,
-    //     isMembership: newBlog.isMembership
-    // }
+    return result[0];
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {
-    const result = await this.dataSource
-      .getRepository('blogs')
-      .createQueryBuilder()
-      .update(Blogs)
-      .set({
-        userId: params.userId,
-      })
-      .where('id = :id', { id: params.id })
-      .execute();
+    const query = `
+      UPDATE public.blogs
+         SET "userId" = $1
+       WHERE id = $2
+    `;
+    const result = await this.dataSource.query(query, [
+      params.userId,
+      params.id,
+    ]);
 
-    if (result.affected !== 1) {
+    if (result[1] !== 1) {
       return false;
     }
     return true;
@@ -71,34 +56,27 @@ export class PgBlogsRepository {
          SET name = $1, description = $2, "websiteUrl" = $3
        WHERE id = $4
     `;
-    const result = await this.dataSource
-      .getRepository('blogs')
-      .createQueryBuilder()
-      .update(Blogs)
-      .set({
-        name: dto.name,
-        description: dto.description,
-        websiteUrl: dto.websiteUrl,
-      })
-      .where('id = :id', { id: id })
-      .execute();
+    const result = await this.dataSource.query(query, [
+      dto.name,
+      dto.description,
+      dto.websiteUrl,
+      id,
+    ]);
 
-    if (result.affected !== 1) {
+    if (result[1] !== 1) {
       return false;
     }
     return true;
   }
 
   async deleteBlog(blogId: string): Promise<boolean> {
-    const result = await this.dataSource
-      .getRepository('blogs')
-      .createQueryBuilder()
-      .delete()
-      .from(Blogs)
-      .where('id = :id', { id: blogId })
-      .execute();
+    const query = `
+      DELETE FROM public.blogs
+       WHERE id = $1;
+    `;
+    const result = await this.dataSource.query(query, [blogId]);
 
-    if (result.affected !== 1) {
+    if (result[1] !== 1) {
       return false;
     }
     return true;
