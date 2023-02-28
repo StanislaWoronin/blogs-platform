@@ -52,9 +52,6 @@ export class SecurityController {
     @Param('id') deviceId: string,
     @User() user: UserDBModel,
   ) {
-    if (deviceId) {
-      throw new NotFoundException();
-    }
     const userDevice = await this.querySecurityRepository.getDeviseById(deviceId);
 
     if (!userDevice) {

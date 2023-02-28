@@ -13,6 +13,7 @@ import {createApp} from "../src/helpers/create-app";
 import {Auth} from "./request/auth";
 import {Testing} from "./request/testing";
 import {Security} from "./request/security";
+import { randomUUID } from "crypto";
 
 
 describe('e2e tests', () => {
@@ -70,7 +71,7 @@ describe('e2e tests', () => {
             it('Create mistake', async () => {
                 const [user] = await factories.createAndLoginUsers(1)
                 const payload = await testing.getPayload(user.accessToken)
-
+                console.log(user.refreshToken);
                 await new Promise((r) => setTimeout(r, 5000));
 
                 const newToken = await auth.getNewRefreshToken(user.refreshToken)
@@ -79,6 +80,8 @@ describe('e2e tests', () => {
                 expect(payload.exp).not.toEqual(newPayload.exp)
                 expect(payload.iat).not.toEqual(newPayload.iat)
 
+                const isoStringPattern = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/
+
                 const allSessions = await security.getAllActiveSessions(newToken.refreshToken)
                 expect(allSessions.status).toBe(200)
                 expect(allSessions.body).toStrictEqual([
@@ -86,9 +89,10 @@ describe('e2e tests', () => {
                     deviceId: newPayload.deviceId,
                     title: expect.any(String),
                     ip: expect.any(String),
-                    lastActiveDate: expect.any(String),
+                    lastActiveDate: expect.stringMatching(isoStringPattern)
                   }
                 ])
+                expect(allSessions.body[0].lastActiveDate.match(isoStringPattern)).toBeTruthy()
                 console.log(allSessions.body)
             })
         })
@@ -102,7 +106,7 @@ describe('e2e tests', () => {
 
             it('Create mistake', async () => {
                 const [user] = await factories.createAndLoginUsers(1)
-                const randomId = undefined
+                const randomId = randomUUID()
 
                 const deleteStatus = await security.deleteDeviseById(randomId, user.refreshToken)
                 expect(deleteStatus).toBe(404)

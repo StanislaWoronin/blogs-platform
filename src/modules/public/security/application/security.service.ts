@@ -43,8 +43,8 @@ export class SecurityService {
       tokenPayload.deviceId,
       title,
       ipAddress,
-      tokenPayload.iat.toString(),
-      tokenPayload.exp.toString(),
+      new Date(tokenPayload.iat).toISOString(),
+      new Date(tokenPayload.exp).toISOString(),
     );
 
     await this.securityRepository.createUserDevice(userDevice);
