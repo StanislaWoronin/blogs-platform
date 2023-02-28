@@ -36,7 +36,7 @@ export class UsersService {
       new Date().toISOString(),
     );
 
-    const banInfo = new BanInfoModel(userId, false, null, null, null);
+    const banInfo = new BanInfoModel(userId, false, null, null);
 
     const createdUser = await this.usersRepository.createUser(user);
     await this.banInfoRepository.createBanInfo(banInfo);

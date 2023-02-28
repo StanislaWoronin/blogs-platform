@@ -93,7 +93,7 @@ const entity = [
 ];
 
 const repositories = [
-  { provide: IBanInfoRepository, useClass: repositorySwitcher(settings.currentRepository, repositoryName.BanInfo) },
+  { provide: IBanInfoRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.BanInfo) },
   { provide: IBlogsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Blogs) },
   { provide: IQueryBlogsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryBlogs) },
   { provide: ICommentsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Comments) },

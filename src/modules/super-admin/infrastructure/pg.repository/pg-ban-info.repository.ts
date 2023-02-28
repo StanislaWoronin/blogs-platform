@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { BanInfoModel } from '../entity/banInfo.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import {UserBanInfo} from "../entity/user-ban-info.entity";
+import {BannedUsersForBlog} from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
+import {BannedBlog} from "../entity/banned_blog.entity";
+import {BannedPost} from "../entity/banned-post.entity";
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -22,7 +26,7 @@ export class PgBanInfoRepository {
     await this.dataSource.query(`
         INSERT INTO public.user_ban_info
                ("userId", "banStatus", "banReason", "banDate")
-        VALUES ('${banInfo.parentId}', '${banInfo.isBanned}', null, null)
+        VALUES ('${banInfo.userId}', '${banInfo.isBanned}', null, null)
     `);
 
     return banInfo;
@@ -49,7 +53,7 @@ export class PgBanInfoRepository {
 
   async deleteUserBanInfoById(userId: string): Promise<boolean> {
     const query = `
-      DELETE 
+      DELETE
         FROM public.user_ban_info
        WHERE "userId" = $1;
     `;
@@ -81,7 +85,7 @@ export class PgBanInfoRepository {
     const query = `
       INSERT INTO public.banned_users_for_blog
              ("blogId", "userId", "banReason", "banDate")
-      VALUES ($1, $2, $3, $4)   
+      VALUES ($1, $2, $3, $4)
               RETURNING "blogId"
     `;
     const result = await this.dataSource.query(query, [
@@ -102,7 +106,7 @@ export class PgBanInfoRepository {
       blogId: string,
   ): Promise<boolean> {
     const query = `
-      DELETE 
+      DELETE
         FROM public.banned_users_for_blog
        WHERE "userId" = $1 AND "blogId" = $2;
     `;
@@ -138,9 +142,9 @@ export class PgBanInfoRepository {
     const values = this.getValues(postsId, banReason, banDate);
 
     const query = `
-      INSERT INTO public.banned_post 
+      INSERT INTO public.banned_post
              ("postId", "banReason", "banDate")
-      VALUES ${values};       
+      VALUES ${values};
     `;
     const result = await this.dataSource.query(query);
 
@@ -152,7 +156,7 @@ export class PgBanInfoRepository {
 
   async deleteBlogBanStatus(blogId: string): Promise<boolean> {
     const query = `
-      DELETE 
+      DELETE
         FROM public.banned_blog
        WHERE "blogId" = $1;
     `;
@@ -194,10 +198,6 @@ export class PgBanInfoRepository {
     banDate: string,
   ): string {
     let values = '';
-
-    // for(let p in postsId) {
-    //   values += `('${id}', '${banReason}', '${banDate}'), `
-    // } // TODO
 
     for (let i = 0, l = postsId.length; i < l; i++) {
       values += `('${postsId[i].id}', '${banReason}', '${banDate}'), `;
