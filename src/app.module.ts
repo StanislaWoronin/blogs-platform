@@ -150,7 +150,7 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       url: process.env.LOCAL_URI,
       autoLoadEntities: true,
       synchronize: true,
-      //ssl: false,
+      ssl: false,
     }),
     TypeOrmModule.forFeature([...entity]),
     // BlogModule,
