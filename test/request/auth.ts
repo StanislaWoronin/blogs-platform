@@ -5,16 +5,16 @@ export class Auth {
     constructor(private readonly server: any) {
     }
 
-    async getNewRefreshToken(refreshToken?: string) {
+    async getNewRefreshToken(token?: string): Promise<{accessToken: string, refreshToken: string, status: number}> {
         const response = await request(this.server)
             .post(endpoints.authController.refreshToken)
-            .auth(refreshToken, {type: "bearer"})
-            .set('Cookie', `refreshToken=${refreshToken}`)
+            .set('Cookie', `refreshToken=${token}`)
 
-        if(!response.body) {
-            return response.status
-        }
-        return response.body
+        const refreshToken = response.headers['set-cookie'][0]
+          .split(';')[0]
+          .split('=')[1];
+
+        return { accessToken: response.body.accessToken, refreshToken, status: response.status}
     }
 
 }

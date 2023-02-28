@@ -3,21 +3,20 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserDeviceModel } from '../entity/userDevice.model';
 import { Security } from "../entity/security";
+import { ViewSecurityDeviseModel } from "../../api/dto/viewSecurityDeviseModel";
 
 @Injectable()
 export class PgQuerySecurityRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getAllActiveSessions(userId: string): Promise<UserDeviceModel[]> {
+  async getAllActiveSessions(userId: string): Promise<ViewSecurityDeviseModel[] | null> {
     const query = `
-      SELECT "userId", "deviceId", "deviceTitle", "ipAddress", iat, exp
+      SELECT "deviceId", "deviceTitle" AS title, "ipAddress" AS ip, iat AS "lastActiveDate"
         FROM public.security
        WHERE "userId" = $1;
     `;
     try {
-      const result = await this.dataSource.query(query, [userId]);
-
-      return result;
+      return await this.dataSource.query(query, [userId]);
     } catch (e) {
       return null;
     }

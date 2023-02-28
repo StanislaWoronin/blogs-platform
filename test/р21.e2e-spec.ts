@@ -78,14 +78,23 @@ describe('e2e tests', () => {
 
                 await new Promise((r) => setTimeout(r, 5000));
 
-                const newToken = await auth.getNewRefreshToken(user.accessToken)
-                const newPayload = await testing.getPayload(newToken.accessToken)
+                const newToken = await auth.getNewRefreshToken(user.refreshToken)
+                const newPayload = await testing.getPayload(newToken.refreshToken)
                 expect(payload.deviceId).toEqual(newPayload.deviceId)
                 expect(payload.exp).not.toEqual(newPayload.exp)
                 expect(payload.iat).not.toEqual(newPayload.iat)
-                console.log(newPayload)
+
                 const allSessions = await security.getAllActiveSessions(newToken.refreshToken)
-                console.log(allSessions)
+                expect(allSessions.status).toBe(200)
+                expect(allSessions.body).toStrictEqual([
+                  {
+                    deviceId: newPayload.deviceId,
+                    title: expect.any(String),
+                    ip: expect.any(String),
+                    lastActiveDate: expect.any(String),
+                  }
+                ])
+
             })
         })
     })

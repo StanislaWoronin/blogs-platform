@@ -16,19 +16,6 @@ export class SecurityService {
     @Inject(IQuerySecurityRepository) protected querySecurityRepository: IQuerySecurityRepository,
   ) {}
 
-  async getAllActiveSessions(
-    userId: string,
-  ): Promise<ViewSecurityDeviseModel[] | null> {
-    const activeSessions =
-      await this.querySecurityRepository.getAllActiveSessions(userId);
-
-    if (!activeSessions) {
-      return null;
-    }
-
-    return activeSessions.map((a) => toActiveSessionsViewModel(a));
-  }
-
   async getDeviceById(deviceId: string): Promise<UserDeviceModel | null> {
     const device = await this.querySecurityRepository.getDeviseById(deviceId);
 

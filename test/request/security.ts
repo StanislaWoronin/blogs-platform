@@ -10,9 +10,7 @@ export class Security {
             .get(endpoints.securityController)
             .set('Cookie', `refreshToken=${refreshToken}`)
             .expect(200) // TODO Unauthorized
-        if (!response.body) {
-            return response.status
-        }
-        return response.body
+
+        return { body: response.body, status: response.status }
     }
 }
