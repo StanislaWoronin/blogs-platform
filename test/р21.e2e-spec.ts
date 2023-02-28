@@ -15,6 +15,7 @@ import {Testing} from "./request/testing";
 import request from "supertest";
 import {endpoints} from "./helper/routing";
 import {Security} from "./request/security";
+import { randomUUID } from "crypto";
 
 describe('e2e tests', () => {
     const second = 1000;
@@ -63,11 +64,7 @@ describe('e2e tests', () => {
         describe('GET -> "/security/devices": should not change device id after call' +
             '/auth/refresh-token. LastActiveDate should be changed; status 200; content:' +
             ' device list;', () => {
-            it('Drop all data.', async () => {
-                await request(server)
-                    .delete(endpoints.testingController.allData)
-                    .expect(204);
-            });
+
             it('Clear data base', async () => {
                 await testing.clearDb()
             })
@@ -94,7 +91,23 @@ describe('e2e tests', () => {
                     lastActiveDate: expect.any(String),
                   }
                 ])
+                console.log(allSessions.body)
+            })
+        })
 
+        describe('DELETE -> "/security/devices/:deviceId": should return error' +
+          ' if :id from uri param not found; status 404;', () => {
+
+            it('Clear data base', async () => {
+                await testing.clearDb()
+            })
+
+            it('Create mistake', async () => {
+                const [user] = await factories.createAndLoginUsers(1)
+                const randomId = undefined
+
+                const deleteStatus = await security.deleteDeviseById(randomId, user.refreshToken)
+                expect(deleteStatus).toBe(404)
             })
         })
     })

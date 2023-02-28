@@ -107,7 +107,7 @@ const repositories = [
   { provide: IPostsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Posts) },
   { provide: IQueryPostsRepository, useClass:  repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryPosts) },
   { provide: ISecurityRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Security) },
-  { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.QuerySecurity) },
+  { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QuerySecurity) },
   { provide: IUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Users) },
   { provide: IQueryUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.QueryUsers) },
   { provide: ITestingRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Testing) }

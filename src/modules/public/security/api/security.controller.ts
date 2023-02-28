@@ -14,7 +14,6 @@ import { SecurityService } from '../application/security.service';
 import { RefreshTokenValidationGuard } from '../../../../guards/refresh-token-validation.guard';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { User } from '../../../../decorator/user.decorator';
-import { UserDeviceModel } from "../infrastructure/entity/userDevice.model";
 import { ViewSecurityDeviseModel } from "./dto/viewSecurityDeviseModel";
 import { IQuerySecurityRepository } from "../infrastructure/i-query-security.repository";
 
@@ -53,6 +52,10 @@ export class SecurityController {
     @Param('id') deviceId: string,
     @User() user: UserDBModel,
   ) {
+    if (!deviceId) {
+      throw new NotFoundException();
+    }
+
     const userDevice = await this.querySecurityRepository.getDeviseById(deviceId);
 
     if (!userDevice) {
