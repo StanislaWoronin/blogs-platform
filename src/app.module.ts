@@ -61,6 +61,8 @@ import { settings } from "./settings";
 import { BannedComment } from "./modules/super-admin/infrastructure/entity/banned-comment.entity";
 import { ITestingRepository } from "./modules/testing/infrastructure/i-testing.repository";
 import { TestingController } from "./modules/testing/api/testingController";
+import {BlogModule} from "./modules/public/blogs/blog.module";
+import {ThrottlerModule} from "@nestjs/throttler";
 
 const controllers = [
   AuthController,
@@ -153,12 +155,12 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
       ssl: true,
     }),
     TypeOrmModule.forFeature([...entity]),
-    // BlogModule,
-    //
-    // ThrottlerModule.forRoot({
-    //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
-    //   limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
-    // }),
+    //BlogModule,
+
+    ThrottlerModule.forRoot({
+      ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
+      limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
+    }),
   ],
   controllers: [...controllers],
   providers: [...repositories, ...services, ...validators, ...useCases],
