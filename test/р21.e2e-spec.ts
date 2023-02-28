@@ -12,10 +12,8 @@ import {EmailManagerMock} from "./mock/emailAdapter.mock";
 import {createApp} from "../src/helpers/create-app";
 import {Auth} from "./request/auth";
 import {Testing} from "./request/testing";
-import request from "supertest";
-import {endpoints} from "./helper/routing";
 import {Security} from "./request/security";
-import { randomUUID } from "crypto";
+
 
 describe('e2e tests', () => {
     const second = 1000;
