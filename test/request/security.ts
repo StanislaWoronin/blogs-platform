@@ -22,4 +22,10 @@ export class Security {
 
         return response.status
     }
+
+    async deleteOtherDevices(refreshToken: string) {
+       return  request(this.server)
+          .delete(endpoints.securityController)
+          .set('Cookie', `refreshToken=${refreshToken}`)
+    }
 }

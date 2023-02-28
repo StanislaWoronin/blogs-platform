@@ -76,6 +76,36 @@ export class Factories {
     return tokens;
   }
 
+  async createAndLoginOneUserManeTimes(loginCount: number): Promise<
+    {
+      user: UserViewModelWithBanInfo;
+      accessToken: string;
+      refreshToken: string;
+    }
+    > {
+    const [user] = await this.createUsers(loginCount);
+
+    const userWithTokens = {user, accessToken: null, refreshToken: null}
+
+    const userLoginData = {
+      loginOrEmail: user.login,
+      password: `password0`,
+    };
+
+    for (let i = 0; i < loginCount; i++) {
+      const response = await request(this.server)
+        .post(endpoints.authController.login)
+        .set('User-Agent', faker.internet.userAgent())
+        .send(userLoginData);
+
+      userWithTokens.accessToken = response.body.accessToken;
+      userWithTokens.refreshToken = response.headers['set-cookie'][0]
+        .split(';')[0]
+        .split('=')[1];
+    }
+    return userWithTokens;
+  }
+
   async createBlogs(accessToken: string, blogsCount: number) {
     const blogs = [];
 

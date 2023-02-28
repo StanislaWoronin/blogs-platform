@@ -29,7 +29,7 @@ export class PgQuerySecurityRepository {
        WHERE "deviceId" = $1;
     `;
     const result = await this.dataSource.query(query, [deviceId]);
-
+    console.log(result);
     return result[0];
   }
 }

@@ -112,5 +112,27 @@ describe('e2e tests', () => {
                 expect(deleteStatus).toBe(404)
             })
         })
+
+        describe(`DELETE -> "/security/devices": should delete all other devices from device list; status 204; used additional methods: GET => /security/devices;`, () => {
+            const loginCount = 5
+            it('Clear data base', async () => {
+                await testing.clearDb()
+            })
+
+            it('Create mistake', async () => {
+                const user = await factories.createAndLoginOneUserManeTimes(loginCount)
+
+                const allSessions = await security.getAllActiveSessions(user.refreshToken)
+                expect(allSessions.body).toHaveLength(loginCount)
+
+                console.log(allSessions, 'allSessions');
+
+                const deleteOtherDevices = await security.deleteOtherDevices(user.refreshToken)
+                expect(deleteOtherDevices.status).toBe(204)
+
+                const allSessionsAfterDelete = await security.getAllActiveSessions(user.refreshToken)
+                expect(allSessionsAfterDelete.body).toHaveLength(1)
+            })
+        })
     })
 })
