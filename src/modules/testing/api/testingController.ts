@@ -1,6 +1,7 @@
 import { Controller, Delete, Get, HttpCode, Inject, Param, Put } from "@nestjs/common";
 import { JwtService } from '../../public/auth/application/jwt.service';
 import { ITestingRepository } from "../infrastructure/i-testing.repository";
+import {TokenPayloadModel} from "../../../global-model/token-payload.model";
 
 @Controller('testing')
 export class TestingController {
@@ -35,6 +36,11 @@ export class TestingController {
         0,
       ),
     };
+  }
+
+  @Get('payload/:token')
+  async getPayload(@Param('token') token: string): Promise<TokenPayloadModel> {
+    return await this.jwtService.getTokenPayload(token)
   }
 
   @Put('set-expiration-date/:userId')

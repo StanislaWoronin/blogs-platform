@@ -149,10 +149,10 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.POSTGRES_URI,
+      url: process.env.LOCAL_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: true,
+      //ssl: true,
     }),
     TypeOrmModule.forFeature([...entity]),
     //BlogModule,
