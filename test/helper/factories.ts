@@ -54,7 +54,6 @@ export class Factories {
     const users = await this.createUsers(userCount);
 
     const tokens = [];
-
     for (let i = 0; i < userCount; i++) {
       const userLoginData = {
         loginOrEmail: users[i].login,
@@ -76,7 +75,7 @@ export class Factories {
     return tokens;
   }
 
-  async createAndLoginOneUserManeTimes(loginCount: number): Promise<
+  async createAndLoginOneUserManyTimes(loginCount: number): Promise<
     {
       user: UserViewModelWithBanInfo;
       accessToken: string;
@@ -84,7 +83,6 @@ export class Factories {
     }
     > {
     const [user] = await this.createUsers(loginCount);
-
     const userWithTokens = {user, accessToken: null, refreshToken: null}
 
     const userLoginData = {
@@ -102,7 +100,10 @@ export class Factories {
       userWithTokens.refreshToken = response.headers['set-cookie'][0]
         .split(';')[0]
         .split('=')[1];
+
+      if (i != loginCount - 1) await new Promise((r) => setTimeout(r, 2500));
     }
+
     return userWithTokens;
   }
 

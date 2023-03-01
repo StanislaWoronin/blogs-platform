@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
+import {DataSource, Not} from "typeorm";
 import { UserDeviceModel } from "../entity/userDevice.model";
 import { Security } from "../entity/security";
 
@@ -45,19 +45,17 @@ export class OrmSecurityRepository {
     userId: string,
     deviceId: string,
   ): Promise<boolean> {
-    const result = await this.dataSource
+    console.log(userId, deviceId)
+    const builder = this.dataSource
       .createQueryBuilder()
       .delete()
       .from(Security)
       .where("userId = :id", {id: userId})
-      .andWhere("deviceId = :id", {id: deviceId})
-      .execute()
+      .andWhere("deviceId != :id", {id: deviceId})
+    const result = await builder.execute()
 
-    if (result.affected != 1) {
-      return false
-    }
     return true
-  }
+  } // TODO trabl 4
 
   async deleteDeviceById(deviceId: string): Promise<boolean> {
     const result = await this.dataSource

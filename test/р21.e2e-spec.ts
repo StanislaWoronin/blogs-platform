@@ -71,7 +71,7 @@ describe('e2e tests', () => {
             it('Create mistake', async () => {
                 const [user] = await factories.createAndLoginUsers(1)
                 const payload = await testing.getPayload(user.accessToken)
-                console.log(user.refreshToken);
+
                 await new Promise((r) => setTimeout(r, 5000));
 
                 const newToken = await auth.getNewRefreshToken(user.refreshToken)
@@ -93,12 +93,11 @@ describe('e2e tests', () => {
                   }
                 ])
                 expect(allSessions.body[0].lastActiveDate.match(isoStringPattern)).toBeTruthy()
-                console.log(allSessions.body)
             })
         })
 
         describe('DELETE -> "/security/devices/:deviceId": should return error' +
-          ' if :id from uri param not found; status 404;', () => {
+          'if :id from uri param not found; status 404;', () => {
 
             it('Clear data base', async () => {
                 await testing.clearDb()
@@ -113,22 +112,23 @@ describe('e2e tests', () => {
             })
         })
 
-        describe(`DELETE -> "/security/devices": should delete all other devices from device list; status 204; used additional methods: GET => /security/devices;`, () => {
-            const loginCount = 5
+        describe('DELETE -> "/security/devices": should delete all other devices' +
+          'from device list; status 204; used additional methods:' +
+          'ET => /security/devices', () => {
+
             it('Clear data base', async () => {
                 await testing.clearDb()
             })
 
             it('Create mistake', async () => {
-                const user = await factories.createAndLoginOneUserManeTimes(loginCount)
+                const loginCount = 5
+                const user = await factories.createAndLoginOneUserManyTimes(loginCount)
 
                 const allSessions = await security.getAllActiveSessions(user.refreshToken)
                 expect(allSessions.body).toHaveLength(loginCount)
 
-                console.log(allSessions, 'allSessions');
-
-                const deleteOtherDevices = await security.deleteOtherDevices(user.refreshToken)
-                expect(deleteOtherDevices.status).toBe(204)
+                const status = await security.deleteOtherDevices(user.refreshToken)
+                expect(status).toBe(204)
 
                 const allSessionsAfterDelete = await security.getAllActiveSessions(user.refreshToken)
                 expect(allSessionsAfterDelete.body).toHaveLength(1)

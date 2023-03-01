@@ -63,6 +63,7 @@ import { ITestingRepository } from "./modules/testing/infrastructure/i-testing.r
 import { TestingController } from "./modules/testing/api/testingController";
 import {BlogModule} from "./modules/public/blogs/blog.module";
 import {ThrottlerModule} from "@nestjs/throttler";
+import {TypeOrmConfig} from "./helpers/TypeOrmConfig";
 
 const controllers = [
   AuthController,
@@ -106,7 +107,7 @@ const repositories = [
   { provide: IJwtRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Jwt) },
   { provide: IPostsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Posts) },
   { provide: IQueryPostsRepository, useClass:  repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryPosts) },
-  { provide: ISecurityRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Security) },
+  { provide: ISecurityRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.Security) },
   { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QuerySecurity) },
   { provide: IUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Users) },
   { provide: IQueryUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.QueryUsers) },
@@ -138,21 +139,15 @@ const validators = [
 
 const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
 
-// let url = settings.POSTGRES_URI
-// if (settings.environment === Environment.Development) {
-//   url = settings.local
-// }
-// console.log(url);
-
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.POSTGRES_URI,
+      url: process.env.ENV_TYPE === 'local' ? process.env.POSTGRES_LOCAL_URI : process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: true,
+      ssl: process.env.ENV_TYPE === 'local' ? false : true
     }),
     TypeOrmModule.forFeature([...entity]),
     //BlogModule,

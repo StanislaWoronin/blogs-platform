@@ -1,7 +1,7 @@
 import { Environment } from "./helpers/environment.model";
 
 export const settings = {
-  local: process.env.LOCAL_URI,
+  local: process.env.POSTGRES_LOCAL_URI,
   MONGO_URI:
     process.env.mongoURI ||
     'mongodb://0.0.0.0:27017/blogPlatform?maxPoolSize=20&w=majority',
@@ -21,7 +21,7 @@ export const settings = {
     CONNECTION_TIME_LIMIT: '10000', // msec
     CONNECTION_COUNT_LIMIT: '5',
   },
-  environment: Environment.Development/*process.env.NODE_ENV || Environment.Production*/,
+  environment: process.env.ENV_TYPE || Environment.Production,
   newestLikes: {
     limit: '3',
   },

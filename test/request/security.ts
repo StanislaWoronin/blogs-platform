@@ -13,7 +13,7 @@ export class Security {
         return { body: response.body, status: response.status }
     }
 
-    async deleteDeviseById(deviceId: string | undefined, refreshToken?: string) {
+    async deleteDeviseById(deviceId: string, refreshToken?: string) {
         const url = getUrlWithId(endpoints.securityController, deviceId)
 
         const response = await request(this.server)
@@ -24,8 +24,10 @@ export class Security {
     }
 
     async deleteOtherDevices(refreshToken: string) {
-       return  request(this.server)
+       const response = await request(this.server)
           .delete(endpoints.securityController)
           .set('Cookie', `refreshToken=${refreshToken}`)
+
+       return response.status
     }
 }
