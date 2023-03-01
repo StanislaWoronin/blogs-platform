@@ -152,10 +152,10 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
     TypeOrmModule.forFeature([...entity]),
     //BlogModule,
 
-    ThrottlerModule.forRoot({
-      ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
-      limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
-    }),
+    // ThrottlerModule.forRoot({
+    //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
+    //   limit: Number(settings.throttler.CONNECTION_COUNT_LIMIT)
+    // }),
   ],
   controllers: [...controllers],
   providers: [...repositories, ...services, ...validators, ...useCases],

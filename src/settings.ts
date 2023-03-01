@@ -14,8 +14,8 @@ export const settings = {
   SALT_GENERATE_ROUND: '10',
   timeLife: {
     CONFIRMATION_CODE: '24', // hour
-    ACCESS_TOKEN: '10', // sec
-    REFRESH_TOKEN: '20', // sec
+    ACCESS_TOKEN: '1000', // sec
+    REFRESH_TOKEN: '2000', // sec
   },
   throttler: {
     CONNECTION_TIME_LIMIT: '10000', // msec
