@@ -1,5 +1,5 @@
 export enum ImageStatus {
-    Valid = 'valid',
-    Small = 'small',
-    Big = 'big'
+  Valid = 'valid',
+  Small = 'small',
+  Big = 'big',
 }

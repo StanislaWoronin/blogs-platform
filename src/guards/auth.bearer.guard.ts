@@ -28,6 +28,7 @@ export class AuthBearerGuard implements CanActivate {
     const tokenPayload = await this.jwtService.getTokenPayload(accessToken);
 
     if (!tokenPayload) {
+      console.log('токена нет:', tokenPayload);
       throw new UnauthorizedException();
     }
 

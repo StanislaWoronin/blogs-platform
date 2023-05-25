@@ -1,32 +1,44 @@
 import request from 'supertest';
 import { endpoints, getUrlForBanned } from '../helper/routing';
 import { faker } from '@faker-js/faker';
-import {preparedBlog} from "../helper/prepeared-data";
-import sharp from "sharp";
-import {images} from "../images/images";
-import {ImageStatus} from "../images/image-status.enum";
+import { preparedBlog } from '../helper/prepeared-data';
+import sharp from 'sharp';
+import { images } from '../images/images';
+import { ImageStatus } from '../images/image-status.enum';
 import { join } from 'path';
+import * as fs from "fs";
 export class Blogger {
   constructor(private readonly server: any) {}
 
   async createBlog(accessToken: string) {
     const response = await request(this.server)
-        .post(endpoints.bloggerController.blogs)
-        .send(preparedBlog.valid)
-        .auth(accessToken, { type: 'bearer' })
+      .post(endpoints.bloggerController.blogs)
+      .send(preparedBlog.valid)
+      .auth(accessToken, { type: 'bearer' });
 
-    return { status: response.status, body: response.body }
+    return { status: response.status, body: response.body };
   }
 
-  async uploadBackgroundWallpaper(blogId: string, imageStatus: ImageStatus, accessToken?: string) {
-    const imagePath = join(__dirname, '..', 'images', 'blog', images.blog.wallpaper[imageStatus])
+  async uploadBackgroundWallpaper(
+    blogId: string,
+    imageStatus: ImageStatus,
+    accessToken?: string,
+  ) {
+    const imagePath = join(
+      __dirname,
+      '..',
+      'images',
+      'blog',
+      images.blog.wallpaper[imageStatus],
+    );
 
     const response = await request(this.server)
-        .post(`/blogger/blogs/${blogId}/images/wallpaper`)
-        .auth(accessToken, { type: 'bearer' })
-        .attach('image', imagePath)
+      .post(`/blogger/blogs/${blogId}/images/wallpaper`)
+      .auth(accessToken, { type: 'bearer' })
+      .set('Content-Type', 'multipart/form-data')
+      .attach('image', fs.readFileSync(imagePath));
 
-    return { status: response.status, body: response.body }
+    return { status: response.status, body: response.body };
   }
 
   async banUser(
@@ -57,5 +69,3 @@ export class Blogger {
     return { status: response.status, body: response.body };
   }
 }
-
-

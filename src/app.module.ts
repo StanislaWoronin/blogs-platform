@@ -64,7 +64,7 @@ import { TestingController } from './modules/testing/api/testingController';
 import { BlogModule } from './modules/public/blogs/blog.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmConfig } from './helpers/TypeOrmConfig';
-import {ImagesController} from "./modules/blogger/api/images.controller";
+import { ImagesController } from './modules/blogger/api/images.controller';
 
 const controllers = [
   AuthController,
@@ -77,7 +77,7 @@ const controllers = [
   SecurityController,
   TestingController,
   UsersController,
-  ImagesController
+  ImagesController,
 ];
 
 const entity = [
