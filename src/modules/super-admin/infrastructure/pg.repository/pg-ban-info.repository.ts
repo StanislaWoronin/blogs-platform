@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { BanInfoModel } from '../entity/banInfo.model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {UserBanInfo} from "../entity/user-ban-info.entity";
-import {BannedUsersForBlog} from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
-import {BannedBlog} from "../entity/banned_blog.entity";
-import {BannedPost} from "../entity/banned-post.entity";
+import { UserBanInfo } from '../entity/user-ban-info.entity';
+import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity';
+import { BannedBlog } from '../entity/banned_blog.entity';
+import { BannedPost } from '../entity/banned-post.entity';
 
 @Injectable()
 export class PgBanInfoRepository {
@@ -33,10 +33,10 @@ export class PgBanInfoRepository {
   }
 
   async saUpdateUserBanStatus(
-      userId: string,
-      banStatus: boolean,
-      banReason: string | null,
-      banDate: Date | null,
+    userId: string,
+    banStatus: boolean,
+    banReason: string | null,
+    banDate: Date | null,
   ): Promise<boolean> {
     const filter = this.getUpdateFilter(banStatus, banReason, banDate);
     const result = await this.dataSource.query(`
@@ -102,8 +102,8 @@ export class PgBanInfoRepository {
   }
 
   async deleteUserBanForBlogStatus(
-      userId: string,
-      blogId: string,
+    userId: string,
+    blogId: string,
   ): Promise<boolean> {
     const query = `
       DELETE

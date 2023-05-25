@@ -72,5 +72,5 @@ export const getUrlForReactionStatus = (url: string, id: string): string => {
 };
 
 export const getUrlForPost = (url: string, id: string): string => {
-  return `${url}/${id}/posts`
-}
+  return `${url}/${id}/posts`;
+};

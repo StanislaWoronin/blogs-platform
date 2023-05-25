@@ -1,22 +1,20 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import {DataSource, Not} from "typeorm";
-import { UserDeviceModel } from "../entity/userDevice.model";
-import { Security } from "../entity/security";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Not } from 'typeorm';
+import { UserDeviceModel } from '../entity/userDevice.model';
+import { Security } from '../entity/security';
 
 @Injectable()
 export class OrmSecurityRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createUserDevice(newDevice: UserDeviceModel): Promise<boolean> {
     try {
-      await this.dataSource.getRepository(Security)
-        .save(newDevice)
+      await this.dataSource.getRepository(Security).save(newDevice);
 
-      return true
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
   }
 
@@ -30,31 +28,31 @@ export class OrmSecurityRepository {
       .update(Security)
       .set({
         iat,
-        exp
+        exp,
       })
-      .where("deviceId = :id", {id: deviceId})
-      .execute()
+      .where('deviceId = :id', { id: deviceId })
+      .execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deleteAllActiveSessions(
     userId: string,
     deviceId: string,
   ): Promise<boolean> {
-    console.log(userId, deviceId)
+    console.log(userId, deviceId);
     const builder = this.dataSource
       .createQueryBuilder()
       .delete()
       .from(Security)
-      .where("userId = :id", {id: userId})
-      .andWhere("deviceId != :id", {id: deviceId})
-    const result = await builder.execute()
+      .where('userId = :id', { id: userId })
+      .andWhere('deviceId != :id', { id: deviceId });
+    const result = await builder.execute();
 
-    return true
+    return true;
   } // TODO trabl 4
 
   async deleteDeviceById(deviceId: string): Promise<boolean> {
@@ -62,13 +60,13 @@ export class OrmSecurityRepository {
       .createQueryBuilder()
       .delete()
       .from(Security)
-      .where("deviceId = :id", {id: deviceId})
-      .execute()
+      .where('deviceId = :id', { id: deviceId })
+      .execute();
 
     console.log(result);
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 }

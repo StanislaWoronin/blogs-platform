@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, ILike } from "typeorm";
+import { DataSource, ILike } from 'typeorm';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
 import {
   giveSkipNumber,
@@ -11,16 +11,18 @@ import { BanStatusModel } from '../../../../global-model/ban-status.model';
 import { toUserViewModel } from '../../../../data-mapper/to-create-user-view.model';
 import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { toBannedUsersModel } from '../../../../data-mapper/to-banned-users.model';
-import { BannedUsersForBlog } from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
-import { rawToView } from "../../../../data-mapper/raw-to-view";
-import { DbBannedUsersModel } from "../entity/db-banned-users.model";
-import { Users } from "../entity/users.entity";
+import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity';
+import { rawToView } from '../../../../data-mapper/raw-to-view';
+import { DbBannedUsersModel } from '../entity/db-banned-users.model';
+import { Users } from '../entity/users.entity';
 
 @Injectable()
 export class PgQueryUsersRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async isLoginOrEmailExistForValidation(loginOrEmail: string): Promise<{id: string}> {
+  async isLoginOrEmailExistForValidation(
+    loginOrEmail: string,
+  ): Promise<{ id: string }> {
     const query = `SELECT id FROM public.users WHERE login = $1 OR email = $1`;
     const result = await this.dataSource.query(query, [loginOrEmail]);
 

@@ -7,7 +7,7 @@ import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/
 import { Comments } from '../../../public/comments/infrastructure/entity/comments.entity';
 import { CommentReactions } from '../../../public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from '../../../public/likes/infrastructure/entity/post-reactions.entity';
-import { UserBanInfo } from "./user-ban-info.entity";
+import { UserBanInfo } from './user-ban-info.entity';
 
 @Entity()
 export class Users {

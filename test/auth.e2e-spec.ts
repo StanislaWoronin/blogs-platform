@@ -16,7 +16,7 @@ import { EmailManagerMock } from './mock/emailAdapter.mock';
 import { randomUUID } from 'crypto';
 import { ExpectAuthModel } from './helper/expect-auth.model';
 import { endpoints } from './helper/routing';
-import { Factories } from "./helper/factories";
+import { Factories } from './helper/factories';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -494,12 +494,11 @@ describe('e2e tests', () => {
     });
 
     it('Try', async () => {
-      const errorsMessages = getErrorMessage(['login', 'email']
-      )
-      await factories.createUsers(1)
+      const errorsMessages = getErrorMessage(['login', 'email']);
+      await factories.createUsers(1);
 
-      const errors = await factories.createUsers(1)
-      expect(errors[0]).toStrictEqual({ errorsMessages })
-    })
+      const errors = await factories.createUsers(1);
+      expect(errors[0]).toStrictEqual({ errorsMessages });
+    });
   });
 });

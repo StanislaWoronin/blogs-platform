@@ -3,16 +3,17 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  Inject
-} from "@nestjs/common";
+  Inject,
+} from '@nestjs/common';
 import { JwtService } from '../modules/public/auth/application/jwt.service';
-import { IQueryUsersRepository } from "../modules/super-admin/infrastructure/i-query-users.repository";
+import { IQueryUsersRepository } from '../modules/super-admin/infrastructure/i-query-users.repository';
 
 @Injectable()
 export class AuthBearerGuard implements CanActivate {
   constructor(
     protected jwtService: JwtService,
-    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
+    @Inject(IQueryUsersRepository)
+    protected queryUsersRepository: IQueryUsersRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -23,6 +24,7 @@ export class AuthBearerGuard implements CanActivate {
     }
 
     const accessToken = req.headers.authorization.split(' ')[1];
+
     const tokenPayload = await this.jwtService.getTokenPayload(accessToken);
 
     if (!tokenPayload) {

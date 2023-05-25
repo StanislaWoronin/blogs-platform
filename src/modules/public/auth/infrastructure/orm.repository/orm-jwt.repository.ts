@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { TokenBlackList } from "../entity/tokenBlackList";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { TokenBlackList } from '../entity/tokenBlackList';
 
 @Injectable()
 export class OrmJwtRepository {

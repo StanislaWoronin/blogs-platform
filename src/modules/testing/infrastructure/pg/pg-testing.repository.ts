@@ -9,9 +9,9 @@ export class PgTestingRepository {
       SELECT "confirmationCode"
         FROM public.email_confirmation
        WHERE "userId" = '${userId}'
-    `)
+    `);
 
-    return result[0]
+    return result[0];
   }
 
   async checkUserConfirmed(userId: string) {
@@ -19,9 +19,9 @@ export class PgTestingRepository {
       SELECT "isConfirmed"
         FROM public.email_confirmation
        WHERE "userId" = '${userId}'
-    `)
+    `);
 
-    return result[0]
+    return result[0];
   }
 
   async getUserPassword(userId: string) {
@@ -29,9 +29,9 @@ export class PgTestingRepository {
       SELECT "passwordHash"
         FROM public.users
        WHERE id = '${userId}'
-    `)
+    `);
 
-    return result[0]
+    return result[0];
   }
 
   async makeExpired(userId: string, expirationDate: string) {
@@ -65,8 +65,6 @@ export class PgTestingRepository {
       DELETE FROM users; 
     `);
 
-    return true
+    return true;
   }
-
-
 }

@@ -31,8 +31,8 @@ export class CommentWithAdditionalInfoModelPlus {
     blogName: string;
   };
   likesInfo: {
-    likesCount: number,
-    dislikesCount: number,
-    myStatus: string
-  }
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: string;
+  };
 }

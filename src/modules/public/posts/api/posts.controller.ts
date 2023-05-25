@@ -3,7 +3,8 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  HttpCode, Inject,
+  HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Post,
@@ -24,23 +25,28 @@ import { ReactionDto } from '../../../../global-model/reaction.dto';
 import { PgQueryPostsRepository } from '../infrastructure/pg.repository/pg-query-posts.repository';
 import { JwtService } from '../../auth/application/jwt.service';
 import { PgQueryCommentsRepository } from '../../comments/infrastructure/pg-repository/pg-query-comments.repository';
-import { AccessTokenValidationGuard } from "../../../../guards/access-token-validation.guard";
-import {IQueryCommentsRepository} from "../../comments/infrastructure/i-query-comments.repository";
-import { IQueryPostsRepository } from "../infrastructure/i-query-posts.repository";
+import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
+import { IQueryCommentsRepository } from '../../comments/infrastructure/i-query-comments.repository';
+import { IQueryPostsRepository } from '../infrastructure/i-query-posts.repository';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     protected commentsService: CommentsService,
     protected postsService: PostsService,
-    @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
-    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
+    @Inject(IQueryCommentsRepository)
+    protected queryCommentsRepository: IQueryCommentsRepository,
+    @Inject(IQueryPostsRepository)
+    protected queryPostsRepository: IQueryPostsRepository,
   ) {}
 
   @UseGuards(AccessTokenValidationGuard)
   @Get()
-  async getPosts(@Query() query: QueryParametersDto, @User() user: UserDBModel) {
-    let blogId = undefined;
+  async getPosts(
+    @Query() query: QueryParametersDto,
+    @User() user: UserDBModel,
+  ) {
+    const blogId = undefined;
     let userId;
     if (user) {
       userId = user.id;
@@ -71,7 +77,7 @@ export class PostsController {
   async getCommentsByPostId(
     @Query() query: QueryParametersDto,
     @Param('id') postId: string,
-    @User() user: UserDBModel
+    @User() user: UserDBModel,
   ) {
     let userId;
     if (user) {
@@ -129,8 +135,8 @@ export class PostsController {
     }
 
     const banStatus = await this.postsService.checkUserBanStatus(
-        user.id,
-        postId,
+      user.id,
+      postId,
     );
     if (banStatus) {
       throw new ForbiddenException();

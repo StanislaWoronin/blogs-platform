@@ -4,9 +4,7 @@ import { AppModule } from '../src/app.module';
 import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
 import { preparedUser, superUser } from './helper/prepeared-data';
-import {
-  endpoints,
-} from './helper/routing';
+import { endpoints } from './helper/routing';
 
 describe('e2e tests', () => {
   const second = 1000;

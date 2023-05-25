@@ -3,18 +3,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
-import { preparedComment, preparedPost } from "./helper/prepeared-data";
-import {
-  getPosts,
-  getStandardPosts,
-} from './helper/expect-post-models';
+import { preparedComment, preparedPost } from './helper/prepeared-data';
+import { getPosts, getStandardPosts } from './helper/expect-post-models';
 import { v4 as uuidv4 } from 'uuid';
 import { getCreatedComment } from './helper/expect-comment-model';
 import {
   endpoints,
   getUrlForComment,
-  getUrlForEndpointPostByBlogger, getUrlForPost
-} from "./helper/routing";
+  getUrlForEndpointPostByBlogger,
+  getUrlForPost,
+} from './helper/routing';
 import { Factories } from './helper/factories';
 
 describe('e2e tests', () => {
@@ -87,11 +85,9 @@ describe('e2e tests', () => {
     describe('Return all posts by blogId', () => {
       it('Return posts without query', async () => {
         const { blog1, post1, post2, post3 } = expect.getState();
-        const url = getUrlForPost(endpoints.blogController, blog1.id)
+        const url = getUrlForPost(endpoints.blogController, blog1.id);
 
-        const response = await request(server)
-          .get(url)
-          .expect(200);
+        const response = await request(server).get(url).expect(200);
 
         expect(response.body).toStrictEqual({
           pagesCount: 1,

@@ -3,7 +3,8 @@ import {
   Controller,
   Get,
   Headers,
-  HttpCode, Inject,
+  HttpCode,
+  Inject,
   Ip,
   NotFoundException,
   NotImplementedException,
@@ -33,8 +34,8 @@ import { AuthDto } from './dto/auth.dto';
 import { EmailDto } from './dto/email.dto';
 import { NewPasswordDto } from './dto/new-password.dto';
 import { UserDto } from '../../../super-admin/api/dto/user.dto';
-import {IEmailConfirmationRepository} from "../../../super-admin/infrastructure/i-email-confirmation.repository";
-import { IQueryUsersRepository } from "../../../super-admin/infrastructure/i-query-users.repository";
+import { IEmailConfirmationRepository } from '../../../super-admin/infrastructure/i-email-confirmation.repository';
+import { IQueryUsersRepository } from '../../../super-admin/infrastructure/i-query-users.repository';
 
 @Controller('auth')
 export class AuthController {
@@ -44,8 +45,10 @@ export class AuthController {
     protected emailManager: EmailManager,
     protected securityService: SecurityService,
     protected userService: UsersService,
-    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
-    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
+    @Inject(IEmailConfirmationRepository)
+    protected emailConfirmationRepository: IEmailConfirmationRepository,
+    @Inject(IQueryUsersRepository)
+    protected queryUsersRepository: IQueryUsersRepository,
   ) {}
 
   @UseGuards(AuthBearerGuard)
@@ -55,7 +58,7 @@ export class AuthController {
   }
 
   //@Throttle(5, 10)
-  @UseGuards(/*ThrottlerGuard, */CheckCredentialGuard)
+  @UseGuards(/*ThrottlerGuard, */ CheckCredentialGuard)
   @Post('login')
   async createUser(
     @Body() dto: AuthDto,

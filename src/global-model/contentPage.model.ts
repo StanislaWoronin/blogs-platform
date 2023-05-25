@@ -7,10 +7,8 @@ import {
   PostViewModel,
 } from '../modules/public/posts/api/dto/postsView.model';
 import { ViewBannedUser } from '../modules/blogger/api/dto/view-banned-users.model';
-import {
-  CommentViewModel,
-} from '../modules/public/comments/api/dto/commentView.model';
-import { CommentWithAdditionalInfoModel } from "../modules/blogger/api/dto/comment-with-additional-info.model";
+import { CommentViewModel } from '../modules/public/comments/api/dto/commentView.model';
+import { CommentWithAdditionalInfoModel } from '../modules/blogger/api/dto/comment-with-additional-info.model';
 
 export class ContentPageModel {
   constructor(

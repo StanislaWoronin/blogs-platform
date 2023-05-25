@@ -1,104 +1,102 @@
-import {InjectDataSource} from "@nestjs/typeorm";
+import { InjectDataSource } from '@nestjs/typeorm';
 
-import {DataSource} from "typeorm";
-import {BanInfoModel} from "../entity/banInfo.model";
-import {UserBanInfo} from "../entity/user-ban-info.entity";
-import {BannedUsersForBlog} from "../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity";
-import {BannedBlog} from "../entity/banned_blog.entity";
-import {BannedPost} from "../entity/banned-post.entity";
+import { DataSource } from 'typeorm';
+import { BanInfoModel } from '../entity/banInfo.model';
+import { UserBanInfo } from '../entity/user-ban-info.entity';
+import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity';
+import { BannedBlog } from '../entity/banned_blog.entity';
+import { BannedPost } from '../entity/banned-post.entity';
 
 export class OrmBanInfoRepository {
-  constructor(
-      @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getBanInfo(userId: string): Promise<BanInfoModel | null> {
-    const builder = this.dataSource.createQueryBuilder()
-        .select("bi.userId", "userId")
-        .addSelect("bi.banStatus", "isBanned")
-        .addSelect("bi.banDate", "banDate")
-        .addSelect("bi.banReason", "banReason")
-        .from(UserBanInfo, "bi")
-        .where("bi.userId = :id", {id: userId})
+    const builder = this.dataSource
+      .createQueryBuilder()
+      .select('bi.userId', 'userId')
+      .addSelect('bi.banStatus', 'isBanned')
+      .addSelect('bi.banDate', 'banDate')
+      .addSelect('bi.banReason', 'banReason')
+      .from(UserBanInfo, 'bi')
+      .where('bi.userId = :id', { id: userId });
 
-    return await builder.getRawOne()
+    return await builder.getRawOne();
   }
 
   async createBanInfo(banInfo: BanInfoModel): Promise<BanInfoModel> {
-    return await this.dataSource.getRepository(UserBanInfo)
-        .save(banInfo)
+    return await this.dataSource.getRepository(UserBanInfo).save(banInfo);
   }
 
   async saUpdateUserBanStatus(
-      userId: string,
-      banStatus: boolean,
-      banReason: string | null,
-      banDate: Date | null,
+    userId: string,
+    banStatus: boolean,
+    banReason: string | null,
+    banDate: Date | null,
   ): Promise<boolean> {
     const builder = this.dataSource
-        .createQueryBuilder()
-        .update(UserBanInfo)
-        .set({
-          userId,
-          banStatus,
-          banReason,
-          banDate
-        })
-        .where("userId = :id", {id: userId})
-    const result = await builder.execute()
+      .createQueryBuilder()
+      .update(UserBanInfo)
+      .set({
+        userId,
+        banStatus,
+        banReason,
+        banDate,
+      })
+      .where('userId = :id', { id: userId });
+    const result = await builder.execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deleteUserBanInfoById(userId: string): Promise<boolean> {
     const builder = this.dataSource
-        .createQueryBuilder()
-        .delete()
-        .from(UserBanInfo)
-        .where("userId = :id", {id: userId})
-    const result = await builder.execute()
+      .createQueryBuilder()
+      .delete()
+      .from(UserBanInfo)
+      .where('userId = :id', { id: userId });
+    const result = await builder.execute();
 
-      if (result.affected != 1) {
-          return false
-      }
-      return true
+    if (result.affected != 1) {
+      return false;
+    }
+    return true;
   }
 
   async youBanned(userId: string, blogId: string): Promise<boolean> {
     const builder = this.dataSource
-        .createQueryBuilder()
-        .select("bfb.blogId")
-        .from(BannedUsersForBlog, "bfb")
-        .where("bfb.userId = :id", {id: userId})
-        .andWhere("bfb.blogId = :id", {id: blogId})
-    const result = await builder.getExists()
+      .createQueryBuilder()
+      .select('bfb.blogId')
+      .from(BannedUsersForBlog, 'bfb')
+      .where('bfb.userId = :id', { id: userId })
+      .andWhere('bfb.blogId = :id', { id: blogId });
+    const result = await builder.getExists();
 
-    return result
+    return result;
   }
 
   async createUserBanForBlogStatus(
-      userId: string,
-      blogId: string,
-      banReason: string,
-      banDate: string,
+    userId: string,
+    blogId: string,
+    banReason: string,
+    banDate: string,
   ): Promise<boolean> {
     const banInfo = {
       userId,
       blogId,
       banReason,
-      banDate
-    }
+      banDate,
+    };
     const result = this.dataSource
-        .getRepository(BannedUsersForBlog)
-        .save(banInfo)
+      .getRepository(BannedUsersForBlog)
+      .save(banInfo);
 
     if (!result) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   // async deleteUserBanForBlogStatus(
@@ -123,76 +121,79 @@ export class OrmBanInfoRepository {
   async createBlogBanStatus(blogId: string, banDate: string): Promise<boolean> {
     const banStatus = {
       blogId,
-      banDate
-    }
+      banDate,
+    };
 
-    const result = await this.dataSource.getRepository(BannedBlog)
-        .save(banStatus)
+    const result = await this.dataSource
+      .getRepository(BannedBlog)
+      .save(banStatus);
 
     if (!result) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async createPostsBanInfo(
-      postsId: { id: string }[],
-      banReason: string,
-      banDate: string,
+    postsId: { id: string }[],
+    banReason: string,
+    banDate: string,
   ): Promise<boolean> {
     const values = this.getValues(postsId, banReason, banDate);
 
     const builder = this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(BannedPost)
-        .values(values)
-    const result = await builder.execute()
+      .createQueryBuilder()
+      .insert()
+      .into(BannedPost)
+      .values(values);
+    const result = await builder.execute();
 
     if (!result) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deleteBlogBanStatus(blogId: string): Promise<boolean> {
     const builder = this.dataSource
-        .createQueryBuilder()
-        .delete()
-        .from(BannedBlog)
-        .where("blogId = :id", {id: blogId})
-    const result = await builder.execute()
+      .createQueryBuilder()
+      .delete()
+      .from(BannedBlog)
+      .where('blogId = :id', { id: blogId });
+    const result = await builder.execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deletePostsBanStatus(blogId: string): Promise<number> {
     const builder = this.dataSource
-        .createQueryBuilder()
-        .delete()
-        .from(BannedPost)
-        .where(`"postId" IN (SELECT id FROM posts WHERE "blogId" = :id)`, {id: blogId})
-    const result = await builder.execute()
+      .createQueryBuilder()
+      .delete()
+      .from(BannedPost)
+      .where(`"postId" IN (SELECT id FROM posts WHERE "blogId" = :id)`, {
+        id: blogId,
+      });
+    const result = await builder.execute();
 
-    return result.affected
+    return result.affected;
   }
 
   private getValues(
-      postsId: { id: string }[],
-      banReason: string,
-      banDate: string,
+    postsId: { id: string }[],
+    banReason: string,
+    banDate: string,
   ): {}[] {
-    let values = [];
+    const values = [];
 
     for (let i = 0, l = postsId.length; i < l; i++) {
       const banInfo = {
         postsId: postsId[i],
         banReason,
-        banDate
-      }
+        banDate,
+      };
       values.push(banInfo);
     }
 

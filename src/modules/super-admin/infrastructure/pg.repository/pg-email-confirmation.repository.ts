@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { EmailConfirmationModel } from '../entity/emailConfirmation.model';
 import { v4 as uuidv4 } from 'uuid';
 import { log } from 'util';
-import { EmailConfirmation } from "../entity/email-confirmation.entity";
+import { EmailConfirmation } from '../entity/email-confirmation.entity';
 
 @Injectable()
 export class PgEmailConfirmationRepository {

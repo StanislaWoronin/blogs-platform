@@ -1,16 +1,17 @@
 import {
-  CreatedComment, DbCommentWithAdditionalInfo,
-  DbCommentWithUserAndLikesInfoModel
-} from "../modules/public/comments/infrastructure/entity/db_comment.model";
+  CreatedComment,
+  DbCommentWithAdditionalInfo,
+  DbCommentWithUserAndLikesInfoModel,
+} from '../modules/public/comments/infrastructure/entity/db_comment.model';
 import {
   CommentViewModel,
   CreatedCommentViewModel,
 } from '../modules/public/comments/api/dto/commentView.model';
 import {
   CommentWithAdditionalInfoModel,
-  CommentWithAdditionalInfoModelPlus
-} from "../modules/blogger/api/dto/comment-with-additional-info.model";
-import { CommentDbWithAdditionalInfoModel } from "../modules/public/comments/infrastructure/entity/commentDB.model";
+  CommentWithAdditionalInfoModelPlus,
+} from '../modules/blogger/api/dto/comment-with-additional-info.model';
+import { CommentDbWithAdditionalInfoModel } from '../modules/public/comments/infrastructure/entity/commentDB.model';
 
 export const toCommentsViewModel = (
   comment: DbCommentWithUserAndLikesInfoModel,
@@ -57,7 +58,7 @@ export const createdCommentViewModel = (
 };
 
 export const commentWithAdditionalInfo = (
-  comment: DbCommentWithAdditionalInfo
+  comment: DbCommentWithAdditionalInfo,
 ): CommentWithAdditionalInfoModel => {
   return {
     id: comment.id,
@@ -73,13 +74,13 @@ export const commentWithAdditionalInfo = (
       blogId: comment.blogId,
       blogName: comment.blogName,
     },
-  }
-}
+  };
+};
 
 export const commentWithAdditionalInfoPlus = (
-  comment: CommentDbWithAdditionalInfoModel
+  comment: CommentDbWithAdditionalInfoModel,
 ): CommentWithAdditionalInfoModelPlus => {
-  let myStatus = 'None'
+  let myStatus = 'None';
   if (comment.myStatus) {
     myStatus = comment.myStatus;
   }
@@ -101,7 +102,7 @@ export const commentWithAdditionalInfoPlus = (
     likesInfo: {
       likesCount: Number(comment.likesCount),
       dislikesCount: Number(comment.dislikesCount),
-      myStatus: myStatus
-    }
-  }
-}
+      myStatus: myStatus,
+    },
+  };
+};

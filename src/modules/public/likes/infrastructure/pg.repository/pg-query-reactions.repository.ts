@@ -1,13 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { NewestLikesModel } from "../entity/newestLikes.model";
-import { settings } from "../../../../../settings";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { NewestLikesModel } from '../entity/newestLikes.model';
+import { settings } from '../../../../../settings';
 
 @Injectable()
 export class PgQueryReactionsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getCommentReaction(
     userId: string,
@@ -38,7 +37,7 @@ export class PgQueryReactionsRepository {
   }
 
   async newestLikes(postId: string): Promise<NewestLikesModel[]> {
-    const reactionFilter = this.reactionFilter()
+    const reactionFilter = this.reactionFilter();
 
     const newestLikesQuery = `
       SELECT "userId", "addedAt",
@@ -63,6 +62,6 @@ export class PgQueryReactionsRepository {
                                  AND banned_users_for_blog."blogId" = (SELECT "blogId" 
                                 FROM public.posts 
                                WHERE id = $1))
-    `
+    `;
   }
 }

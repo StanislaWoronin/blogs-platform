@@ -1,17 +1,11 @@
-import { NewestLikesModel } from "./entity/newestLikes.model";
+import { NewestLikesModel } from './entity/newestLikes.model';
 
 export interface IQueryReactionRepository {
-  getCommentReaction(
-    userId: string,
-    commentId: string,
-  ): Promise<string | null>
+  getCommentReaction(userId: string, commentId: string): Promise<string | null>;
 
-  getPostReaction(
-    userId: string,
-    postId: string,
-  ): Promise<string | null>
+  getPostReaction(userId: string, postId: string): Promise<string | null>;
 
-  newestLikes(postId: string): Promise<NewestLikesModel[]>
+  newestLikes(postId: string): Promise<NewestLikesModel[]>;
 }
 
-export const IQueryReactionRepository = 'IQueryReactionRepository'
+export const IQueryReactionRepository = 'IQueryReactionRepository';

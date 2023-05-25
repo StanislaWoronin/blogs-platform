@@ -1,9 +1,10 @@
 import request from 'supertest';
 import {
-  endpoints, getUrlForComment,
+  endpoints,
+  getUrlForComment,
   getUrlForReactionStatus,
-  getUrlWithId
-} from "../helper/routing";
+  getUrlWithId,
+} from '../helper/routing';
 
 export class Posts {
   constructor(private readonly server: any) {}
@@ -40,7 +41,7 @@ export class Posts {
   }
 
   async getCommentsByPostId(postId: string, accessToken?: string) {
-    const url = getUrlForComment(endpoints.postController, postId)
+    const url = getUrlForComment(endpoints.postController, postId);
 
     const response = await request(this.server)
       .get(url)

@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ValidationArguments,
   ValidatorConstraint,
@@ -6,13 +6,14 @@ import {
 } from 'class-validator';
 import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
 import { request } from 'express';
-import {IEmailConfirmationRepository} from "../modules/super-admin/infrastructure/i-email-confirmation.repository";
+import { IEmailConfirmationRepository } from '../modules/super-admin/infrastructure/i-email-confirmation.repository';
 
 @ValidatorConstraint({ name: 'ConfirmationCodeValidator', async: true })
 @Injectable()
 export class PasswordRecoveryValidator implements ValidatorConstraintInterface {
   constructor(
-      @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
+    @Inject(IEmailConfirmationRepository)
+    protected emailConfirmationRepository: IEmailConfirmationRepository,
   ) {}
 
   async validate(code: string) {

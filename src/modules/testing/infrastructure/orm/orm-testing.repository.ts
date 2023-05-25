@@ -1,15 +1,15 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { EmailConfirmation } from "../../../super-admin/infrastructure/entity/email-confirmation.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { EmailConfirmation } from '../../../super-admin/infrastructure/entity/email-confirmation.entity';
 
 @Injectable()
 export class OrmTestingRepository {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getConfirmationCode(userId: string)/*: Promise<{ confirmationCode: string }>*/ {
+  async getConfirmationCode(
+    userId: string,
+  ) /*: Promise<{ confirmationCode: string }>*/ {
     const result = await this.dataSource
       .getRepository('email_confirmation')
       .createQueryBuilder('ec')
@@ -20,7 +20,9 @@ export class OrmTestingRepository {
     return result;
   }
 
-  async checkUserConfirmed(userId: string)/*: Promise<{isConfirmed: boolean}>*/ {
+  async checkUserConfirmed(
+    userId: string,
+  ) /*: Promise<{isConfirmed: boolean}>*/ {
     const result = await this.dataSource
       .getRepository('email_confirmation')
       .createQueryBuilder('ec')
@@ -31,7 +33,7 @@ export class OrmTestingRepository {
     return result;
   }
 
-  async getUserPassword(userId: string)/*: Promise<{passwordHash: string}>*/ {
+  async getUserPassword(userId: string) /*: Promise<{passwordHash: string}>*/ {
     const result = await this.dataSource
       .getRepository('users')
       .createQueryBuilder('u')
@@ -77,6 +79,6 @@ export class OrmTestingRepository {
       DELETE FROM users; 
     `);
 
-    return true
+    return true;
   }
 }

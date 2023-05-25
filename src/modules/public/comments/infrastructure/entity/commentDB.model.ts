@@ -21,7 +21,6 @@ export class CommentDbWithAdditionalInfoModel {
     public blogName: string,
     public likesCount: number,
     public dislikesCount: number,
-    public myStatus: string | null
-  ) {
-  }
+    public myStatus: string | null,
+  ) {}
 }

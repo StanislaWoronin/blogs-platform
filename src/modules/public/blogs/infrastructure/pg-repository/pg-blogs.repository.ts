@@ -4,14 +4,12 @@ import { BindBlogDto } from '../../../../super-admin/api/dto/bind-blog.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogDBModel } from '../entity/blog-db.model';
-import {BlogViewModel, CreatedBlogModel} from '../../api/dto/blogView.model';
+import { BlogViewModel, CreatedBlogModel } from '../../api/dto/blogView.model';
 import { Blogs } from '../entity/blogs.entity';
 
 @Injectable()
 export class PgBlogsRepository {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createBlog(newBlog: BlogDBModel): Promise<BlogViewModel | null> {
     const query = `
@@ -27,7 +25,7 @@ export class PgBlogsRepository {
       newBlog.websiteUrl,
       newBlog.createdAt,
       newBlog.userId,
-      newBlog.isMembership
+      newBlog.isMembership,
     ]);
 
     return result[0];

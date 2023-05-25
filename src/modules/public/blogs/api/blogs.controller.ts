@@ -1,22 +1,26 @@
 import {
   Controller,
-  Get, Inject,
+  Get,
+  Inject,
   NotFoundException,
   Param,
-  Query, UseGuards
-} from "@nestjs/common";
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { QueryParametersDto } from '../../../../global-model/query-parameters.dto';
-import { IQueryBlogsRepository } from "../infrastructure/i-query-blogs.repository";
-import { IQueryPostsRepository } from "../../posts/infrastructure/i-query-posts.repository";
-import { AccessTokenValidationGuard } from "../../../../guards/access-token-validation.guard";
-import { User } from "../../../../decorator/user.decorator";
-import { UserDBModel } from "../../../super-admin/infrastructure/entity/userDB.model";
+import { IQueryBlogsRepository } from '../infrastructure/i-query-blogs.repository';
+import { IQueryPostsRepository } from '../../posts/infrastructure/i-query-posts.repository';
+import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
+import { User } from '../../../../decorator/user.decorator';
+import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository,
-    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
+    @Inject(IQueryBlogsRepository)
+    protected queryBlogsRepository: IQueryBlogsRepository,
+    @Inject(IQueryPostsRepository)
+    protected queryPostsRepository: IQueryPostsRepository,
   ) {}
 
   @Get()
@@ -47,7 +51,7 @@ export class BlogsController {
   async getPostsByBlogId(
     @Query() query: QueryParametersDto,
     @Param('id') blogId: string,
-    @User() user: UserDBModel
+    @User() user: UserDBModel,
   ) {
     let userId;
     if (user) {

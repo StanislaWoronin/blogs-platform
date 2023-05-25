@@ -1,7 +1,15 @@
-import { Controller, Delete, Get, HttpCode, Inject, Param, Put } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { JwtService } from '../../public/auth/application/jwt.service';
-import { ITestingRepository } from "../infrastructure/i-testing.repository";
-import {TokenPayloadModel} from "../../../global-model/token-payload.model";
+import { ITestingRepository } from '../infrastructure/i-testing.repository';
+import { TokenPayloadModel } from '../../../global-model/token-payload.model';
 
 @Controller('testing')
 export class TestingController {
@@ -22,11 +30,13 @@ export class TestingController {
 
   @Get('user-password/:userId')
   async getUserPassword(@Param('userId') userId: string) {
-    return await this.testingRepository.getUserPassword(userId)
+    return await this.testingRepository.getUserPassword(userId);
   }
 
   @Get('expired-token/:token')
-  async getExpiredToken(@Param('token') token: string): Promise<{expiredToken: string}> {
+  async getExpiredToken(
+    @Param('token') token: string,
+  ): Promise<{ expiredToken: string }> {
     const tokenPayload = await this.jwtService.getTokenPayload(token);
 
     return {
@@ -40,7 +50,7 @@ export class TestingController {
 
   @Get('payload/:token')
   async getPayload(@Param('token') token: string): Promise<TokenPayloadModel> {
-    return await this.jwtService.getTokenPayload(token)
+    return await this.jwtService.getTokenPayload(token);
   }
 
   @Put('set-expiration-date/:userId')
@@ -48,12 +58,12 @@ export class TestingController {
   async makeExpired(@Param('userId') userId: string): Promise<boolean> {
     const expirationDate = new Date(Date.now() - 48 * 1000).toISOString();
 
-    return await this.testingRepository.makeExpired(userId, expirationDate)
+    return await this.testingRepository.makeExpired(userId, expirationDate);
   }
 
   @Delete('all-data')
   @HttpCode(204)
   async deleteAll(): Promise<boolean> {
-    return this.testingRepository.deleteAll()
+    return this.testingRepository.deleteAll();
   }
 }

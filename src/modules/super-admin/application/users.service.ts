@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   CreatedUserModel,
   UserDBModel,
@@ -8,16 +8,17 @@ import { _generateHash } from '../../../helper.functions';
 import { BanInfoModel } from '../infrastructure/entity/banInfo.model';
 import { EmailConfirmationModel } from '../infrastructure/entity/emailConfirmation.model';
 import { UserDto } from '../api/dto/user.dto';
-import {IBanInfoRepository} from "../infrastructure/i-ban-info.repository";
-import {IEmailConfirmationRepository} from "../infrastructure/i-email-confirmation.repository";
-import { IUsersRepository } from "../infrastructure/i-users.repository";
+import { IBanInfoRepository } from '../infrastructure/i-ban-info.repository';
+import { IEmailConfirmationRepository } from '../infrastructure/i-email-confirmation.repository';
+import { IUsersRepository } from '../infrastructure/i-users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
-    @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
-    @Inject(IUsersRepository) protected usersRepository: IUsersRepository
+    @Inject(IEmailConfirmationRepository)
+    protected emailConfirmationRepository: IEmailConfirmationRepository,
+    @Inject(IUsersRepository) protected usersRepository: IUsersRepository,
   ) {}
 
   async createUser(

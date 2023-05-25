@@ -8,20 +8,18 @@ import {
 } from '../../../../../helper.functions';
 import {
   DbCommentWithAdditionalInfo,
-  DbCommentWithUserAndLikesInfoModel
-} from "../entity/db_comment.model";
+  DbCommentWithUserAndLikesInfoModel,
+} from '../entity/db_comment.model';
 import {
   commentWithAdditionalInfo,
   commentWithAdditionalInfoPlus,
-  toCommentsViewModel
-} from "../../../../../data-mapper/to_comments_view.model";
+  toCommentsViewModel,
+} from '../../../../../data-mapper/to_comments_view.model';
 import { ContentPageModel } from '../../../../../global-model/contentPage.model';
-import {
-  CommentViewModel
-} from "../../api/dto/commentView.model";
-import { CommentWithAdditionalInfoModel } from "../../../../blogger/api/dto/comment-with-additional-info.model";
-import { CommentDbWithAdditionalInfoModel } from "../entity/commentDB.model";
-import {ReactionModel} from "../../../../../global-model/reaction.model";
+import { CommentViewModel } from '../../api/dto/commentView.model';
+import { CommentWithAdditionalInfoModel } from '../../../../blogger/api/dto/comment-with-additional-info.model';
+import { CommentDbWithAdditionalInfoModel } from '../entity/commentDB.model';
+import { ReactionModel } from '../../../../../global-model/reaction.model';
 
 @Injectable()
 export class PgQueryCommentsRepository {
@@ -62,7 +60,9 @@ export class PgQueryCommentsRepository {
     const commentDB: DbCommentWithAdditionalInfo[] =
       await this.dataSource.query(query, [queryDto.pageSize]);
 
-    const comments: CommentWithAdditionalInfoModel[] = commentDB.map((c) => commentWithAdditionalInfo(c));
+    const comments: CommentWithAdditionalInfoModel[] = commentDB.map((c) =>
+      commentWithAdditionalInfo(c),
+    );
 
     const totalCountQuery = `
           SELECT COUNT(c.id)
@@ -97,7 +97,7 @@ export class PgQueryCommentsRepository {
     userId: string,
   ): Promise<ContentPageModel | null> {
     const myStatusFilter = this.myStatusFilter(userId);
-    const reactions = this.reactions()
+    const reactions = this.reactions();
 
     const query = `
               SELECT id, content, "createdAt",
@@ -127,9 +127,9 @@ export class PgQueryCommentsRepository {
              )};   
         `;
     const commentsDB: DbCommentWithUserAndLikesInfoModel[] =
-      await this.dataSource.query(query, [ queryDto.pageSize]);
+      await this.dataSource.query(query, [queryDto.pageSize]);
     if (!commentsDB.length) {
-      return null
+      return null;
     }
 
     const comments = commentsDB.map((c) => toCommentsViewModel(c));
@@ -162,7 +162,7 @@ export class PgQueryCommentsRepository {
     userId: string | undefined,
   ): Promise<CommentViewModel> {
     const myStatusFilter = this.myStatusFilter(userId);
-    const reactions = this.reactions()
+    const reactions = this.reactions();
 
     const query = `
               SELECT id, content, "createdAt",
@@ -192,9 +192,12 @@ export class PgQueryCommentsRepository {
     return toCommentsViewModel(commentsDB[0]);
   }
 
-  async bloggerGetComments(userId: string, queryDto: QueryParametersDto): Promise<ContentPageModel> {
+  async bloggerGetComments(
+    userId: string,
+    queryDto: QueryParametersDto,
+  ): Promise<ContentPageModel> {
     const myStatusFilter = this.myStatusFilter(userId);
-    const reactions = this.reactions()
+    const reactions = this.reactions();
 
     const query = `
       SELECT c.id, c.content, c."createdAt", p.id AS "postId", p.title, p."blogId",
@@ -225,10 +228,11 @@ export class PgQueryCommentsRepository {
                queryDto.pageNumber,
                queryDto.pageSize,
              )};         
-    `
-    const commentDb: CommentDbWithAdditionalInfoModel[] = await this.dataSource.query(query, [queryDto.pageSize])
+    `;
+    const commentDb: CommentDbWithAdditionalInfoModel[] =
+      await this.dataSource.query(query, [queryDto.pageSize]);
 
-    const comments = commentDb.map(c => commentWithAdditionalInfoPlus(c))
+    const comments = commentDb.map((c) => commentWithAdditionalInfoPlus(c));
 
     const totalCountQuery = `
         SELECT COUNT(c.id)
@@ -245,8 +249,8 @@ export class PgQueryCommentsRepository {
            AND NOT EXISTS (SELECT "userId" 
           FROM public.banned_users_for_blog
          WHERE (SELECT "blogId" FROM public.posts WHERE p.id = c."postId") = p."blogId" AND c."userId" = banned_users_for_blog."userId")                                
-    `
-    const totalCount = await this.dataSource.query(totalCountQuery)
+    `;
+    const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
       queryDto.pageNumber,
@@ -285,7 +289,10 @@ export class PgQueryCommentsRepository {
     return '';
   }
   private reactions(): string {
-    return `${this.reactionCount("likesCount", ReactionModel.Like)}, ${this.reactionCount("dislikesCount", ReactionModel.Dislike)}`
+    return `${this.reactionCount(
+      'likesCount',
+      ReactionModel.Like,
+    )}, ${this.reactionCount('dislikesCount', ReactionModel.Dislike)}`;
   }
 
   private reactionCount(fieldName: string, reaction: ReactionModel): string {
@@ -304,6 +311,6 @@ export class PgQueryCommentsRepository {
                             FROM public.posts
                            WHERE posts.id = c."postId"))) "${fieldName}"
       
-    `
+    `;
   }
 }

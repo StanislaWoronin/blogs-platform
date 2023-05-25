@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-import { Comments } from "../../../public/comments/infrastructure/entity/comments.entity";
-
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Comments } from '../../../public/comments/infrastructure/entity/comments.entity';
 
 @Entity()
 export class BannedComment {

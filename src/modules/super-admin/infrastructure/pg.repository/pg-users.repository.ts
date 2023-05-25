@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreatedUserModel, UserDBModel } from '../entity/userDB.model';
-import { Users } from "../entity/users.entity";
+import { Users } from '../entity/users.entity';
 
 @Injectable()
 export class PgUsersRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createUser(newUser: UserDBModel): Promise<CreatedUserModel | null> {
     const query = `

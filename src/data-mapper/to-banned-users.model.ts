@@ -1,9 +1,7 @@
 import { DbBannedUsersModel } from '../modules/super-admin/infrastructure/entity/db-banned-users.model';
 import { ViewBannedUser } from '../modules/blogger/api/dto/view-banned-users.model';
 
-export const toBannedUsersModel = (
-  user: any,
-): ViewBannedUser => {
+export const toBannedUsersModel = (user: any): ViewBannedUser => {
   return {
     id: user.id,
     login: user.login,

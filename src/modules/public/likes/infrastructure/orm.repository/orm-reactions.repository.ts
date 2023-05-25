@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { CommentReactions } from "../entity/comment-reactions.entity";
-import { PostReactions } from "../entity/post-reactions.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { CommentReactions } from '../entity/comment-reactions.entity';
+import { PostReactions } from '../entity/post-reactions.entity';
 
 @Injectable()
 export class OrmReactionsRepository {
@@ -19,14 +19,13 @@ export class OrmReactionsRepository {
         status: likeStatus,
         addedAt,
         userId,
-        commentId
-      }
-      await this.dataSource.getRepository(CommentReactions)
-        .save(reaction)
+        commentId,
+      };
+      await this.dataSource.getRepository(CommentReactions).save(reaction);
 
-      return true
+      return true;
     } catch (e) {
-      return null
+      return null;
     }
   }
 
@@ -82,14 +81,13 @@ export class OrmReactionsRepository {
         status: likeStatus,
         addedAt,
         userId,
-        postId
-      }
-      await this.dataSource.getRepository(PostReactions)
-        .save(reaction)
+        postId,
+      };
+      await this.dataSource.getRepository(PostReactions).save(reaction);
 
-      return true
+      return true;
     } catch (e) {
-      return null
+      return null;
     }
   }
 

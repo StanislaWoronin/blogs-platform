@@ -1,4 +1,4 @@
-import { preparedComment, superUser } from "./prepeared-data";
+import { preparedComment, superUser } from './prepeared-data';
 import { UserDto } from '../../src/modules/super-admin/api/dto/user.dto';
 import request from 'supertest';
 import {
@@ -75,15 +75,13 @@ export class Factories {
     return tokens;
   }
 
-  async createAndLoginOneUserManyTimes(loginCount: number): Promise<
-    {
-      user: UserViewModelWithBanInfo;
-      accessToken: string;
-      refreshToken: string;
-    }
-    > {
+  async createAndLoginOneUserManyTimes(loginCount: number): Promise<{
+    user: UserViewModelWithBanInfo;
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const [user] = await this.createUsers(loginCount);
-    const userWithTokens = {user, accessToken: null, refreshToken: null}
+    const userWithTokens = { user, accessToken: null, refreshToken: null };
 
     const userLoginData = {
       loginOrEmail: user.login,
@@ -166,7 +164,7 @@ export class Factories {
     const comment = [];
 
     for (let i = 0; i < commentCount; i++) {
-      const inputPostData: CommentDTO = preparedComment.valid
+      const inputPostData: CommentDTO = preparedComment.valid;
 
       const url = getUrlForComment(endpoints.postController, postId);
 

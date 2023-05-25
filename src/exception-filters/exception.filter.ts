@@ -16,7 +16,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const errors = {
         errorsMessages: [],
       };
+
       const responseBody: any = exception.getResponse();
+      console.log(responseBody)
       responseBody.message.forEach((m) => errors.errorsMessages.push(m));
 
       response.status(status).send(errors);

@@ -6,8 +6,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentViewModel } from '../../api/dto/commentView.model';
 import { CreatedComment } from '../entity/db_comment.model';
-import {Comments} from "../entity/comments.entity";
-import {Users} from "../../../../super-admin/infrastructure/entity/users.entity";
+import { Comments } from '../entity/comments.entity';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
 
 @Injectable()
 export class PgCommentsRepository {
@@ -55,7 +55,7 @@ export class PgCommentsRepository {
       DELETE FROM public.comment_reactions
        WHERE comment_reactions."commentId" = '${commentId}';
     `;
-    await this.dataSource.query(reactionsQuery)
+    await this.dataSource.query(reactionsQuery);
     const query = `
       DELETE FROM public.comments
        WHERE id = '${commentId}';

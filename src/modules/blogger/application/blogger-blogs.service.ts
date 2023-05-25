@@ -1,13 +1,14 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { BanUserDto } from '../api/dto/ban-user.dto';
-import {IBanInfoRepository} from "../../super-admin/infrastructure/i-ban-info.repository";
-import { IQueryUsersRepository } from "../../super-admin/infrastructure/i-query-users.repository";
+import { IBanInfoRepository } from '../../super-admin/infrastructure/i-ban-info.repository';
+import { IQueryUsersRepository } from '../../super-admin/infrastructure/i-query-users.repository';
 
 @Injectable()
 export class BloggerBlogService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
-    @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
+    @Inject(IQueryUsersRepository)
+    protected queryUsersRepository: IQueryUsersRepository,
   ) {}
 
   async updateUserBanStatus(

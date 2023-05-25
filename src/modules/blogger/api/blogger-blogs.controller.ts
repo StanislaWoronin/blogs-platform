@@ -3,7 +3,8 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode, Inject,
+  HttpCode, HttpStatus,
+  Inject,
   NotFoundException,
   Param,
   Post,
@@ -22,8 +23,8 @@ import { ContentPageModel } from '../../../global-model/contentPage.model';
 import { BlogViewModel } from '../../public/blogs/api/dto/blogView.model';
 import { PostsService } from '../../public/posts/application/posts.service';
 import { BlogsService } from '../../public/blogs/application/blogs.service';
-import {IQueryBlogsRepository} from "../../public/blogs/infrastructure/i-query-blogs.repository";
-import {IQueryCommentsRepository} from "../../public/comments/infrastructure/i-query-comments.repository";
+import { IQueryBlogsRepository } from '../../public/blogs/infrastructure/i-query-blogs.repository';
+import { IQueryCommentsRepository } from '../../public/comments/infrastructure/i-query-comments.repository';
 
 @UseGuards(AuthBearerGuard)
 @Controller('blogger/blogs')
@@ -31,8 +32,10 @@ export class BloggerBlogsController {
   constructor(
     protected blogsService: BlogsService,
     protected postsService: PostsService,
-    @Inject(IQueryBlogsRepository) protected queryBlogsRepository: IQueryBlogsRepository,
-    @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
+    @Inject(IQueryBlogsRepository)
+    protected queryBlogsRepository: IQueryBlogsRepository,
+    @Inject(IQueryCommentsRepository)
+    protected queryCommentsRepository: IQueryCommentsRepository,
   ) {}
 
   @Get()

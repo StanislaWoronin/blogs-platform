@@ -4,7 +4,8 @@ import {
   Delete,
   ForbiddenException,
   Get,
-  HttpCode, Inject,
+  HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Put,
@@ -17,13 +18,14 @@ import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { ReactionDto } from '../../../../global-model/reaction.dto';
 import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
-import {IQueryCommentsRepository} from "../infrastructure/i-query-comments.repository";
+import { IQueryCommentsRepository } from '../infrastructure/i-query-comments.repository';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
     protected commentsService: CommentsService,
-    @Inject(IQueryCommentsRepository) protected queryCommentsRepository: IQueryCommentsRepository,
+    @Inject(IQueryCommentsRepository)
+    protected queryCommentsRepository: IQueryCommentsRepository,
   ) {}
 
   @UseGuards(AccessTokenValidationGuard)
@@ -91,7 +93,10 @@ export class CommentsController {
       throw new NotFoundException();
     }
 
-    const banStatus = await this.commentsService.checkUserBanStatus(user.id, commentId)
+    const banStatus = await this.commentsService.checkUserBanStatus(
+      user.id,
+      commentId,
+    );
     if (banStatus) {
       throw new ForbiddenException();
     }

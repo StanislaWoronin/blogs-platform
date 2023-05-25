@@ -1,18 +1,17 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { createQueryBuilder, DataSource, SelectQueryBuilder } from "typeorm";
-import { QueryParametersDto } from "../../../../../global-model/query-parameters.dto";
-import { ContentPageModel } from "../../../../../global-model/contentPage.model";
-import { Posts } from "../entity/posts.entity";
-import { PostReactions } from "../../../likes/infrastructure/entity/post-reactions.entity";
-import { ReactionModel } from "../../../../../global-model/reaction.model";
-import { BannedUsersForBlog } from "../../../blogs/infrastructure/entity/banned-users-for-blog.entity";
-import { giveSkipNumber } from "../../../../../helper.functions";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { createQueryBuilder, DataSource, SelectQueryBuilder } from 'typeorm';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
+import { ContentPageModel } from '../../../../../global-model/contentPage.model';
+import { Posts } from '../entity/posts.entity';
+import { PostReactions } from '../../../likes/infrastructure/entity/post-reactions.entity';
+import { ReactionModel } from '../../../../../global-model/reaction.model';
+import { BannedUsersForBlog } from '../../../blogs/infrastructure/entity/banned-users-for-blog.entity';
+import { giveSkipNumber } from '../../../../../helper.functions';
 
 @Injectable()
 export class OrmQueryPostsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {
-  }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   // async getPosts(
   //   queryDto: QueryParametersDto,

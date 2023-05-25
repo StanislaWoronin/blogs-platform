@@ -6,18 +6,16 @@ import { EmailManager } from '../src/modules/public/auth/email-transfer/email.ma
 import { EmailManagerMock } from './mock/emailAdapter.mock';
 import { createApp } from '../src/helpers/create-app';
 import request from 'supertest';
-import {
-  endpoints,
-} from './helper/routing';
+import { endpoints } from './helper/routing';
 import { Posts } from './request/posts';
 import { randomUUID } from 'crypto';
 import { getErrorMessage } from './helper/helpers';
 import { ReactionModel } from '../src/global-model/reaction.model';
-import { preparedComment, preparedStatus } from "./helper/prepeared-data";
+import { preparedComment, preparedStatus } from './helper/prepeared-data';
 import { Comments } from './request/comments';
-import {SA} from "./request/sa";
-import {Blogger} from "./request/blogger";
-import { getExpectComment } from "./helper/expect-comment-model";
+import { SA } from './request/sa';
+import { Blogger } from './request/blogger';
+import { getExpectComment } from './helper/expect-comment-model';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -25,7 +23,7 @@ describe('e2e tests', () => {
 
   let app: INestApplication;
   let server;
-  let blogger: Blogger
+  let blogger: Blogger;
   let comments: Comments;
   let factories: Factories;
   let posts: Posts;
@@ -43,7 +41,7 @@ describe('e2e tests', () => {
     app = createApp(rawApp);
     await app.init();
     server = await app.getHttpServer();
-    blogger = new Blogger(server)
+    blogger = new Blogger(server);
     comments = new Comments(server);
     factories = new Factories(server);
     posts = new Posts(server);
@@ -462,7 +460,7 @@ describe('e2e tests', () => {
           post.id,
           1,
         );
-        console.log(justUser.user.id)
+        console.log(justUser.user.id);
         expect.setState({
           commentOwner: commentOwner.user,
           ownerToken: commentOwner.accessToken,
@@ -537,15 +535,15 @@ describe('e2e tests', () => {
           expect(response.status).toBe(204);
 
           const updatedComment = await comments.getCommentById(comment.id);
-          expect(updatedComment.status).toBe(200)
+          expect(updatedComment.status).toBe(200);
           expect(updatedComment.body).not.toEqual(comment);
           expect(updatedComment.body.content).toEqual(
             preparedComment.newValid.content,
           );
 
           expect.setState({
-            updatedComment: updatedComment.body
-          })
+            updatedComment: updatedComment.body,
+          });
         });
       });
 
@@ -634,13 +632,19 @@ describe('e2e tests', () => {
             userToken,
           );
           expect(commentWithLike.body).toEqual(
-            getExpectComment(commentOwner, updatedComment, 2, 0, ReactionModel.Like),
+            getExpectComment(
+              commentOwner,
+              updatedComment,
+              2,
+              0,
+              ReactionModel.Like,
+            ),
           );
         });
 
         it('Should update reaction', async () => {
           const { commentOwner, userToken, updatedComment } = expect.getState();
-          console.log(updatedComment.id)
+          console.log(updatedComment.id);
           const response = await comments.addReaction(
             updatedComment.id,
             ReactionModel.Dislike,

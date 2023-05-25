@@ -1,19 +1,21 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '../../auth/application/jwt.service';
 import { ViewSecurityDeviseModel } from '../api/dto/viewSecurityDeviseModel';
 import { UserDeviceModel } from '../infrastructure/entity/userDevice.model';
 import { toActiveSessionsViewModel } from '../../../../data-mapper/to-active-session-view.model';
 import { v4 as uuidv4 } from 'uuid';
 import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
-import { ISecurityRepository } from "../infrastructure/i-security.repository";
-import { IQuerySecurityRepository } from "../infrastructure/i-query-security.repository";
+import { ISecurityRepository } from '../infrastructure/i-security.repository';
+import { IQuerySecurityRepository } from '../infrastructure/i-query-security.repository';
 
 @Injectable()
 export class SecurityService {
   constructor(
     protected jwtService: JwtService,
-    @Inject(ISecurityRepository) protected securityRepository: ISecurityRepository,
-    @Inject(IQuerySecurityRepository) protected querySecurityRepository: IQuerySecurityRepository,
+    @Inject(ISecurityRepository)
+    protected securityRepository: ISecurityRepository,
+    @Inject(IQuerySecurityRepository)
+    protected querySecurityRepository: IQuerySecurityRepository,
   ) {}
 
   async getDeviceById(deviceId: string): Promise<UserDeviceModel | null> {

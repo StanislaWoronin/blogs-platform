@@ -1,4 +1,4 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PgQueryUsersRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-query-users.repository';
 import { PgEmailConfirmationRepository } from '../modules/super-admin/infrastructure/pg.repository/pg-email-confirmation.repository';
 import {
@@ -7,15 +7,17 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { request } from 'express';
-import {IEmailConfirmationRepository} from "../modules/super-admin/infrastructure/i-email-confirmation.repository";
-import { IQueryUsersRepository } from "../modules/super-admin/infrastructure/i-query-users.repository";
+import { IEmailConfirmationRepository } from '../modules/super-admin/infrastructure/i-email-confirmation.repository';
+import { IQueryUsersRepository } from '../modules/super-admin/infrastructure/i-query-users.repository';
 
 @ValidatorConstraint({ name: 'EmailResendingValidator', async: true })
 @Injectable()
 export class EmailResendingValidator implements ValidatorConstraintInterface {
   constructor(
-      @Inject(IEmailConfirmationRepository) protected emailConfirmationRepository: IEmailConfirmationRepository,
-      @Inject(IQueryUsersRepository) protected queryUsersRepository: IQueryUsersRepository
+    @Inject(IEmailConfirmationRepository)
+    protected emailConfirmationRepository: IEmailConfirmationRepository,
+    @Inject(IQueryUsersRepository)
+    protected queryUsersRepository: IQueryUsersRepository,
   ) {}
 
   async validate(email) {
@@ -25,9 +27,8 @@ export class EmailResendingValidator implements ValidatorConstraintInterface {
       return false;
     }
 
-    const isConfirmed = await this.emailConfirmationRepository.checkConfirmation(
-      user.id,
-    );
+    const isConfirmed =
+      await this.emailConfirmationRepository.checkConfirmation(user.id);
 
     if (isConfirmed) {
       return false;

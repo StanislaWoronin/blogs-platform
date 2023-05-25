@@ -3,30 +3,35 @@ import {
   Delete,
   ForbiddenException,
   Get,
-  HttpCode, Inject,
+  HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Req,
-  UseGuards
-} from "@nestjs/common";
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { SecurityService } from '../application/security.service';
 import { RefreshTokenValidationGuard } from '../../../../guards/refresh-token-validation.guard';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { User } from '../../../../decorator/user.decorator';
-import { ViewSecurityDeviseModel } from "./dto/viewSecurityDeviseModel";
-import { IQuerySecurityRepository } from "../infrastructure/i-query-security.repository";
+import { ViewSecurityDeviseModel } from './dto/viewSecurityDeviseModel';
+import { IQuerySecurityRepository } from '../infrastructure/i-query-security.repository';
 
 @Controller('security/devices')
 export class SecurityController {
-  constructor(protected securityService: SecurityService,
-              @Inject(IQuerySecurityRepository) protected querySecurityRepository: IQuerySecurityRepository,
+  constructor(
+    protected securityService: SecurityService,
+    @Inject(IQuerySecurityRepository)
+    protected querySecurityRepository: IQuerySecurityRepository,
   ) {}
 
   @UseGuards(RefreshTokenValidationGuard)
   @Get()
-  async getAllActiveSessions(@User() user: UserDBModel): Promise<ViewSecurityDeviseModel[]> {
-    return await this.querySecurityRepository.getAllActiveSessions(user.id);;
+  async getAllActiveSessions(
+    @User() user: UserDBModel,
+  ): Promise<ViewSecurityDeviseModel[]> {
+    return await this.querySecurityRepository.getAllActiveSessions(user.id);
   }
 
   @UseGuards(RefreshTokenValidationGuard)
@@ -52,7 +57,9 @@ export class SecurityController {
     @Param('id') deviceId: string,
     @User() user: UserDBModel,
   ) {
-    const userDevice = await this.querySecurityRepository.getDeviseById(deviceId);
+    const userDevice = await this.querySecurityRepository.getDeviseById(
+      deviceId,
+    );
 
     if (!userDevice) {
       throw new NotFoundException();

@@ -1,11 +1,13 @@
-import { Environment } from "./helpers/environment.model";
+import { Environment } from './helpers/environment.model';
 
 export const settings = {
   local: process.env.POSTGRES_LOCAL_URI,
   MONGO_URI:
     process.env.mongoURI ||
     'mongodb://0.0.0.0:27017/blogPlatform?maxPoolSize=20&w=majority',
-  POSTGRES_URI: process.env.POSTGRES_URI || 'postgresql://fxwuOcQLxdBBXdSBdLPRXFDYirBtPoaB:jNfYWwovDucnzAQqApTOCVrJINyOxDEY@db.thin.dev/6642a832-10dd-41b9-a072-eb62bcf20454',
+  POSTGRES_URI:
+    process.env.POSTGRES_URI ||
+    'postgresql://fxwuOcQLxdBBXdSBdLPRXFDYirBtPoaB:jNfYWwovDucnzAQqApTOCVrJINyOxDEY@db.thin.dev/6642a832-10dd-41b9-a072-eb62bcf20454',
   JWT_SECRET: process.env.JWT_SECRET || '123',
   basic: {
     USER: 'admin',
@@ -28,7 +30,7 @@ export const settings = {
   repositoryType: {
     mongoose: '',
     rawSql: 'pg',
-    orm: 'orm'
+    orm: 'orm',
   },
-  currentRepository: 'pg'
+  currentRepository: 'pg',
 };

@@ -1,30 +1,31 @@
-import {Inject, Injectable} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ReactionModel } from '../../../../global-model/reaction.model';
 import { PostDto } from '../../../blogger/api/dto/post.dto';
 import { PostViewModel } from '../api/dto/postsView.model';
 import { PostDBModel } from '../infrastructure/entity/post-db.model';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  toCreatedPostsViewModel,
-} from '../../../../data-mapper/to-posts-view.model';
-import {IBanInfoRepository} from "../../../super-admin/infrastructure/i-ban-info.repository";
-import { IReactionsRepository } from "../../likes/infrastructure/i-reactions.repository";
-import { IQueryReactionRepository } from "../../likes/infrastructure/i-query-reaction.repository";
-import { IQueryPostsRepository } from "../infrastructure/i-query-posts.repository";
-import { IPostsRepository } from "../infrastructure/i-posts.repository";
+import { toCreatedPostsViewModel } from '../../../../data-mapper/to-posts-view.model';
+import { IBanInfoRepository } from '../../../super-admin/infrastructure/i-ban-info.repository';
+import { IReactionsRepository } from '../../likes/infrastructure/i-reactions.repository';
+import { IQueryReactionRepository } from '../../likes/infrastructure/i-query-reaction.repository';
+import { IQueryPostsRepository } from '../infrastructure/i-query-posts.repository';
+import { IPostsRepository } from '../infrastructure/i-posts.repository';
 
 @Injectable()
 export class PostsService {
   constructor(
     @Inject(IBanInfoRepository) protected banInfoRepository: IBanInfoRepository,
-    @Inject(IReactionsRepository) protected ReactionsRepository: IReactionsRepository,
-    @Inject(IQueryReactionRepository) protected queryReactionsRepository: IQueryReactionRepository,
+    @Inject(IReactionsRepository)
+    protected ReactionsRepository: IReactionsRepository,
+    @Inject(IQueryReactionRepository)
+    protected queryReactionsRepository: IQueryReactionRepository,
     @Inject(IPostsRepository) protected postsRepository: IPostsRepository,
-    @Inject(IQueryPostsRepository) protected queryPostsRepository: IQueryPostsRepository,
+    @Inject(IQueryPostsRepository)
+    protected queryPostsRepository: IQueryPostsRepository,
   ) {}
 
   async checkUserBanStatus(userId: string, postId: string): Promise<boolean> {
-    const blogId = await this.queryPostsRepository.getBlogIdByPostId(postId)
+    const blogId = await this.queryPostsRepository.getBlogIdByPostId(postId);
 
     return await this.banInfoRepository.youBanned(userId, blogId);
   }

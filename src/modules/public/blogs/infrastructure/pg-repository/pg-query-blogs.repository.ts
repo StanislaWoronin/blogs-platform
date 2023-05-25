@@ -9,7 +9,7 @@ import {
 import { ContentPageModel } from '../../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from '../entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blog-with-additional-info.model';
-import { CreatedBlogModel } from "../../api/dto/blogView.model";
+import { CreatedBlogModel } from '../../api/dto/blogView.model';
 
 @Injectable()
 export class PgQueryBlogsRepository {

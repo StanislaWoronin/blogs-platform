@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { EmailConfirmationModel } from "../entity/emailConfirmation.model";
-import { EmailConfirmation } from "../entity/email-confirmation.entity";
-import { Users } from "../entity/users.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { EmailConfirmationModel } from '../entity/emailConfirmation.model';
+import { EmailConfirmation } from '../entity/email-confirmation.entity';
+import { Users } from '../entity/users.entity';
 
 @Injectable()
 export class OrmEmailConfirmationRepository {
@@ -12,46 +12,49 @@ export class OrmEmailConfirmationRepository {
   async getEmailConfirmationByCode(
     code: string,
   ): Promise<EmailConfirmationModel | null> {
-    const builder = this.dataSource.createQueryBuilder()
-      .select("ec.userId", "userId")
-      .addSelect("ec.confirmationCode", "confirmationCode")
-      .addSelect("ec.expirationDate", "expirationDate")
-      .addSelect("ec.isConfirmed", "isConfirmed")
-      .from(EmailConfirmation, "ec")
-      .where("ec.confirmationCode = :code", {code: code})
+    const builder = this.dataSource
+      .createQueryBuilder()
+      .select('ec.userId', 'userId')
+      .addSelect('ec.confirmationCode', 'confirmationCode')
+      .addSelect('ec.expirationDate', 'expirationDate')
+      .addSelect('ec.isConfirmed', 'isConfirmed')
+      .from(EmailConfirmation, 'ec')
+      .where('ec.confirmationCode = :code', { code: code });
 
-    return await builder.getRawOne()
+    return await builder.getRawOne();
   }
 
   async checkConfirmation(userId: string): Promise<boolean | null> {
-    const builder = this.dataSource.createQueryBuilder()
-      .select("ec.isConfirmed", "isConfirmed")
-      .from(EmailConfirmation, "ec")
-      .where("ec.userId = :id", {id: userId})
-    const status = await builder.getRawOne()
+    const builder = this.dataSource
+      .createQueryBuilder()
+      .select('ec.isConfirmed', 'isConfirmed')
+      .from(EmailConfirmation, 'ec')
+      .where('ec.userId = :id', { id: userId });
+    const status = await builder.getRawOne();
 
     if (!status) {
-      return null
+      return null;
     }
-    return status.isConfirmed
+    return status.isConfirmed;
   }
 
   async createEmailConfirmation(
     emailConfirmation: EmailConfirmationModel,
   ): Promise<EmailConfirmationModel | null> {
     try {
-      const result = await this.dataSource.getRepository(EmailConfirmation)
-        .save(emailConfirmation)
+      const result = await this.dataSource
+        .getRepository(EmailConfirmation)
+        .save(emailConfirmation);
 
       return {
         userId: result.userId,
         confirmationCode: result.confirmationCode,
         expirationDate: result.expirationDate,
-        isConfirmed: result.isConfirmed
-      }
+        isConfirmed: result.isConfirmed,
+      };
     } catch (e) {
       console.log(e);
-      return null
+      return null;
     }
   }
 
@@ -60,15 +63,15 @@ export class OrmEmailConfirmationRepository {
       .createQueryBuilder()
       .update(EmailConfirmation)
       .set({
-        isConfirmed: true
+        isConfirmed: true,
       })
-      .where("confirmationCode = :code", {code: confirmationCode})
-      .execute()
+      .where('confirmationCode = :code', { code: confirmationCode })
+      .execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async updateConfirmationCode(
@@ -81,15 +84,15 @@ export class OrmEmailConfirmationRepository {
       .update(EmailConfirmation)
       .set({
         confirmationCode,
-        expirationDate
+        expirationDate,
       })
-      .where("userId = :id", {id: userId})
-      .execute()
+      .where('userId = :id', { id: userId })
+      .execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deleteEmailConfirmationById(userId: string): Promise<boolean> {
@@ -97,12 +100,12 @@ export class OrmEmailConfirmationRepository {
       .createQueryBuilder()
       .delete()
       .from(EmailConfirmation)
-      .where("userId = :id", {id: userId})
-      .execute()
+      .where('userId = :id', { id: userId })
+      .execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 }

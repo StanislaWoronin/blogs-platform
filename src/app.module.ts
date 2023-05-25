@@ -41,29 +41,30 @@ import { SaBlogsService } from './modules/super-admin/application/sa-blogs.servi
 import { BannedPost } from './modules/super-admin/infrastructure/entity/banned-post.entity';
 import { PasswordRecoveryValidator } from './validation/password-recovery.validator';
 import { CommentsController } from './modules/public/comments/api/comments.controller';
-import {IBlogsRepository} from "./modules/public/blogs/infrastructure/i-blogs.repository";
-import {IQueryBlogsRepository} from "./modules/public/blogs/infrastructure/i-query-blogs.repository";
-import {IJwtRepository} from "./modules/public/auth/infrastructure/i-jwt.repository";
-import {IBanInfoRepository} from "./modules/super-admin/infrastructure/i-ban-info.repository";
-import {ICommentsRepository} from "./modules/public/comments/infrastructure/i-comments.repository";
-import {IQueryCommentsRepository} from "./modules/public/comments/infrastructure/i-query-comments.repository";
-import {IEmailConfirmationRepository} from "./modules/super-admin/infrastructure/i-email-confirmation.repository";
-import { IReactionsRepository } from "./modules/public/likes/infrastructure/i-reactions.repository";
-import { IQueryReactionRepository } from "./modules/public/likes/infrastructure/i-query-reaction.repository";
-import { IQueryPostsRepository } from "./modules/public/posts/infrastructure/i-query-posts.repository";
-import { IPostsRepository } from "./modules/public/posts/infrastructure/i-posts.repository";
-import { IQuerySecurityRepository } from "./modules/public/security/infrastructure/i-query-security.repository";
-import { ISecurityRepository } from "./modules/public/security/infrastructure/i-security.repository";
-import { IQueryUsersRepository } from "./modules/super-admin/infrastructure/i-query-users.repository";
-import { IUsersRepository } from "./modules/super-admin/infrastructure/i-users.repository";
-import { repositoryName, repositorySwitcher } from "./repositories";
-import { settings } from "./settings";
-import { BannedComment } from "./modules/super-admin/infrastructure/entity/banned-comment.entity";
-import { ITestingRepository } from "./modules/testing/infrastructure/i-testing.repository";
-import { TestingController } from "./modules/testing/api/testingController";
-import {BlogModule} from "./modules/public/blogs/blog.module";
-import {ThrottlerModule} from "@nestjs/throttler";
-import {TypeOrmConfig} from "./helpers/TypeOrmConfig";
+import { IBlogsRepository } from './modules/public/blogs/infrastructure/i-blogs.repository';
+import { IQueryBlogsRepository } from './modules/public/blogs/infrastructure/i-query-blogs.repository';
+import { IJwtRepository } from './modules/public/auth/infrastructure/i-jwt.repository';
+import { IBanInfoRepository } from './modules/super-admin/infrastructure/i-ban-info.repository';
+import { ICommentsRepository } from './modules/public/comments/infrastructure/i-comments.repository';
+import { IQueryCommentsRepository } from './modules/public/comments/infrastructure/i-query-comments.repository';
+import { IEmailConfirmationRepository } from './modules/super-admin/infrastructure/i-email-confirmation.repository';
+import { IReactionsRepository } from './modules/public/likes/infrastructure/i-reactions.repository';
+import { IQueryReactionRepository } from './modules/public/likes/infrastructure/i-query-reaction.repository';
+import { IQueryPostsRepository } from './modules/public/posts/infrastructure/i-query-posts.repository';
+import { IPostsRepository } from './modules/public/posts/infrastructure/i-posts.repository';
+import { IQuerySecurityRepository } from './modules/public/security/infrastructure/i-query-security.repository';
+import { ISecurityRepository } from './modules/public/security/infrastructure/i-security.repository';
+import { IQueryUsersRepository } from './modules/super-admin/infrastructure/i-query-users.repository';
+import { IUsersRepository } from './modules/super-admin/infrastructure/i-users.repository';
+import { repositoryName, repositorySwitcher } from './repositories';
+import { settings } from './settings';
+import { BannedComment } from './modules/super-admin/infrastructure/entity/banned-comment.entity';
+import { ITestingRepository } from './modules/testing/infrastructure/i-testing.repository';
+import { TestingController } from './modules/testing/api/testingController';
+import { BlogModule } from './modules/public/blogs/blog.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmConfig } from './helpers/TypeOrmConfig';
+import {ImagesController} from "./modules/blogger/api/images.controller";
 
 const controllers = [
   AuthController,
@@ -76,6 +77,7 @@ const controllers = [
   SecurityController,
   TestingController,
   UsersController,
+  ImagesController
 ];
 
 const entity = [
@@ -96,22 +98,118 @@ const entity = [
 ];
 
 const repositories = [
-  { provide: IBanInfoRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.BanInfo) },
-  { provide: IBlogsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Blogs) },
-  { provide: IQueryBlogsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryBlogs) },
-  { provide: ICommentsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Comments) },
-  { provide: IQueryCommentsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryComments) },
-  { provide: IEmailConfirmationRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.EmailConfirmation) },
-  { provide: IReactionsRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.Reactions) },
-  { provide: IQueryReactionRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryReactions) },
-  { provide: IJwtRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Jwt) },
-  { provide: IPostsRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Posts) },
-  { provide: IQueryPostsRepository, useClass:  repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QueryPosts) },
-  { provide: ISecurityRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.Security) },
-  { provide: IQuerySecurityRepository, useClass: repositorySwitcher(settings.repositoryType.rawSql, repositoryName.QuerySecurity) },
-  { provide: IUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Users) },
-  { provide: IQueryUsersRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.QueryUsers) },
-  { provide: ITestingRepository, useClass: repositorySwitcher(settings.repositoryType.orm, repositoryName.Testing) }
+  {
+    provide: IBanInfoRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.BanInfo,
+    ),
+  },
+  {
+    provide: IBlogsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.Blogs,
+    ),
+  },
+  {
+    provide: IQueryBlogsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.QueryBlogs,
+    ),
+  },
+  {
+    provide: ICommentsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.Comments,
+    ),
+  },
+  {
+    provide: IQueryCommentsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.QueryComments,
+    ),
+  },
+  {
+    provide: IEmailConfirmationRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.EmailConfirmation,
+    ),
+  },
+  {
+    provide: IReactionsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.Reactions,
+    ),
+  },
+  {
+    provide: IQueryReactionRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.QueryReactions,
+    ),
+  },
+  {
+    provide: IJwtRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.Jwt,
+    ),
+  },
+  {
+    provide: IPostsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.Posts,
+    ),
+  },
+  {
+    provide: IQueryPostsRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.QueryPosts,
+    ),
+  },
+  {
+    provide: ISecurityRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.Security,
+    ),
+  },
+  {
+    provide: IQuerySecurityRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.rawSql,
+      repositoryName.QuerySecurity,
+    ),
+  },
+  {
+    provide: IUsersRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.Users,
+    ),
+  },
+  {
+    provide: IQueryUsersRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.QueryUsers,
+    ),
+  },
+  {
+    provide: ITestingRepository,
+    useClass: repositorySwitcher(
+      settings.repositoryType.orm,
+      repositoryName.Testing,
+    ),
+  },
 ];
 
 const services = [
@@ -144,10 +242,13 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.ENV_TYPE === 'local' ? process.env.POSTGRES_LOCAL_URI : process.env.POSTGRES_URI,
+      url:
+        process.env.ENV_TYPE === 'local'
+          ? process.env.POSTGRES_LOCAL_URI
+          : process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: process.env.ENV_TYPE === 'local' ? false : true
+      ssl: process.env.ENV_TYPE === 'local' ? false : true,
     }),
     TypeOrmModule.forFeature([...entity]),
     //BlogModule,

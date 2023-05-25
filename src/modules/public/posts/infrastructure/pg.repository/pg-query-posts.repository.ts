@@ -1,19 +1,23 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { QueryParametersDto } from "../../../../../global-model/query-parameters.dto";
-import { giveSkipNumber, paginationContentPage } from "../../../../../helper.functions";
-import { ContentPageModel } from "../../../../../global-model/contentPage.model";
-import { DbPostModel } from "../entity/db-post.model";
-import { PostViewModel } from "../../api/dto/postsView.model";
-import { IQueryReactionRepository } from "../../../likes/infrastructure/i-query-reaction.repository";
-import { ReactionModel } from "../../../../../global-model/reaction.model";
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { QueryParametersDto } from '../../../../../global-model/query-parameters.dto';
+import {
+  giveSkipNumber,
+  paginationContentPage,
+} from '../../../../../helper.functions';
+import { ContentPageModel } from '../../../../../global-model/contentPage.model';
+import { DbPostModel } from '../entity/db-post.model';
+import { PostViewModel } from '../../api/dto/postsView.model';
+import { IQueryReactionRepository } from '../../../likes/infrastructure/i-query-reaction.repository';
+import { ReactionModel } from '../../../../../global-model/reaction.model';
 
 @Injectable()
 export class PgQueryPostsRepository {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    @Inject(IQueryReactionRepository) protected queryReactionsRepository: IQueryReactionRepository
+    @Inject(IQueryReactionRepository)
+    protected queryReactionsRepository: IQueryReactionRepository,
   ) {}
 
   async getPosts(
@@ -23,7 +27,7 @@ export class PgQueryPostsRepository {
   ): Promise<ContentPageModel> {
     const blogIdFilter = this.getBlogIdFilter(blogId);
     const statusFilter = this.myStatusFilter(userId);
-    const reactions = this.reactions()
+    const reactions = this.reactions();
 
     const query = `
             SELECT id, title, "shortDescription", content, "createdAt", "blogId",
@@ -34,9 +38,9 @@ export class PgQueryPostsRepository {
                  ${blogIdFilter}
                  ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                  LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
-                    queryDto.pageNumber,
-                    queryDto.pageSize,
-                 )};
+      queryDto.pageNumber,
+      queryDto.pageSize,
+    )};
         `;
     const postsDB: DbPostModel[] = await this.dataSource.query(query);
 
@@ -64,7 +68,7 @@ export class PgQueryPostsRepository {
     userId: string | undefined,
   ): Promise<PostViewModel | null> {
     const myStatusFilter = this.myStatusFilter(userId);
-    const reactions = this.reactions()
+    const reactions = this.reactions();
 
     const query = `
          SELECT id, title, "shortDescription", content, "createdAt", "blogId",
@@ -169,9 +173,9 @@ export class PgQueryPostsRepository {
                            FROM public.comments
                           WHERE comments.id = $1);
     `;
-    const result = await this.dataSource.query(query, [commentId])
+    const result = await this.dataSource.query(query, [commentId]);
 
-    return result[0].blogId
+    return result[0].blogId;
   }
 
   async getBlogIdByPostId(postId: string): Promise<string> {
@@ -180,13 +184,15 @@ export class PgQueryPostsRepository {
         FROM public.posts 
        WHERE posts.id = '${postId}';
     `;
-    const result = await this.dataSource.query(query)
+    const result = await this.dataSource.query(query);
 
-    return result[0].blogId
+    return result[0].blogId;
   }
 
-  private async addNewestLikes(post: DbPostModel ): Promise<PostViewModel> {
-    const newestLikes = await this.queryReactionsRepository.newestLikes(post.id);
+  private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
+    const newestLikes = await this.queryReactionsRepository.newestLikes(
+      post.id,
+    );
 
     let myStatus = 'None';
     if (post.myStatus) {
@@ -227,7 +233,10 @@ export class PgQueryPostsRepository {
   }
 
   private reactions(): string {
-    return `${this.reactionCount("likesCount", ReactionModel.Like)}, ${this.reactionCount("dislikesCount", ReactionModel.Dislike)}`
+    return `${this.reactionCount(
+      'likesCount',
+      ReactionModel.Like,
+    )}, ${this.reactionCount('dislikesCount', ReactionModel.Dislike)}`;
   }
 
   private reactionCount(fieldName: string, reaction: ReactionModel): string {
@@ -243,6 +252,6 @@ export class PgQueryPostsRepository {
                                   FROM public.banned_users_for_blog
                                  WHERE banned_users_for_blog."userId" = post_reactions."userId"
                                    AND banned_users_for_blog."blogId" = posts."blogId")) AS "${fieldName}"
-    `
+    `;
   }
 }

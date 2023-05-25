@@ -3,12 +3,12 @@ import jwt from 'jsonwebtoken';
 import { settings } from '../../../../settings';
 import { PgJwtRepository } from '../infrastructure/pg.repository/pg-jwt.repository';
 import { TokenPayloadModel } from '../../../../global-model/token-payload.model';
-import {IJwtRepository} from "../infrastructure/i-jwt.repository";
+import { IJwtRepository } from '../infrastructure/i-jwt.repository';
 
 @Injectable()
 export class JwtService {
   constructor(
-      @Inject(IJwtRepository) protected jwtRepository: IJwtRepository
+    @Inject(IJwtRepository) protected jwtRepository: IJwtRepository,
   ) {}
 
   async getTokenPayload(token: string): Promise<TokenPayloadModel> {

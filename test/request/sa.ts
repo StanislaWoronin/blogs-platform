@@ -1,40 +1,44 @@
-import {endpoints, getUrlForBanned} from "../helper/routing";
-import request from "supertest";
-import { banBlogDto, banUserDto, preparedStatus, superUser } from "../helper/prepeared-data";
+import { endpoints, getUrlForBanned } from '../helper/routing';
+import request from 'supertest';
+import {
+  banBlogDto,
+  banUserDto,
+  preparedStatus,
+  superUser,
+} from '../helper/prepeared-data';
 
 export class SA {
-    constructor(private readonly server: any) {
+  constructor(private readonly server: any) {}
+
+  async saBannedUser(userId: string, banStatus: boolean) {
+    const url = getUrlForBanned(endpoints.sa.users, userId);
+
+    let dto = banUserDto.validBan;
+    if (!banStatus) {
+      dto = banUserDto.validUnBun;
     }
 
-    async saBannedUser(userId: string, banStatus: boolean) {
-        const url = getUrlForBanned(endpoints.sa.users, userId)
+    const response = await request(this.server)
+      .put(url)
+      .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+      .send(dto);
 
-        let dto = banUserDto.validBan
-        if(!banStatus) {
-            dto = banUserDto.validUnBun
-        }
+    return { status: response.status, errorsMessages: response.body };
+  }
 
-        const response = await request(this.server)
-            .put(url)
-            .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
-            .send(dto)
+  async saBannedBlog(blogId: string, banStatus: boolean) {
+    const url = getUrlForBanned(endpoints.sa.blogs, blogId);
 
-        return {status: response.status, errorsMessages: response.body}
+    let dto = banBlogDto.validBan;
+    if (!banStatus) {
+      dto = banUserDto.validUnBun;
     }
 
-    async saBannedBlog(blogId: string, banStatus: boolean) {
-        const url = getUrlForBanned(endpoints.sa.blogs, blogId)
+    const response = await request(this.server)
+      .put(url)
+      .auth(superUser.valid.login, superUser.valid.password, { type: 'basic' })
+      .send(dto);
 
-        let dto = banBlogDto.validBan
-        if(!banStatus) {
-            dto = banUserDto.validUnBun
-        }
-
-        const response = await request(this.server)
-          .put(url)
-          .auth(superUser.valid.login, superUser.valid.password, {type: "basic"})
-          .send(dto)
-
-        return {status: response.status, errorsMessages: response.body}
-    }
+    return { status: response.status, errorsMessages: response.body };
+  }
 }

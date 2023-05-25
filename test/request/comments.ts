@@ -1,7 +1,8 @@
 import { CommentDTO } from '../../src/modules/public/comments/api/dto/commentDTO';
 import request from 'supertest';
 import {
-  endpoints, getUrlForComment,
+  endpoints,
+  getUrlForComment,
   getUrlForReactionStatus,
   getUrlWithId,
 } from '../helper/routing';
@@ -19,15 +20,19 @@ export class Comments {
     return { status: response.status, body: response.body };
   }
 
-  async createComments(postId: string, inputPostData: CommentDTO, accessToken?: string) {
+  async createComments(
+    postId: string,
+    inputPostData: CommentDTO,
+    accessToken?: string,
+  ) {
     const url = getUrlForComment(endpoints.postController, postId);
 
     const response = await request(this.server)
-        .post(url)
-        .auth(accessToken, { type: 'bearer' })
-        .send(inputPostData);
+      .post(url)
+      .auth(accessToken, { type: 'bearer' })
+      .send(inputPostData);
 
-    return {status: response.status, body: response.body}
+    return { status: response.status, body: response.body };
   }
 
   async updateComment(

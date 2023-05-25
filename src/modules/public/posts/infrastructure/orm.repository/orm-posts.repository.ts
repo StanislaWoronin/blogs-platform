@@ -1,28 +1,26 @@
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { PostDBModel } from "../entity/post-db.model";
-import { CreatedPostModel } from "../entity/db-post.model";
-import { Posts } from "../entity/posts.entity";
-import { Blogs } from "../../../blogs/infrastructure/entity/blogs.entity";
-import { PostDto } from "../../../../blogger/api/dto/post.dto";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { PostDBModel } from '../entity/post-db.model';
+import { CreatedPostModel } from '../entity/db-post.model';
+import { Posts } from '../entity/posts.entity';
+import { Blogs } from '../../../blogs/infrastructure/entity/blogs.entity';
+import { PostDto } from '../../../../blogger/api/dto/post.dto';
 
 @Injectable()
 export class OrmPostsRepository {
-  constructor(
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createPost(newPost: PostDBModel): Promise<CreatedPostModel> {
     try {
-      const result = await this.dataSource.getRepository(Posts)
-        .save(newPost)
+      const result = await this.dataSource.getRepository(Posts).save(newPost);
 
-      const builder = this.dataSource.createQueryBuilder()
-        .select("b.name")
-        .from(Blogs, "b")
-        .where("b.id = :id", { id: newPost.blogId })
-      const blog = await builder.getOne()
+      const builder = this.dataSource
+        .createQueryBuilder()
+        .select('b.name')
+        .from(Blogs, 'b')
+        .where('b.id = :id', { id: newPost.blogId });
+      const blog = await builder.getOne();
 
       return {
         id: result.id,
@@ -31,10 +29,10 @@ export class OrmPostsRepository {
         content: result.content,
         createdAt: result.createdAt,
         blogId: result.blogId,
-        blogName: blog.name
-      }
+        blogName: blog.name,
+      };
     } catch (e) {
-      return null
+      return null;
     }
   }
 
@@ -45,15 +43,15 @@ export class OrmPostsRepository {
       .set({
         title: dto.title,
         shortDescription: dto.shortDescription,
-        content: dto.content
+        content: dto.content,
       })
-      .where("id = :id", {id: postId})
-      .execute()
+      .where('id = :id', { id: postId })
+      .execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   async deletePost(postId: string): Promise<boolean> {
@@ -61,12 +59,12 @@ export class OrmPostsRepository {
       .createQueryBuilder()
       .delete()
       .from(Posts)
-      .where("id = :id", {id: postId})
-      .execute()
+      .where('id = :id', { id: postId })
+      .execute();
 
     if (result.affected != 1) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 }
