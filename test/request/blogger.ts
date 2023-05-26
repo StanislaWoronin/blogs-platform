@@ -6,7 +6,6 @@ import sharp from 'sharp';
 import { images } from '../images/images';
 import { ImageStatus } from '../images/image-status.enum';
 import { join } from 'path';
-import * as fs from "fs";
 export class Blogger {
   constructor(private readonly server: any) {}
 
@@ -35,8 +34,7 @@ export class Blogger {
     const response = await request(this.server)
       .post(`/blogger/blogs/${blogId}/images/wallpaper`)
       .auth(accessToken, { type: 'bearer' })
-      .set('Content-Type', 'multipart/form-data')
-      .attach('image', fs.readFileSync(imagePath));
+      .attach('image', imagePath);
 
     return { status: response.status, body: response.body };
   }

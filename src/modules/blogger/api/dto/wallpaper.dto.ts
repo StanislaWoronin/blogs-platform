@@ -1,6 +1,6 @@
-import {IsEmpty, Validate} from "class-validator";
+import { IsEmpty, Validate } from 'class-validator';
 
 export class WallpaperDto {
-    @IsEmpty()
-    wallpaper: Express.Multer.File
+  @IsEmpty()
+  wallpaper: Express.Multer.File;
 }
