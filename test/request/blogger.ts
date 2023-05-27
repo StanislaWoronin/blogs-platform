@@ -2,10 +2,11 @@ import request from 'supertest';
 import { endpoints, getUrlForBanned } from '../helper/routing';
 import { faker } from '@faker-js/faker';
 import { preparedBlog } from '../helper/prepeared-data';
-import sharp from 'sharp';
 import { images } from '../images/images';
 import { ImageStatus } from '../images/image-status.enum';
 import { join } from 'path';
+import { readFileSync } from 'fs';
+
 export class Blogger {
   constructor(private readonly server: any) {}
 
@@ -34,7 +35,7 @@ export class Blogger {
     const response = await request(this.server)
       .post(`/blogger/blogs/${blogId}/images/wallpaper`)
       .auth(accessToken, { type: 'bearer' })
-      .attach('image', imagePath);
+      .attach('file', readFileSync(imagePath));
 
     return { status: response.status, body: response.body };
   }

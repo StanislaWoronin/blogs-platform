@@ -61,8 +61,8 @@ describe('e2e tests', () => {
       const users = await factories.createAndLoginUsers(2);
       const fistUserBlog = await blogger.createBlog(users[0].accessToken);
       const secondUserBlog = await blogger.createBlog(users[1].accessToken);
-      console.log('accessToken:', users[0].accessToken);
-      console.log('fistUserBlogId:', fistUserBlog.body.id);
+      // console.log('accessToken:', users[0].accessToken);
+      // console.log('fistUserBlogId:', fistUserBlog.body.id);
       expect.setState({
         accessToken: users[0].accessToken,
         userId: users[0].user.id,
@@ -71,7 +71,7 @@ describe('e2e tests', () => {
       });
     });
 
-    it.skip(`Status: ${HttpStatus.FORBIDDEN}.
+    it(`Status: ${HttpStatus.FORBIDDEN}.
          If user try to update blog that doesn't belong to current user.`, async () => {
       const { accessToken, secondUserBlogId } = expect.getState();
 
@@ -83,7 +83,7 @@ describe('e2e tests', () => {
       expect(result.status).toBe(HttpStatus.FORBIDDEN);
     });
 
-    it.skip(`Status: ${HttpStatus.UNAUTHORIZED}.
+    it(`Status: ${HttpStatus.UNAUTHORIZED}.
          If user try to update without credentials.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadBackgroundWallpaper(
@@ -93,7 +93,7 @@ describe('e2e tests', () => {
       expect(result.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
-    it.skip(`Status: ${HttpStatus.OK}.
+    it(`Status: ${HttpStatus.CREATED}.
          Upload image.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadBackgroundWallpaper(
@@ -101,7 +101,7 @@ describe('e2e tests', () => {
         ImageStatus.Valid,
         accessToken,
       );
-      expect(result.status).toBe(HttpStatus.OK);
+      expect(result.status).toBe(HttpStatus.CREATED);
     });
   });
 });

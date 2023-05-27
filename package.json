@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.341.0",
     "@aws-sdk/s3-request-presigner": "^3.338.0",
     "@faker-js/faker": "^7.6.0",
     "@nestjs/common": "^9.2.0",

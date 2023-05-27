@@ -1,4 +1,6 @@
 import { Environment } from './helpers/environment.model';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 export const settings = {
   local: process.env.POSTGRES_LOCAL_URI,
@@ -33,4 +35,11 @@ export const settings = {
     orm: 'orm',
   },
   currentRepository: 'pg',
+  s3: {
+    baseUrl: 'https://storage.yandexcloud.net',
+    bucketsName: 'test-buckets',
+    endpoint: 'https://storage.yandexcloud.net',
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  },
 };

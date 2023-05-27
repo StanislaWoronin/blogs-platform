@@ -8,6 +8,7 @@ import { Comments } from '../../../public/comments/infrastructure/entity/comment
 import { CommentReactions } from '../../../public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from '../../../public/likes/infrastructure/entity/post-reactions.entity';
 import { UserBanInfo } from './user-ban-info.entity';
+import { Image } from '../../../blogger/image';
 
 @Entity()
 export class Users {
@@ -52,4 +53,7 @@ export class Users {
 
   @OneToMany(() => CommentReactions, (r) => r.user)
   pReactions: PostReactions[];
+
+  @OneToMany(() => Image, (i) => i.user)
+  images: Image[];
 }

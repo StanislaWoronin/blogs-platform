@@ -65,6 +65,9 @@ import { BlogModule } from './modules/public/blogs/blog.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmConfig } from './helpers/TypeOrmConfig';
 import { ImagesController } from './modules/blogger/api/images.controller';
+import { UploadBackgroundWallpaperUseCase } from './modules/blogger/use-cases';
+import { S3FileStorageAdapter } from './modules/blogger/adapter/s3-file-storage.adapter';
+import { Image } from './modules/blogger/image';
 
 const controllers = [
   AuthController,
@@ -89,6 +92,7 @@ const entity = [
   Comments,
   CommentReactions,
   EmailConfirmation,
+  Image,
   Posts,
   PostReactions,
   TokenBlackList,
@@ -212,6 +216,8 @@ const repositories = [
   },
 ];
 
+const adapters = [S3FileStorageAdapter, EmailAdapters];
+
 const services = [
   AuthService,
   BlogsService,
@@ -235,7 +241,11 @@ const validators = [
   PasswordRecoveryValidator,
 ];
 
-const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
+const useCases = [
+  CreateUserUseCase,
+  CreateUserBySaUseCase,
+  UploadBackgroundWallpaperUseCase,
+];
 
 @Module({
   imports: [
@@ -259,7 +269,13 @@ const useCases = [CreateUserUseCase, CreateUserBySaUseCase];
     // }),
   ],
   controllers: [...controllers],
-  providers: [...repositories, ...services, ...validators, ...useCases],
+  providers: [
+    ...adapters,
+    ...repositories,
+    ...services,
+    ...validators,
+    ...useCases,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {}
