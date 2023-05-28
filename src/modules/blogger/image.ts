@@ -1,23 +1,16 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Users } from '../super-admin/infrastructure/entity/users.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ImageType } from './imageType';
+import { Blogs } from '../public/blogs/infrastructure/entity/blogs.entity';
 
 @Entity()
 export class Image {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   imageId: string;
 
-  @ManyToOne(() => Users, (u) => u.images)
+  @ManyToOne(() => Blogs, (b) => b.images)
   @JoinColumn()
-  user: Users;
-  @Column() userId: string;
+  blog: Blogs;
+  @Column() blogId: string;
 
   @Column()
   imageType: ImageType;
@@ -35,18 +28,22 @@ export class Image {
   fileSize: number;
 
   static create(
-    userId: string,
+    imageId: string,
+    blogId: string,
+    imageType: ImageType,
     url: string,
     width: number,
     height: number,
-    size: number,
+    fileSize: number,
   ) {
     return {
-      userId,
+      imageId,
+      blogId,
+      imageType,
       url,
       width,
       height,
-      size,
+      fileSize,
     };
   }
 }

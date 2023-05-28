@@ -1,9 +1,7 @@
 import {
-  BadRequestException,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
+  Param,
   Post,
   UploadedFile,
   UseGuards,
@@ -16,13 +14,12 @@ import { User } from '../../../decorator/user.decorator';
 import { ForbiddenGuard } from '../../../guards/forbidden.guard';
 import { join } from 'node:path';
 import { readTextFileAsync } from '../../../helpers/fs-utils';
-import { WallpaperDto } from './dto/wallpaper.dto';
 import { UploadBackgroundWallpaperUseCase } from '../use-cases';
 import { BlogImagesInfoView } from './views';
-import sharp from 'sharp';
+import { WallpaperValidator } from '../../../validation/wallpaper.validator';
 
 @Controller('blogger/blogs')
-//@UseGuards(AuthBearerGuard, ForbiddenGuard)
+@UseGuards(AuthBearerGuard, ForbiddenGuard)
 export class ImagesController {
   constructor(
     private uploadBackgroundWallpaperUseCase: UploadBackgroundWallpaperUseCase,
@@ -36,23 +33,26 @@ export class ImagesController {
     return htmlContent;
   }
 
-  @Post('images/wallpaper')
+  @Post(':blogId/images/wallpaper')
   @UseInterceptors(FileInterceptor('file'))
   async uploadBackgroundWallpaper(
-    //@UploadedFile() content: WallpaperDto,
-    @UploadedFile() content: Express.Multer.File,
-    s,
-    //@User() user: UserDBModel,
-  ) /*: Promise<BlogImagesInfoView>*/ {
-    const imageBuffer = content.buffer;
+    @Param('blogId') blogId: string,
+    @UploadedFile(new WallpaperValidator()) content: Express.Multer.File,
+    @User() user: UserDBModel,
+  ): Promise<BlogImagesInfoView> {
+    try {
+      const imageBuffer = content.buffer;
+      const originalName = content.originalname;
 
-    const userId = '1';
-    const originalName = content.originalname;
-
-    return await this.uploadBackgroundWallpaperUseCase.execute(
-      userId,
-      imageBuffer,
-      originalName,
-    );
+      return await this.uploadBackgroundWallpaperUseCase.execute(
+        user.id,
+        blogId,
+        imageBuffer,
+        originalName,
+      );
+    } catch (e) {
+      console.log(e);
+      return;
+    }
   }
 }

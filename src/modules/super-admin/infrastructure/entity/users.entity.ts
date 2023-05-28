@@ -53,7 +53,4 @@ export class Users {
 
   @OneToMany(() => CommentReactions, (r) => r.user)
   pReactions: PostReactions[];
-
-  @OneToMany(() => Image, (i) => i.user)
-  images: Image[];
 }

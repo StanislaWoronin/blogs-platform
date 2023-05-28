@@ -5,7 +5,6 @@ import { preparedBlog } from '../helper/prepeared-data';
 import { images } from '../images/images';
 import { ImageStatus } from '../images/image-status.enum';
 import { join } from 'path';
-import { readFileSync } from 'fs';
 
 export class Blogger {
   constructor(private readonly server: any) {}
@@ -24,6 +23,15 @@ export class Blogger {
     imageStatus: ImageStatus,
     accessToken?: string,
   ) {
+    if (!accessToken) {
+      const response = await request(this.server)
+        .post(`/blogger/blogs/${blogId}/images/wallpaper`)
+        .auth(accessToken, { type: 'bearer' })
+        .send();
+
+      return { status: response.status, body: response.body };
+    }
+
     const imagePath = join(
       __dirname,
       '..',
@@ -35,7 +43,7 @@ export class Blogger {
     const response = await request(this.server)
       .post(`/blogger/blogs/${blogId}/images/wallpaper`)
       .auth(accessToken, { type: 'bearer' })
-      .attach('file', readFileSync(imagePath));
+      .attach('file', imagePath);
 
     return { status: response.status, body: response.body };
   }

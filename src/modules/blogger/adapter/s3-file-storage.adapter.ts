@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  DeleteObjectCommand,
   PutObjectCommand,
   PutObjectCommandOutput,
   S3Client,
@@ -29,11 +30,12 @@ export class S3FileStorageAdapter {
 
   async saveImage(
     userId: string,
+    blogId: string,
     imageBuffer: Buffer,
     originalName: string,
     imageName: ImageType,
-  ): Promise<string> {
-    const key = `content/users/${userId}/${imageName}/${imageName}-${originalName}.png`;
+  ): Promise<{ url: string; imageId: string }> {
+    const key = `content/users/${userId}/${blogId}/${imageName}/${imageName}.png`;
     const bucketParams = {
       Bucket: this.bucketName,
       Key: key,
@@ -44,13 +46,34 @@ export class S3FileStorageAdapter {
     const command = new PutObjectCommand(bucketParams);
 
     try {
-      const result: PutObjectCommandOutput = await this.s3Client.send(command);
+      const result = await this.s3Client.send(command);
 
-      return key;
+      return {
+        url: key,
+        imageId: result.ETag,
+      };
     } catch (exception) {
       console.log(exception);
       throw exception;
     }
+  }
+
+  async deleteImage(url: string) {
+    const bucketParams = {
+      Bucket: this.bucketName,
+      Key: url,
+    };
+    try {
+      const data = await this.s3Client.send(
+        new DeleteObjectCommand(bucketParams),
+      );
+      return data;
+    } catch (exception) {
+      console.error('Delete error:', exception);
+      throw exception;
+    }
+
+    return;
   }
 
   async #ensureUserFolder(userId: string, subFolder: string) {

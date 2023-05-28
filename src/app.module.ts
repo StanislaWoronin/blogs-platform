@@ -68,6 +68,7 @@ import { ImagesController } from './modules/blogger/api/images.controller';
 import { UploadBackgroundWallpaperUseCase } from './modules/blogger/use-cases';
 import { S3FileStorageAdapter } from './modules/blogger/adapter/s3-file-storage.adapter';
 import { Image } from './modules/blogger/image';
+import { WallpaperValidator } from './validation/wallpaper.validator';
 
 const controllers = [
   AuthController,
@@ -234,6 +235,7 @@ const services = [
 
 const validators = [
   /*BlogExistValidator,*/
+  WallpaperValidator,
   ConfirmationCodeValidator,
   EmailResendingValidator,
   EmailExistValidator,

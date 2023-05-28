@@ -12,6 +12,7 @@ import { EmailManagerMock } from './mock/emailAdapter.mock';
 import { createApp } from '../src/helpers/create-app';
 import { Testing } from './request/testing';
 import { ImageStatus } from './images/image-status.enum';
+import { getErrorMessage } from './helper/helpers';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -93,8 +94,33 @@ describe('e2e tests', () => {
       expect(result.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
+    const errorsMessages = getErrorMessage(['width', 'height']);
+    it(`Status: ${HttpStatus.BAD_REQUEST}.
+         Try send big image.`, async () => {
+      const { fistUserBlogId, accessToken } = expect.getState();
+      const result = await blogger.uploadBackgroundWallpaper(
+        fistUserBlogId,
+        ImageStatus.Big,
+        accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(result.body).toStrictEqual({ errorsMessages });
+    });
+
+    it(`Status: ${HttpStatus.BAD_REQUEST}.
+         Try send small image.`, async () => {
+      const { fistUserBlogId, accessToken } = expect.getState();
+      const result = await blogger.uploadBackgroundWallpaper(
+        fistUserBlogId,
+        ImageStatus.Small,
+        accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(result.body).toStrictEqual({ errorsMessages });
+    });
+
     it(`Status: ${HttpStatus.CREATED}.
-         Upload image.`, async () => {
+         Try send small image.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadBackgroundWallpaper(
         fistUserBlogId,
@@ -102,6 +128,7 @@ describe('e2e tests', () => {
         accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
+      console.log(result.body);
     });
   });
 });

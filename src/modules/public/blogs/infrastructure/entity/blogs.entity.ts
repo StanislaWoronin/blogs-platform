@@ -11,6 +11,7 @@ import { Users } from '../../../../super-admin/infrastructure/entity/users.entit
 import { BannedUsersForBlog } from './banned-users-for-blog.entity';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned_blog.entity';
+import { Image } from '../../../../blogger/image';
 
 @Entity()
 export class Blogs {
@@ -45,4 +46,7 @@ export class Blogs {
 
   @OneToOne(() => BannedBlog, (bb) => bb.blog)
   isBanned: BannedBlog;
+
+  @OneToMany(() => Image, (i) => i.blog)
+  images: Image[];
 }
