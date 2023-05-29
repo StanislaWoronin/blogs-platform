@@ -5,51 +5,68 @@ import sharp from 'sharp';
 import {DataSource} from 'typeorm';
 import {BlogImagesInfo} from '../api/views';
 import {BlogImage} from "../blog-image.entity";
+import {PostImage} from "../post-image.entity";
 
 @Injectable()
-export class UploadBackgroundWallpaperUseCase {
+export class UploadPostMainImageUseCase {
   constructor(
     private s3FileStorageAdapter: S3FileStorageAdapter,
     private dataSource: DataSource,
   ) {}
+
   async execute(
     userId: string,
     blogId: string,
+    postId: string,
     imageBuffer: Buffer,
     originalName: string,
   ): Promise<BlogImagesInfo> {
-    const [wallpaper] = await this.dataSource.query(this.getWallpaperExistQuery(), [
-      blogId,
-      ImageType.Wallpaper,
-    ]);
+    const images = await this.dataSource.query(this.getPostMainImagesQuery(), [
+      postId
+    ])
 
-    if (wallpaper) {
-      const deleteInCloud = this.s3FileStorageAdapter.deleteImage(wallpaper.url);
-      const deleteInBd = this.dataSource
-        .getRepository(BlogImage)
-        .delete({ imageId: wallpaper.imageId });
+    if (images.length) {
+      let deletedImagesPromise = []
+      for (let image of images) {
+        const deleteImage = this.s3FileStorageAdapter.deleteImage(image.url)
+        deletedImagesPromise.push(deleteImage)
+      }
+      const deleteInBd = this.dataSource.getRepository(PostImage).delete({postId: postId})
 
-      await Promise.all([deleteInCloud, deleteInBd])
+      await Promise.all([...deletedImagesPromise, deleteInBd])
     }
 
-    const { url, imageId } = await this.s3FileStorageAdapter.saveImage(
-      userId,
-      blogId,
-      imageBuffer,
-      originalName,
-      ImageType.Wallpaper,
-    );
+    const original = imageBuffer
+    const middle = sharp(imageBuffer).resize(300, 180)
+    const small = sharp(imageBuffer).resize(149, 96)
+    const mainImages = [original, middle, small]
+
+
+
+    for (let key of mainImages) {
+      const { url, imageId } = await this.s3FileStorageAdapter.saveImage(
+          userId,
+          blogId,
+          imageBuffer,
+          `${originalName}-key`,
+          ImageType.Main,
+          postId
+      );
+
+    }
+
 
     const { size, width, height } = await sharp(imageBuffer).metadata();
-    const image = BlogImage.create(
+    const image = PostImage.create(
       imageId,
-      blogId,
-      ImageType.Wallpaper,
+      postId,
+      ImageType.Main,
       url,
       width,
       height,
       size,
     );
+
     await this.dataSource.getRepository(BlogImage).save(image);
     const [blogImagesInfo]: BlogImagesInfo[] = await this.dataSource.query(
       this.getBlogImagesInfoQuery(),
@@ -59,25 +76,25 @@ export class UploadBackgroundWallpaperUseCase {
     return BlogImagesInfo.relativeToAbsoluteUrl(blogImagesInfo);
   }
 
-  private getWallpaperExistQuery = (): string => {
+  private getPostMainImagesQuery = (): string => {
     return `
       SELECT "imageId", url
-        FROM blog_image
-       WHERE "blogId" = $1 AND "imageType" = $2;
+        FROM post_image
+       WHERE "postId" = $1;
     `;
-  };
+  }
 
   private getBlogImagesInfoQuery = (): string => {
     return `
       SELECT 
         (
           SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
-            FROM blog_image 
+            FROM post_image 
            WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = $1
         ) AS wallpaper,
         COALESCE((
           SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
-            FROM blog_image 
+            FROM post_image 
            WHERE "imageType" = '${ImageType.Main}' AND "blogId" = $1
         ), '[]') AS main;
     `;

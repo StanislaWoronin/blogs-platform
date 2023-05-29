@@ -3,7 +3,7 @@ import {S3FileStorageAdapter} from '../adapter/s3-file-storage.adapter';
 import {ImageType} from '../imageType';
 import sharp from 'sharp';
 import {DataSource} from 'typeorm';
-import {Image} from '../image';
+import {BlogImage} from '../blog-image.entity';
 import {BlogImagesInfo} from '../api/views';
 
 @Injectable()
@@ -28,7 +28,7 @@ export class UploadBlogMainImageUseCase {
     );
 
     const { size, width, height } = await sharp(imageBuffer).metadata();
-    const image = Image.create(
+    const image = BlogImage.create(
       imageId,
       blogId,
       ImageType.Main,
@@ -38,7 +38,7 @@ export class UploadBlogMainImageUseCase {
       size,
     );
     console.log(image)
-    await this.dataSource.getRepository(Image).save(image);
+    await this.dataSource.getRepository(BlogImage).save(image);
     const [blogImagesInfo]: BlogImagesInfo[] = await this.dataSource.query(
       this.getBlogImagesInfoQuery(),
       [blogId],
@@ -52,12 +52,12 @@ export class UploadBlogMainImageUseCase {
       SELECT 
         (
           SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
-            FROM image 
+            FROM blog_image 
            WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = $1
         ) AS wallpaper,
         COALESCE((
           SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
-            FROM image 
+            FROM blog_image 
            WHERE "imageType" = '${ImageType.Main}' AND "blogId" = $1
         ), '[]') AS main;
     `;

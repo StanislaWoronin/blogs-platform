@@ -1,5 +1,4 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
-
 import { Security } from '../../../public/security/infrastructure/entity/security';
 import { EmailConfirmation } from './email-confirmation.entity';
 import { Blogs } from '../../../public/blogs/infrastructure/entity/blogs.entity';
@@ -8,7 +7,6 @@ import { Comments } from '../../../public/comments/infrastructure/entity/comment
 import { CommentReactions } from '../../../public/likes/infrastructure/entity/comment-reactions.entity';
 import { PostReactions } from '../../../public/likes/infrastructure/entity/post-reactions.entity';
 import { UserBanInfo } from './user-ban-info.entity';
-import { Image } from '../../../blogger/image';
 
 @Entity()
 export class Users {

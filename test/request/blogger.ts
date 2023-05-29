@@ -80,6 +80,38 @@ export class Blogger {
     return { status: response.status, body: response.body };
   }
 
+  async uploadMainImageForPost(
+      blogId: string,
+      postId: string,
+      imageStatus: ImageStatus,
+      accessToken?: string,
+  ) {
+    const url = `/blogger/blogs/${blogId}/posts/${postId}/images/main`
+    if (!accessToken) {
+      const response = await request(this.server)
+          .post(url)
+          .auth(accessToken, { type: 'bearer' })
+          .send();
+
+      return { status: response.status, body: response.body };
+    }
+
+    const imagePath = join(
+        __dirname,
+        '..',
+        'images',
+        'post',
+        images.post.original[imageStatus],
+    );
+
+    const response = await request(this.server)
+        .post(url)
+        .auth(accessToken, { type: 'bearer' })
+        .attach('file', imagePath);
+
+    return { status: response.status, body: response.body };
+  }
+
   async banUser(
     accessToken: string,
     userId: string,

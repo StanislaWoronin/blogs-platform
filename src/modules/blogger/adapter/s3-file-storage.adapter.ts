@@ -34,8 +34,9 @@ export class S3FileStorageAdapter {
     imageBuffer: Buffer,
     originalName: string,
     imageType: ImageType,
+    postId?: string
   ): Promise<{ url: string; imageId: string }> {
-    const key = `content/users/${userId}/${blogId}/${imageType}/${originalName}`;
+    const key = `content/users/${userId}/${blogId}/${postId ? `${postId}/` : ''}${imageType}/${originalName}`;
 
     const bucketParams = {
       Bucket: this.bucketName,

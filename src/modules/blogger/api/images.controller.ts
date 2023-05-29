@@ -19,13 +19,16 @@ import { BlogImagesInfo } from './views';
 import { WallpaperValidator } from '../../../validation/wallpaper.validator';
 import {BlogMainValidator} from "../../../validation/blog-main.validator";
 import {UploadBlogMainImageUseCase} from "../use-cases/upload-blog-main-image.use-case";
+import {PostMainValidator} from "../../../validation/post-main.validator";
+import {UploadPostMainImageUseCase} from "../use-cases/upload-post-main-image.use-case";
 
 @Controller('blogger/blogs')
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
 export class ImagesController {
   constructor(
     private uploadBackgroundWallpaperUseCase: UploadBackgroundWallpaperUseCase,
-    private uploadBlogMainImageUseCase: UploadBlogMainImageUseCase
+    private uploadBlogMainImageUseCase: UploadBlogMainImageUseCase,
+    private uploadPostMainImageUseCase: UploadPostMainImageUseCase
   ) {}
   @Get('images')
   async changeAvatarPage() {
@@ -43,15 +46,19 @@ export class ImagesController {
     @UploadedFile(new WallpaperValidator()) content: Express.Multer.File,
     @User() user: UserDBModel,
   ): Promise<BlogImagesInfo> {
-    const imageBuffer = content.buffer;
-    const originalName = content.originalname;
+    try {
+      const imageBuffer = content.buffer;
+      const originalName = content.originalname;
 
-    return await this.uploadBackgroundWallpaperUseCase.execute(
-        user.id,
-        blogId,
-        imageBuffer,
-        originalName,
-    );
+      return await this.uploadBackgroundWallpaperUseCase.execute(
+          user.id,
+          blogId,
+          imageBuffer,
+          originalName,
+      );
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   @Post(':blogId/images/main')
@@ -72,5 +79,23 @@ export class ImagesController {
     );
   }
 
+  @Post(':blogId/post/:postId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPostMainImage(
+      @Param('blogId') blogId: string,
+      @Param('postId') postId: string,
+      @UploadedFile(new PostMainValidator()) content: Express.Multer.File,
+      @User() user: UserDBModel,
+  ): Promise<BlogImagesInfo> {
+    const imageBuffer = content.buffer;
+    const originalName = content.originalname;
 
+    return await this.uploadPostMainImageUseCase.execute(
+        user.id,
+        blogId,
+        postId,
+        imageBuffer,
+        originalName,
+    );
+  }
 }
