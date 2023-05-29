@@ -62,23 +62,20 @@ export class OrmTestingRepository {
   }
 
   async deleteAll(): Promise<boolean> {
-    await this.dataSource.query(`
-      DELETE FROM post_reactions;
-      DELETE FROM security;    
-      DELETE FROM banned_blog;
-      DELETE FROM banned_post;
-      DELETE FROM banned_users_for_blog;
-      DELETE FROM comment_reactions;
-      DELETE FROM comments;
-      DELETE FROM posts;
-      DELETE FROM blogs;
-      DELETE FROM user_ban_info;
-      DELETE FROM security;
-      DELETE FROM email_confirmation;
-      DELETE FROM token_black_list;
-      DELETE FROM users; 
-    `);
+    try {
+      const entities = this.dataSource.entityMetadatas;
+      const tableNames = entities
+          .map((entity) => `"${entity.tableName}"`)
+          .join(', ');
 
-    return true;
+      const deleted = await this.dataSource.query(
+          `TRUNCATE ${tableNames} CASCADE;`,
+      );
+
+      return deleted;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
 }

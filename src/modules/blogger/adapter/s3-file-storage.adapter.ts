@@ -35,7 +35,7 @@ export class S3FileStorageAdapter {
     originalName: string,
     imageName: ImageType,
   ): Promise<{ url: string; imageId: string }> {
-    const key = `content/users/${userId}/${blogId}/${imageName}/${imageName}.png`;
+    const key = `content/users/${userId}/${blogId}/${imageName}/${originalName}`;
     const bucketParams = {
       Bucket: this.bucketName,
       Key: key,
@@ -53,7 +53,7 @@ export class S3FileStorageAdapter {
         imageId: result.ETag,
       };
     } catch (exception) {
-      console.log(exception);
+      console.log('Try save image:', exception);
       throw exception;
     }
   }

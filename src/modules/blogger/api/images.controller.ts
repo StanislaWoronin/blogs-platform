@@ -15,7 +15,7 @@ import { ForbiddenGuard } from '../../../guards/forbidden.guard';
 import { join } from 'node:path';
 import { readTextFileAsync } from '../../../helpers/fs-utils';
 import { UploadBackgroundWallpaperUseCase } from '../use-cases';
-import { BlogImagesInfoView } from './views';
+import { BlogImagesInfo } from './views';
 import { WallpaperValidator } from '../../../validation/wallpaper.validator';
 
 @Controller('blogger/blogs')
@@ -39,7 +39,7 @@ export class ImagesController {
     @Param('blogId') blogId: string,
     @UploadedFile(new WallpaperValidator()) content: Express.Multer.File,
     @User() user: UserDBModel,
-  ): Promise<BlogImagesInfoView> {
+  ): Promise<BlogImagesInfo> {
     try {
       const imageBuffer = content.buffer;
       const originalName = content.originalname;

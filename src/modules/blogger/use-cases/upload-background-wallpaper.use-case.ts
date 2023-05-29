@@ -4,7 +4,9 @@ import { ImageType } from '../imageType';
 import sharp from 'sharp';
 import { DataSource } from 'typeorm';
 import { Image } from '../image';
-import { BlogImagesInfoView } from '../api/views';
+import { BlogImagesInfo } from '../api/views';
+import {join} from "path";
+import {settings} from "../../../settings";
 
 @Injectable()
 export class UploadBackgroundWallpaperUseCase {
@@ -17,13 +19,13 @@ export class UploadBackgroundWallpaperUseCase {
     blogId: string,
     imageBuffer: Buffer,
     originalName: string,
-  ): Promise<BlogImagesInfoView> {
-    const wallpaper = await this.dataSource.query(this.checkWallpaperExist(), [
-      userId,
+  ): Promise<BlogImagesInfo> {
+    const [wallpaper] = await this.dataSource.query(this.getWallpaperExistQuery(), [
+      blogId,
       ImageType.Wallpaper,
     ]);
-    console.log(wallpaper);
-    if (wallpaper.length) {
+
+    if (wallpaper) {
       await this.s3FileStorageAdapter.deleteImage(wallpaper.url);
       await this.dataSource
         .getRepository(Image)
@@ -39,7 +41,6 @@ export class UploadBackgroundWallpaperUseCase {
     );
 
     const { size, width, height } = await sharp(imageBuffer).metadata();
-    console.log(size);
     const image = Image.create(
       imageId,
       blogId,
@@ -50,23 +51,23 @@ export class UploadBackgroundWallpaperUseCase {
       size,
     );
     await this.dataSource.getRepository(Image).save(image);
-    const [blogImagesInfo]: BlogImagesInfoView[] = await this.dataSource.query(
-      this.getBlogImagesInfo(),
+    const [blogImagesInfo]: BlogImagesInfo[] = await this.dataSource.query(
+      this.getBlogImagesInfoQuery(),
       [blogId],
     );
 
-    return blogImagesInfo;
+    return BlogImagesInfo.relativeToAbsoluteUrl(blogImagesInfo);
   }
 
-  private checkWallpaperExist = (): string => {
+  private getWallpaperExistQuery = (): string => {
     return `
       SELECT "imageId", url
         FROM image
-       WHERE "blogId" = $1 AND "imageType" = $2
+       WHERE "blogId" = $1 AND "imageType" = $2;
     `;
   };
 
-  private getBlogImagesInfo = (): string => {
+  private getBlogImagesInfoQuery = (): string => {
     return `
       SELECT 
         (

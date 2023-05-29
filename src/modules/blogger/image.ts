@@ -1,6 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ImageType } from './imageType';
 import { Blogs } from '../public/blogs/infrastructure/entity/blogs.entity';
+import {join} from "path";
+import {settings} from "../../settings";
+import {BlogImagesInfo} from "./api/views";
 
 @Entity()
 export class Image {
@@ -36,6 +39,7 @@ export class Image {
     height: number,
     fileSize: number,
   ) {
+
     return {
       imageId,
       blogId,

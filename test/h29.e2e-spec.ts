@@ -13,6 +13,10 @@ import { createApp } from '../src/helpers/create-app';
 import { Testing } from './request/testing';
 import { ImageStatus } from './images/image-status.enum';
 import { getErrorMessage } from './helper/helpers';
+import {join} from "path";
+import {settings} from "../src/settings";
+import {ImageType} from "../src/modules/blogger/imageType";
+import {images} from "./images/images";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -54,7 +58,7 @@ describe('e2e tests', () => {
   });
 
   describe('Upload background wallpaper', () => {
-    it('Cleare data base', async () => {
+    it('Clear data base', async () => {
       await testing.clearDb();
     });
 
@@ -120,15 +124,46 @@ describe('e2e tests', () => {
     });
 
     it(`Status: ${HttpStatus.CREATED}.
-         Try send small image.`, async () => {
-      const { fistUserBlogId, accessToken } = expect.getState();
+         Save new wallpaper in cloud.`, async () => {
+      const { userId, fistUserBlogId, accessToken } = expect.getState();
+      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Wallpaper, images.blog.wallpaper.valid)
       const result = await blogger.uploadBackgroundWallpaper(
         fistUserBlogId,
         ImageStatus.Valid,
         accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
-      console.log(result.body);
+      expect(result.body).toStrictEqual({
+        wallpaper: {
+          url: expectUrl,
+          width: 1028,
+          height: 312,
+          fileSize: 6321
+        },
+        main: []
+      })
+    });
+
+    it(`Status: ${HttpStatus.CREATED}.
+         Update wallpaper.`, async () => {
+      const { userId, fistUserBlogId, accessToken } = expect.getState();
+      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Wallpaper, images.blog.wallpaper.copy)
+
+      const result = await blogger.uploadBackgroundWallpaper(
+          fistUserBlogId,
+          ImageStatus.Copy,
+          accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.CREATED);
+      expect(result.body).toStrictEqual({
+        wallpaper: {
+          url: expectUrl,
+          width: 1028,
+          height: 312,
+          fileSize: 6321
+        },
+        main: []
+      })
     });
   });
 });
