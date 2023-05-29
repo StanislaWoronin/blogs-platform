@@ -3,7 +3,7 @@ export const images = {
     main: {
       valid: 'blog-main-valid-156X156.png',
       small: 'blog-main-small-155X155.png',
-      big: 'blog-main-valid-157X157.png',
+      big: 'blog-main-big-157X157.png',
     },
     wallpaper: {
       valid: 'blog-wallpaper-valid-1028X312.png',

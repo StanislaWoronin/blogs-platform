@@ -17,12 +17,15 @@ import { readTextFileAsync } from '../../../helpers/fs-utils';
 import { UploadBackgroundWallpaperUseCase } from '../use-cases';
 import { BlogImagesInfo } from './views';
 import { WallpaperValidator } from '../../../validation/wallpaper.validator';
+import {BlogMainValidator} from "../../../validation/blog-main.validator";
+import {UploadBlogMainImageUseCase} from "../use-cases/upload-blog-main-image.use-case";
 
 @Controller('blogger/blogs')
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
 export class ImagesController {
   constructor(
     private uploadBackgroundWallpaperUseCase: UploadBackgroundWallpaperUseCase,
+    private uploadBlogMainImageUseCase: UploadBlogMainImageUseCase
   ) {}
   @Get('images')
   async changeAvatarPage() {
@@ -40,19 +43,34 @@ export class ImagesController {
     @UploadedFile(new WallpaperValidator()) content: Express.Multer.File,
     @User() user: UserDBModel,
   ): Promise<BlogImagesInfo> {
-    try {
-      const imageBuffer = content.buffer;
-      const originalName = content.originalname;
+    const imageBuffer = content.buffer;
+    const originalName = content.originalname;
 
-      return await this.uploadBackgroundWallpaperUseCase.execute(
+    return await this.uploadBackgroundWallpaperUseCase.execute(
         user.id,
         blogId,
         imageBuffer,
         originalName,
-      );
-    } catch (e) {
-      console.log(e);
-      return;
-    }
+    );
   }
+
+  @Post(':blogId/images/main')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBlogMainImage(
+      @Param('blogId') blogId: string,
+      @UploadedFile(new BlogMainValidator()) content: Express.Multer.File,
+      @User() user: UserDBModel,
+  ): Promise<BlogImagesInfo> {
+    const imageBuffer = content.buffer;
+    const originalName = content.originalname;
+
+    return await this.uploadBlogMainImageUseCase.execute(
+        user.id,
+        blogId,
+        imageBuffer,
+        originalName,
+    );
+  }
+
+
 }

@@ -69,6 +69,7 @@ import { UploadBackgroundWallpaperUseCase } from './modules/blogger/use-cases';
 import { S3FileStorageAdapter } from './modules/blogger/adapter/s3-file-storage.adapter';
 import { Image } from './modules/blogger/image';
 import { WallpaperValidator } from './validation/wallpaper.validator';
+import {UploadBlogMainImageUseCase} from "./modules/blogger/use-cases/upload-blog-main-image.use-case";
 
 const controllers = [
   AuthController,
@@ -247,6 +248,7 @@ const useCases = [
   CreateUserUseCase,
   CreateUserBySaUseCase,
   UploadBackgroundWallpaperUseCase,
+  UploadBlogMainImageUseCase
 ];
 
 @Module({

@@ -33,9 +33,10 @@ export class S3FileStorageAdapter {
     blogId: string,
     imageBuffer: Buffer,
     originalName: string,
-    imageName: ImageType,
+    imageType: ImageType,
   ): Promise<{ url: string; imageId: string }> {
-    const key = `content/users/${userId}/${blogId}/${imageName}/${originalName}`;
+    const key = `content/users/${userId}/${blogId}/${imageType}/${originalName}`;
+
     const bucketParams = {
       Bucket: this.bucketName,
       Key: key,
@@ -63,6 +64,7 @@ export class S3FileStorageAdapter {
       Bucket: this.bucketName,
       Key: url,
     };
+
     try {
       const data = await this.s3Client.send(
         new DeleteObjectCommand(bucketParams),

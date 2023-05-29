@@ -23,9 +23,10 @@ export class Blogger {
     imageStatus: ImageStatus,
     accessToken?: string,
   ) {
+    const url = `/blogger/blogs/${blogId}/images/wallpaper`
     if (!accessToken) {
       const response = await request(this.server)
-        .post(`/blogger/blogs/${blogId}/images/wallpaper`)
+        .post(url)
         .auth(accessToken, { type: 'bearer' })
         .send();
 
@@ -41,9 +42,40 @@ export class Blogger {
     );
 
     const response = await request(this.server)
-      .post(`/blogger/blogs/${blogId}/images/wallpaper`)
+      .post(url)
       .auth(accessToken, { type: 'bearer' })
       .attach('file', imagePath);
+
+    return { status: response.status, body: response.body };
+  }
+
+  async uploadMainImageForBlog(
+      blogId: string,
+      imageStatus: ImageStatus,
+      accessToken?: string,
+  ) {
+    const url = `/blogger/blogs/${blogId}/images/main`
+    if (!accessToken) {
+      const response = await request(this.server)
+          .post(url)
+          .auth(accessToken, { type: 'bearer' })
+          .send();
+
+      return { status: response.status, body: response.body };
+    }
+
+    const imagePath = join(
+        __dirname,
+        '..',
+        'images',
+        'blog',
+        images.blog.main[imageStatus],
+    );
+
+    const response = await request(this.server)
+        .post(url)
+        .auth(accessToken, { type: 'bearer' })
+        .attach('file', imagePath);
 
     return { status: response.status, body: response.body };
   }

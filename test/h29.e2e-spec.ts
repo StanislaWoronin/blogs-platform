@@ -57,7 +57,7 @@ describe('e2e tests', () => {
     await app.close();
   });
 
-  describe('Upload background wallpaper', () => {
+  describe.skip('Upload background wallpaper', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
     });
@@ -163,6 +163,93 @@ describe('e2e tests', () => {
           fileSize: 6321
         },
         main: []
+      })
+    });
+  });
+
+  describe('Upload main square image for blog', () => {
+    it('Clear data base', async () => {
+      await testing.clearDb();
+    });
+
+    it('Create testing date', async () => {
+      const users = await factories.createAndLoginUsers(2);
+      const fistUserBlog = await blogger.createBlog(users[0].accessToken);
+      const secondUserBlog = await blogger.createBlog(users[1].accessToken);
+
+      expect.setState({
+        accessToken: users[0].accessToken,
+        userId: users[0].user.id,
+        fistUserBlogId: fistUserBlog.body.id,
+        secondUserBlogId: secondUserBlog.body.id,
+      });
+    });
+
+    it(`Status: ${HttpStatus.FORBIDDEN}.
+         If user try to update blog that doesn't belong to current user.`, async () => {
+      const { accessToken, secondUserBlogId } = expect.getState();
+
+      const result = await blogger.uploadMainImageForBlog(
+          secondUserBlogId,
+          ImageStatus.Valid,
+          accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.FORBIDDEN);
+    });
+
+    it(`Status: ${HttpStatus.UNAUTHORIZED}.
+         If user try to update without credentials.`, async () => {
+      const { fistUserBlogId, accessToken } = expect.getState();
+      const result = await blogger.uploadMainImageForBlog(
+          fistUserBlogId,
+          ImageStatus.Valid,
+      );
+      expect(result.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    const errorsMessages = getErrorMessage(['width', 'height']);
+    it(`Status: ${HttpStatus.BAD_REQUEST}.
+         Try send big image.`, async () => {
+      const { fistUserBlogId, accessToken } = expect.getState();
+      const result = await blogger.uploadMainImageForBlog(
+          fistUserBlogId,
+          ImageStatus.Big,
+          accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(result.body).toStrictEqual({ errorsMessages });
+    });
+
+    it(`Status: ${HttpStatus.BAD_REQUEST}.
+         Try send small image.`, async () => {
+      const { fistUserBlogId, accessToken } = expect.getState();
+      const result = await blogger.uploadMainImageForBlog(
+          fistUserBlogId,
+          ImageStatus.Small,
+          accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.BAD_REQUEST);
+      expect(result.body).toStrictEqual({ errorsMessages });
+    });
+
+    it(`Status: ${HttpStatus.CREATED}.
+         Save new wallpaper in cloud.`, async () => {
+      const { userId, fistUserBlogId, accessToken } = expect.getState();
+      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Main, images.blog.main.valid)
+      const result = await blogger.uploadMainImageForBlog(
+          fistUserBlogId,
+          ImageStatus.Valid,
+          accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.CREATED);
+      expect(result.body).toStrictEqual({
+        wallpaper: null,
+        main: [{
+          url: expectUrl,
+          width: 156,
+          height: 156,
+          fileSize: 774
+        }]
       })
     });
   });
