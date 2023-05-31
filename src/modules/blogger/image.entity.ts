@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryColumn} from "typeorm";
+import {Column, PrimaryColumn} from "typeorm";
 import {ImageType} from "./imageType";
 
 export class Image {

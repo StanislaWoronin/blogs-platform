@@ -260,14 +260,14 @@ describe('e2e tests', () => {
     });
 
     it('Create testing date', async () => {
-      const users = await factories.createAndLoginUsers(2);
-      const fistUserBlog = await blogger.createBlog(users[0].accessToken);
-      const secondUserBlog = await blogger.createBlog(users[1].accessToken);
-      const [post] = await factories.createPostsForBlog(fistUserBlog.body.accessToken, fistUserBlog.body.id, 1)
+      const [firstUser, secondUser] = await factories.createAndLoginUsers(2);
+      const fistUserBlog = await blogger.createBlog(firstUser.accessToken);
+      const secondUserBlog = await blogger.createBlog(secondUser.accessToken);
+      const [post] = await factories.createPostsForBlog(firstUser.accessToken, fistUserBlog.body.id, 1)
 
       expect.setState({
-        accessToken: users[0].accessToken,
-        userId: users[0].user.id,
+        accessToken: firstUser.accessToken,
+        userId: firstUser.user.id,
         fistUserBlogId: fistUserBlog.body.id,
         secondUserBlogId: secondUserBlog.body.id,
         postId: post.id
@@ -327,7 +327,7 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save new wallpaper in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
-      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Main, images.blog.main.valid)
+      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, postId, ImageType.Main)
       const result = await blogger.uploadMainImageForPost(
           fistUserBlogId,
           postId,
@@ -336,13 +336,26 @@ describe('e2e tests', () => {
       );
       expect(result.status).toBe(HttpStatus.CREATED);
       expect(result.body).toStrictEqual({
-        wallpaper: null,
-        main: [{
-          url: expectUrl,
-          width: 156,
-          height: 156,
-          fileSize: 774
-        }]
+        main: [
+          {
+            url: join(expectUrl, 'original'),
+            width: 940,
+            height: 432,
+            fileSize: 8175,
+          },
+          {
+            url: join(expectUrl, 'middle'),
+            width: 300,
+            height: 180,
+            fileSize: 1462
+          },
+          {
+            url: join(expectUrl, 'small'),
+            width: 149,
+            height: 96,
+            fileSize: 549
+          },
+        ]
       })
     });
   });

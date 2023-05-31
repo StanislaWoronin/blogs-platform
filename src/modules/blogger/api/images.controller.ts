@@ -21,6 +21,7 @@ import {BlogMainValidator} from "../../../validation/blog-main.validator";
 import {UploadBlogMainImageUseCase} from "../use-cases/upload-blog-main-image.use-case";
 import {PostMainValidator} from "../../../validation/post-main.validator";
 import {UploadPostMainImageUseCase} from "../use-cases/upload-post-main-image.use-case";
+import {PostImagesInfo} from "./views/post-images-info.view";
 
 @Controller('blogger/blogs')
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
@@ -79,14 +80,14 @@ export class ImagesController {
     );
   }
 
-  @Post(':blogId/post/:postId/images/main')
+  @Post(':blogId/posts/:postId/images/main')
   @UseInterceptors(FileInterceptor('file'))
   async uploadPostMainImage(
       @Param('blogId') blogId: string,
       @Param('postId') postId: string,
       @UploadedFile(new PostMainValidator()) content: Express.Multer.File,
       @User() user: UserDBModel,
-  ): Promise<BlogImagesInfo> {
+  ): Promise<PostImagesInfo> {
     const imageBuffer = content.buffer;
     const originalName = content.originalname;
 
