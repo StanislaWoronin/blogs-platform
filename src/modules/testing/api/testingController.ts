@@ -10,12 +10,14 @@ import {
 import { JwtService } from '../../public/auth/application/jwt.service';
 import { ITestingRepository } from '../infrastructure/i-testing.repository';
 import { TokenPayloadModel } from '../../../global-model/token-payload.model';
+import {S3FileStorageAdapter} from "../../blogger/adapter/s3-file-storage.adapter";
 
 @Controller('testing')
 export class TestingController {
   constructor(
     @Inject(ITestingRepository) protected testingRepository: ITestingRepository,
     private jwtService: JwtService,
+    private s3FileStorageAdapter: S3FileStorageAdapter,
   ) {}
 
   @Get('confirmation-code/:userId')
@@ -64,6 +66,9 @@ export class TestingController {
   @Delete('all-data')
   @HttpCode(204)
   async deleteAll(): Promise<boolean> {
-    return this.testingRepository.deleteAll();
+    await this.testingRepository.deleteAll();
+    // await this.s3FileStorageAdapter.deleteImage('content');
+
+    return
   }
 }

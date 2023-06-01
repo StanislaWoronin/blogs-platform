@@ -10,6 +10,8 @@ import { ContentPageModel } from '../../../../../global-model/contentPage.model'
 import { dbBlogWithAdditionalInfo } from '../entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blog-with-additional-info.model';
 import { CreatedBlogModel } from '../../api/dto/blogView.model';
+import {IQueryBlogsRepository} from "../i-query-blogs.repository";
+import {ImageType} from "../../../../blogger/imageType";
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -22,14 +24,28 @@ export class PgQueryBlogsRepository {
     const filter = this.getFilter(userId, queryDto);
 
     const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
-              FROM public.blogs
-             WHERE ${filter} AND NOT EXISTS (SELECT "blogId" 
-                                               FROM public.banned_blog
-                                              WHERE banned_blog."blogId" = blogs.id)
-                             AND (SELECT "banStatus"
-                                    FROM user_ban_info 
-                                   WHERE user_ban_info."userId" = blogs."userId") != true
+            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
+	   (
+    SELECT JSON_BUILD_OBJECT(
+      'wallpaper', (
+        SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+        FROM blog_image
+        WHERE "imageType" = ${ImageType.Wallpaper} AND "blogId" = b.id
+      ),
+      'main', (
+        SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+        FROM blog_image
+        WHERE "imageType" = ${ImageType.Main} AND "blogId" = b.id
+      )
+    )
+  ) AS images
+  FROM public.blogs b	 
+ WHERE  NOT EXISTS (SELECT "blogId" 
+                      FROM public.banned_blog
+                     WHERE banned_blog."blogId" = b.id)
+                       AND (SELECT "banStatus"
+                              FROM user_ban_info 
+                             WHERE user_ban_info."userId" = b."userId") != true
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
                queryDto.pageNumber,

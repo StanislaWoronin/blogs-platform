@@ -1,3 +1,5 @@
+import {BlogImagesInfo} from "../../../../blogger/api/views";
+
 export class BlogViewModel {
   constructor(
     public id: string,

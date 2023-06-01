@@ -37,7 +37,7 @@ export class UploadBlogMainImageUseCase {
       height,
       size,
     );
-    console.log(image)
+
     await this.dataSource.getRepository(BlogImage).save(image);
     const [blogImagesInfo]: BlogImagesInfo[] = await this.dataSource.query(
       this.getBlogImagesInfoQuery(),

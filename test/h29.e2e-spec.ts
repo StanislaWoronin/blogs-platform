@@ -17,6 +17,7 @@ import {join} from "path";
 import {settings} from "../src/settings";
 import {ImageType} from "../src/modules/blogger/imageType";
 import {images} from "./images/images";
+import request from 'supertest';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -394,4 +395,43 @@ describe('e2e tests', () => {
       })
     });
   });
+
+  describe('Return blogs and posts with images info', () => {
+    it('Clear data base', async () => {
+      await testing.clearDb();
+    });
+
+    it('Create data', async () => {
+      const [user] = await factories.createAndLoginUsers(1);
+      const blog = await blogger.createBlog(user.accessToken);
+      const [post] = await factories.createPostsForBlog(user.accessToken, blog.body.id, 1)
+      const blogBackgroundWallpaper = await blogger.uploadBackgroundWallpaper(
+          blog.body.id,
+          ImageStatus.Valid,
+          user.accessToken,
+      );
+      const blogMainImages = await blogger.uploadMainImageForBlog(
+          blog.body.id,
+          ImageStatus.Valid,
+          user.accessToken,
+      );
+      const postMainImages = await blogger.uploadMainImageForPost(
+          blog.body.id,
+          post.id,
+          ImageStatus.Valid,
+          user.accessToken,
+      );
+
+      expect.setState({user, blog, post, blogBackgroundWallpaper, blogMainImages, postMainImages})
+    })
+
+    it('Get posts by blogger', async () => {
+      const {user} = expect.getState()
+
+      const result = await request(server)
+          .get('/blogger/blogs')
+          .auth(user.accessToken, {type: 'bearer'})
+      console.log(result.body)
+    })
+  })
 });
