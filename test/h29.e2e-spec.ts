@@ -57,7 +57,7 @@ describe('e2e tests', () => {
     await app.close();
   });
 
-  describe.skip('Upload background wallpaper', () => {
+  describe('Upload background wallpaper', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
     });
@@ -167,7 +167,7 @@ describe('e2e tests', () => {
     });
   });
 
-  describe.skip('Upload main square image for blog', () => {
+  describe('Upload main square image for blog', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
     });
@@ -325,13 +325,48 @@ describe('e2e tests', () => {
     });
 
     it(`Status: ${HttpStatus.CREATED}.
-         Save new wallpaper in cloud.`, async () => {
+         Save main image in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
       const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, postId, ImageType.Main)
       const result = await blogger.uploadMainImageForPost(
           fistUserBlogId,
           postId,
           ImageStatus.Valid,
+          accessToken,
+      );
+      expect(result.status).toBe(HttpStatus.CREATED);
+      expect(result.body).toStrictEqual({
+        main: [
+          {
+            url: join(expectUrl, 'original'),
+            width: 940,
+            height: 432,
+            fileSize: 8175,
+          },
+          {
+            url: join(expectUrl, 'middle'),
+            width: 300,
+            height: 180,
+            fileSize: 1462
+          },
+          {
+            url: join(expectUrl, 'small'),
+            width: 149,
+            height: 96,
+            fileSize: 549
+          },
+        ]
+      })
+    });
+
+    it(`Status: ${HttpStatus.CREATED}.
+         Save new main image in cloud.`, async () => {
+      const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
+      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, postId, ImageType.Main)
+      const result = await blogger.uploadMainImageForPost(
+          fistUserBlogId,
+          postId,
+          ImageStatus.Copy,
           accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);

@@ -44,9 +44,7 @@ export class BloggerBlogsController {
     @Query() query: QueryParametersDto,
     @User() user: UserDBModel,
   ): Promise<ContentPageModel> {
-    const blogs = await this.queryBlogsRepository.getBlogs(query, user.id);
-
-    return blogs;
+    return await this.queryBlogsRepository.getBlogs(query, user.id);
   }
 
   @Get('comments')

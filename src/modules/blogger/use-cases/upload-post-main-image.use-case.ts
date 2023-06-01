@@ -3,8 +3,6 @@ import {S3FileStorageAdapter} from '../adapter/s3-file-storage.adapter';
 import {ImageType} from '../imageType';
 import sharp from 'sharp';
 import {DataSource} from 'typeorm';
-import {BlogImagesInfo} from '../api/views';
-import {BlogImage} from "../blog-image.entity";
 import {PostImage} from "../post-image.entity";
 import {PostImagesInfo} from "../api/views/post-images-info.view";
 
@@ -20,7 +18,6 @@ export class UploadPostMainImageUseCase {
     blogId: string,
     postId: string,
     imageBuffer: Buffer,
-    originalName: string,
   ): Promise<PostImagesInfo> {
     try {
       const images = await this.dataSource.query(this.getPostMainImagesQuery(), [
@@ -39,42 +36,63 @@ export class UploadPostMainImageUseCase {
       }
 
       const original = imageBuffer
-      const middle = await sharp(imageBuffer)
+      const middle = sharp(imageBuffer)
           .resize({width: 300, height: 180})
           .toBuffer()
-      const small = await sharp(imageBuffer)
+      const small = sharp(imageBuffer)
           .resize({width: 149, height: 96})
           .toBuffer()
-      const mainImages = {original, middle, small}
+      const resizePromise = await Promise.all([original, middle, small])
+
+      let metadataArr= []
+      for (let buffer of resizePromise) {
+        const metadata = sharp(buffer).metadata();
+        metadataArr.push(metadata)
+      }
+      const metadataPromise = await Promise.all(metadataArr)
+
+      const mainImages = {};
+      const imageSizes = ['original', 'middle', 'small'];
+      for (let i = 0; i < resizePromise.length; i++) {
+        const key = imageSizes[i];
+        const buffer = resizePromise[i];
+        const metadata = metadataPromise[i];
+
+        mainImages[key] = {
+          buffer: buffer,
+          width: metadata.width,
+          height: metadata.height,
+          size: metadata.size,
+        };
+      }
 
       const saveImage = []
       for (let key in mainImages) {
-        const saveInStorage = await this.s3FileStorageAdapter.saveImage(
+        const saveInStorage = this.s3FileStorageAdapter.saveImage(
             userId,
             blogId,
-            mainImages[key].imageBuffer,
+            mainImages[key].buffer,
             key,
             ImageType.Main,
             postId
         );
 
-        const {size, width, height} = await sharp(mainImages[key]).metadata();
         const image = PostImage.create(
             postId,
             ImageType.Main,
-            width,
-            height,
-            size,
+            mainImages[key].width,
+            mainImages[key].height,
+            mainImages[key].size,
             userId,
             blogId,
             key
         );
-        const saveInBd = await this.dataSource.getRepository(PostImage).save(image);
+        const saveInBd = this.dataSource.getRepository(PostImage).save(image);
 
-        // saveImage.push(saveInStorage)
-        // saveImage.push(saveInBd)
+        saveImage.push(saveInStorage)
+        saveImage.push(saveInBd)
       }
-      //await Promise.all(saveImage)
+      await Promise.all(saveImage)
 
       const [postImagesInfo]: PostImagesInfo[] = await this.dataSource.query(
           this.getPostImagesInfoQuery(),

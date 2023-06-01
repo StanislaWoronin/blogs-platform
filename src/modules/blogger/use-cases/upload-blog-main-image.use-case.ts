@@ -23,7 +23,7 @@ export class UploadBlogMainImageUseCase {
       userId,
       blogId,
       imageBuffer,
-      originalName,
+      `${originalName}-${Date.now()}`,
       ImageType.Main,
     );
 

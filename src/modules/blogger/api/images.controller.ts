@@ -96,7 +96,6 @@ export class ImagesController {
         blogId,
         postId,
         imageBuffer,
-        originalName,
     );
   }
 }
