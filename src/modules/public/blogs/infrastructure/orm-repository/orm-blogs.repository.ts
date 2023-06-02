@@ -33,7 +33,7 @@ export class OrmBlogsRepository {
       )
       .execute();
 
-    return result.raw[0];
+    return CreatedBlogModel.addImages(result.raw[0]);
   }
 
   async bindBlog(params: BindBlogDto): Promise<boolean> {

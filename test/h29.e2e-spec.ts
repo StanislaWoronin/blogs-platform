@@ -18,6 +18,7 @@ import {settings} from "../src/settings";
 import {ImageType} from "../src/modules/blogger/imageType";
 import {images} from "./images/images";
 import request from 'supertest';
+import {preparedBlog, preparedPost} from "./helper/prepeared-data";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -396,6 +397,57 @@ describe('e2e tests', () => {
     });
   });
 
+  describe('Create blog and post', () => {
+    it('Clear data base', async () => {
+      await testing.clearDb();
+    });
+
+    it('Created blog and return with image info', async () => {
+      const [user] = await factories.createAndLoginUsers(1);
+      const blog = await blogger.createBlog(user.accessToken);
+      expect(blog.status).toBe(HttpStatus.CREATED)
+      expect(blog.body).toStrictEqual({
+        id: blog.body.id,
+        name: blog.body.name,
+        description: blog.body.description,
+        websiteUrl: blog.body.websiteUrl,
+        createdAt: blog.body.createdAt,
+        isMembership: blog.body.isMembership,
+        images: {
+          wallpaper: null,
+          main: []
+        }
+      })
+
+      expect.setState({accessToken: user.accessToken, blogId: blog.body.id})
+    })
+
+    it('Created post and return with image info', async () => {
+      const {accessToken, blogId} = expect.getState()
+
+      const [post] = await factories.createPostsForBlog(accessToken, blogId, 1)
+      console.dir(post, {depth: null})
+      expect(post).toStrictEqual({
+        id: expect.any(String),
+        title: 'title0',
+        shortDescription: 'shortDescription0',
+        content: 'content0',
+        blogId: blogId,
+        blogName: preparedBlog.valid.name,
+        createdAt: expect.any(String),
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+          newestLikes: [],
+        },
+        images: {
+          main: []
+        }
+      })
+    })
+  })
+
   describe('Return blogs and posts with images info', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
@@ -426,12 +478,33 @@ describe('e2e tests', () => {
     })
 
     it('Get posts by blogger', async () => {
-      const {user} = expect.getState()
+      const {user, blog, blogMainImages} = expect.getState()
 
       const result = await request(server)
           .get('/blogger/blogs')
           .auth(user.accessToken, {type: 'bearer'})
-      console.log(result.body)
+      expect(result.status).toBe(HttpStatus.OK)
+      expect(result.body).toStrictEqual({
+        page: 1,
+        pageSize: 10,
+        pagesCount: 1,
+        totalCount: 1,
+        items: [
+          {
+            id: blog.body.id,
+            name: blog.body.name,
+            description: blog.body.description,
+            websiteUrl: blog.body.websiteUrl,
+            createdAt: blog.body.createdAt,
+            isMembership: blog.body.isMembership,
+            images: blogMainImages.body
+          }
+        ]
+      })
     })
+  })
+
+  describe('Return blog and post with images info for public endpoints', async () => {
+
   })
 });

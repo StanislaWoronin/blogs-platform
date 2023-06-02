@@ -1,4 +1,6 @@
 import { NewestLikesModel } from '../../../likes/infrastructure/entity/newestLikes.model';
+import {PostImage} from "../../../../blogger/post-image.entity";
+import {PostImagesInfo} from "../../../../blogger/api/views/post-images-info.view";
 
 export class PostViewModel {
   constructor(
@@ -15,6 +17,7 @@ export class PostViewModel {
       dislikesCount: number;
       newestLikes: NewestLikesModel[];
     },
+    public images: PostImagesInfo
   ) {}
 }
 

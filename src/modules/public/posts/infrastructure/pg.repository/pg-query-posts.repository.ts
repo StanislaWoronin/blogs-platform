@@ -11,6 +11,7 @@ import { DbPostModel } from '../entity/db-post.model';
 import { PostViewModel } from '../../api/dto/postsView.model';
 import { IQueryReactionRepository } from '../../../likes/infrastructure/i-query-reaction.repository';
 import { ReactionModel } from '../../../../../global-model/reaction.model';
+import {ImageType} from "../../../../blogger/imageType";
 
 @Injectable()
 export class PgQueryPostsRepository {
@@ -75,6 +76,11 @@ export class PgQueryPostsRepository {
                 (SELECT name AS "blogName" 
                    FROM public.blogs 
                   WHERE blogs.id = posts."blogId"),
+                  COALESCE((
+                    SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
+                      FROM post_image 
+                     WHERE "imageType" = '${ImageType.Main}' AND "postId" = $1
+                  ), '[]') AS main;
                   ${reactions}
                   ${myStatusFilter}
                    FROM public.posts
@@ -83,7 +89,7 @@ export class PgQueryPostsRepository {
                                       FROM public.banned_post 
                                      WHERE banned_post."postId" = posts.id)
         `;
-    const postDB: DbPostModel[] = await this.dataSource.query(query);
+    const postDB = await this.dataSource.query(query);
 
     if (!postDB.length) {
       return null;
@@ -189,7 +195,7 @@ export class PgQueryPostsRepository {
     return result[0].blogId;
   }
 
-  private async addNewestLikes(post: DbPostModel): Promise<PostViewModel> {
+  private async addNewestLikes(post) {
     const newestLikes = await this.queryReactionsRepository.newestLikes(
       post.id,
     );
@@ -213,6 +219,7 @@ export class PgQueryPostsRepository {
         myStatus: myStatus,
         newestLikes,
       },
+      images: post.main
     };
   }
 

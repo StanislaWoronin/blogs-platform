@@ -9,7 +9,7 @@ import {
 import { ContentPageModel } from '../../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from '../entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blog-with-additional-info.model';
-import { CreatedBlogModel } from '../../api/dto/blogView.model';
+import {CreatedBlogModel, ViewBlogModel} from '../../api/dto/blogView.model';
 import {IQueryBlogsRepository} from "../i-query-blogs.repository";
 import {ImageType} from "../../../../blogger/imageType";
 
@@ -21,21 +21,22 @@ export class PgQueryBlogsRepository {
     queryDto: QueryParametersDto,
     userId?: string,
   ): Promise<ContentPageModel> {
-    const filter = this.getFilter(userId, queryDto);
+    try {
+      const filter = this.getFilter(userId, queryDto);
 
-    const query = `
+      const query = `
             SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
 	   (
     SELECT JSON_BUILD_OBJECT(
       'wallpaper', (
         SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
         FROM blog_image
-        WHERE "imageType" = ${ImageType.Wallpaper} AND "blogId" = b.id
+        WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
       ),
       'main', (
         SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
         FROM blog_image
-        WHERE "imageType" = ${ImageType.Main} AND "blogId" = b.id
+        WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
       )
     )
   ) AS images
@@ -48,25 +49,29 @@ export class PgQueryBlogsRepository {
                              WHERE user_ban_info."userId" = b."userId") != true
              ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
              LIMIT $1 OFFSET ${giveSkipNumber(
-               queryDto.pageNumber,
-               queryDto.pageSize,
-             )};
+          queryDto.pageNumber,
+          queryDto.pageSize,
+      )};
         `;
-    const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
+      const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
+      const blogWithAbsoluteUrl = blogs.map(b => ViewBlogModel.relativeToAbsoluteUrl(b))
 
-    const totalCountQuery = `
+      const totalCountQuery = `
           SELECT COUNT(id)
             FROM public.blogs
            WHERE ${filter}
         `;
-    const totalCount = await this.dataSource.query(totalCountQuery);
+      const totalCount = await this.dataSource.query(totalCountQuery);
 
-    return paginationContentPage(
-      queryDto.pageNumber,
-      queryDto.pageSize,
-      blogs,
-      Number(totalCount[0].count),
-    );
+      return paginationContentPage(
+          queryDto.pageNumber,
+          queryDto.pageSize,
+          blogWithAbsoluteUrl,
+          Number(totalCount[0].count),
+      );
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async saGetBlogs(queryDto: QueryParametersDto): Promise<ContentPageModel> {

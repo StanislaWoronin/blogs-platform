@@ -44,5 +44,8 @@ export const toCreatedPostsViewModel = (
       myStatus: 'None',
       newestLikes: [],
     },
+    images: {
+      main: []
+    }
   };
 };

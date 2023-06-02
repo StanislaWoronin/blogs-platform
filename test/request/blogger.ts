@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { endpoints, getUrlForBanned } from '../helper/routing';
 import { faker } from '@faker-js/faker';
-import { preparedBlog } from '../helper/prepeared-data';
+import {preparedBlog, preparedPost} from '../helper/prepeared-data';
 import { images } from '../images/images';
 import { ImageStatus } from '../images/image-status.enum';
 import { join } from 'path';

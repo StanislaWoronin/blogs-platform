@@ -29,5 +29,45 @@ export class CreatedBlogModel {
     public websiteUrl: string,
     public createdAt: string,
     public isMembership: boolean,
+    public images: BlogImagesInfo
   ) {}
+
+  static addImages(blog) {
+    return {
+      id: blog.id,
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.websiteUrl,
+      createdAt: blog.createdAt,
+      isMembership: blog.isMembership,
+      images: {
+        wallpaper: null,
+        main: []
+      }
+    }
+  }
+}
+
+export class ViewBlogModel {
+  constructor(
+      public id: string,
+      public name: string,
+      public description: string,
+      public websiteUrl: string,
+      public createdAt: string,
+      public isMembership: boolean,
+      public images: BlogImagesInfo
+  ) {}
+
+  static relativeToAbsoluteUrl(blog) {
+    return {
+      id: blog.id,
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.websiteUrl,
+      createdAt: blog.createdAt,
+      isMembership: blog.isMembership,
+      images: BlogImagesInfo.relativeToAbsoluteUrl(blog.images)
+    }
+  }
 }
