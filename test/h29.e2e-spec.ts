@@ -477,7 +477,7 @@ describe('e2e tests', () => {
       expect.setState({user, blog, post, blogBackgroundWallpaper, blogMainImages, postMainImages})
     })
 
-    it('Get posts by blogger', async () => {
+    it('Get blogs by blogger', async () => {
       const {user, blog, blogMainImages} = expect.getState()
 
       const result = await request(server)
@@ -501,10 +501,109 @@ describe('e2e tests', () => {
           }
         ]
       })
+      expect.setState({expectedBlog: result.body})
     })
-  })
 
-  describe('Return blog and post with images info for public endpoints', async () => {
+    it('Get blogs by simple user', async () => {
+      const {expectedBlog} = expect.getState()
+      const result = await request(server)
+          .get('/blogs')
+      expect(result.status).toBe(HttpStatus.OK)
+      expect(result.body).toStrictEqual(expectedBlog)
+    })
 
+    it('Get blog via id by simple user', async () => {
+      const {expectedBlog} = expect.getState()
+      const result = await request(server)
+          .get(`/blogs/${expectedBlog.items[0].id}`)
+      expect(result.status).toBe(HttpStatus.OK)
+      expect(result.body).toStrictEqual(expectedBlog.items[0])
+    })
+
+    it('Get posts via blogId by simple user', async () => {
+      const {expectedBlog, postMainImages} = expect.getState()
+      const result = await request(server)
+          .get(`/blogs/${expectedBlog.items[0].id}/posts`)
+      expect(result.status).toBe(HttpStatus.OK)
+      expect(result.body).toStrictEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            id: expect.any(String),
+            title: 'title0',
+            shortDescription: 'shortDescription0',
+            content: 'content0',
+            blogId: expectedBlog.items[0].id,
+            blogName: preparedBlog.valid.name,
+            createdAt: expect.any(String),
+            extendedLikesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: 'None',
+              newestLikes: []
+            },
+            images: postMainImages.body
+          }
+        ]
+      })
+    })
+
+    it('Get posts by simple user', async () => {
+      const {expectedBlog, postMainImages} = expect.getState()
+      const result = await request(server)
+          .get(`/posts`)
+      expect(result.status).toBe(HttpStatus.OK)
+      expect(result.body).toStrictEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 1,
+        items: [
+          {
+            id: expect.any(String),
+            title: 'title0',
+            shortDescription: 'shortDescription0',
+            content: 'content0',
+            blogId: expectedBlog.items[0].id,
+            blogName: preparedBlog.valid.name,
+            createdAt: expect.any(String),
+            extendedLikesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: 'None',
+              newestLikes: []
+            },
+            images: postMainImages.body
+          }
+        ]
+      })
+    })
+
+    it('Get posts via id by simple user', async () => {
+      const {post, expectedBlog, postMainImages} = expect.getState()
+      const result = await request(server)
+          .get(`/posts/${post.id}`)
+      expect(result.status).toBe(HttpStatus.OK)
+      expect(result.body).toStrictEqual({
+            id: expect.any(String),
+            title: 'title0',
+            shortDescription: 'shortDescription0',
+            content: 'content0',
+            blogId: expectedBlog.items[0].id,
+            blogName: preparedBlog.valid.name,
+            createdAt: expect.any(String),
+            extendedLikesInfo: {
+              likesCount: 0,
+              dislikesCount: 0,
+              myStatus: 'None',
+              newestLikes: []
+            },
+            images: postMainImages.body
+          }
+      )
+    })
   })
 });

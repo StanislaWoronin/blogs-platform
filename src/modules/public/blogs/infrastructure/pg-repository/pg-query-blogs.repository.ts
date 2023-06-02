@@ -12,6 +12,7 @@ import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blo
 import {CreatedBlogModel, ViewBlogModel} from '../../api/dto/blogView.model';
 import {IQueryBlogsRepository} from "../i-query-blogs.repository";
 import {ImageType} from "../../../../blogger/imageType";
+import {BlogImagesInfo} from "../../../../blogger/api/views";
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -27,31 +28,31 @@ export class PgQueryBlogsRepository {
       const query = `
             SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
 	   (
-    SELECT JSON_BUILD_OBJECT(
-      'wallpaper', (
-        SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
-        FROM blog_image
-        WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
-      ),
-      'main', (
-        SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
-        FROM blog_image
-        WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
-      )
-    )
-  ) AS images
-  FROM public.blogs b	 
- WHERE  NOT EXISTS (SELECT "blogId" 
-                      FROM public.banned_blog
-                     WHERE banned_blog."blogId" = b.id)
-                       AND (SELECT "banStatus"
-                              FROM user_ban_info 
-                             WHERE user_ban_info."userId" = b."userId") != true
-             ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-             LIMIT $1 OFFSET ${giveSkipNumber(
-          queryDto.pageNumber,
-          queryDto.pageSize,
-      )};
+          SELECT JSON_BUILD_OBJECT(
+            'wallpaper', (
+              SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+              FROM blog_image
+              WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
+            ),
+            'main', (
+              SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+              FROM blog_image
+              WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
+            )
+          )
+        ) AS images
+        FROM public.blogs b	 
+       WHERE  NOT EXISTS (SELECT "blogId" 
+                            FROM public.banned_blog
+                           WHERE banned_blog."blogId" = b.id)
+                             AND (SELECT "banStatus"
+                                    FROM user_ban_info 
+                                   WHERE user_ban_info."userId" = b."userId") != true
+                   ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+                   LIMIT $1 OFFSET ${giveSkipNumber(
+                queryDto.pageNumber,
+                queryDto.pageSize,
+            )};
         `;
       const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
       const blogWithAbsoluteUrl = blogs.map(b => ViewBlogModel.relativeToAbsoluteUrl(b))
@@ -116,9 +117,23 @@ export class PgQueryBlogsRepository {
     );
   }
 
-  async getBlog(blogId: string): Promise<CreatedBlogModel | null> {
+  async getBlog(blogId: string): Promise<ViewBlogModel | null> {
     const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership"
+            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
+            (
+              SELECT JSON_BUILD_OBJECT(
+                'wallpaper', (
+                  SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+                  FROM blog_image
+                  WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
+                ),
+                'main', (
+                  SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+                  FROM blog_image
+                  WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
+                )
+              )
+            ) AS images
               FROM public.blogs b
              WHERE id = '${blogId}' AND NOT EXISTS (SELECT "blogId"
                                                       FROM public.banned_blog
@@ -133,7 +148,7 @@ export class PgQueryBlogsRepository {
       return null;
     }
 
-    return result[0];
+    return ViewBlogModel.relativeToAbsoluteUrl(result[0]);
   }
 
   async blogExist(blogId: string): Promise<string | null> {

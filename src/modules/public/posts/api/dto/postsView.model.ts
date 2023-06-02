@@ -19,6 +19,20 @@ export class PostViewModel {
     },
     public images: PostImagesInfo
   ) {}
+
+    static relativeToAbsoluteUrl(post) {
+       return {
+          id: post.id,
+          title: post.title,
+          shortDescription: post.shortDescription,
+          content: post.content,
+          blogId: post.blogId,
+          blogName: post.blogName,
+          createdAt: post.createdAt,
+          extendedLikesInfo: post.extendedLikesInfo,
+          images: PostImagesInfo.relativeToAbsoluteUrl(post.images)
+      }
+    }
 }
 
 export class PostForBlogViewModel {

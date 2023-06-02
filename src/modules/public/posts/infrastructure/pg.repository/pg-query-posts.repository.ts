@@ -12,6 +12,7 @@ import { PostViewModel } from '../../api/dto/postsView.model';
 import { IQueryReactionRepository } from '../../../likes/infrastructure/i-query-reaction.repository';
 import { ReactionModel } from '../../../../../global-model/reaction.model';
 import {ImageType} from "../../../../blogger/imageType";
+import {toCreatedPostsViewModel} from "../../../../../data-mapper/to-posts-view.model";
 
 @Injectable()
 export class PgQueryPostsRepository {
@@ -33,6 +34,11 @@ export class PgQueryPostsRepository {
     const query = `
             SELECT id, title, "shortDescription", content, "createdAt", "blogId",
                        (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+                       COALESCE((
+                          SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
+                            FROM post_image 
+                           WHERE "imageType" = '${ImageType.Main}' AND "postId" = posts.id
+                        ), '[]') AS main,
                        ${reactions}
                        ${statusFilter}
                   FROM public.posts
@@ -43,11 +49,12 @@ export class PgQueryPostsRepository {
       queryDto.pageSize,
     )};
         `;
-    const postsDB: DbPostModel[] = await this.dataSource.query(query);
+    const postsDB = await this.dataSource.query(query);
 
-    const posts = await Promise.all(
-      postsDB.map(async (p) => await this.addNewestLikes(p)),
+    const prePosts = await Promise.all(
+        postsDB.map(async (p) => await this.addNewestLikes(p)),
     );
+    const posts = prePosts.map(p => PostViewModel.relativeToAbsoluteUrl(p))
 
     const totalCountQuery = `
           SELECT COUNT(id)
@@ -57,10 +64,10 @@ export class PgQueryPostsRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-      queryDto.pageNumber,
-      queryDto.pageSize,
-      posts,
-      Number(totalCount[0].count),
+        queryDto.pageNumber,
+        queryDto.pageSize,
+        posts,
+        Number(totalCount[0].count),
     );
   }
 
@@ -73,28 +80,27 @@ export class PgQueryPostsRepository {
 
     const query = `
          SELECT id, title, "shortDescription", content, "createdAt", "blogId",
-                (SELECT name AS "blogName" 
-                   FROM public.blogs 
-                  WHERE blogs.id = posts."blogId"),
-                  COALESCE((
-                    SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
-                      FROM post_image 
-                     WHERE "imageType" = '${ImageType.Main}' AND "postId" = $1
-                  ), '[]') AS main;
-                  ${reactions}
-                  ${myStatusFilter}
-                   FROM public.posts
-                  WHERE id = '${id}' 
+                       (SELECT name AS "blogName" FROM public.blogs WHERE blogs.id = posts."blogId"),
+                       COALESCE((
+                          SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
+                            FROM post_image 
+                           WHERE "imageType" = '${ImageType.Main}' AND "postId" = posts.id
+                        ), '[]') AS main,
+                       ${reactions}
+                       ${myStatusFilter}
+                  FROM public.posts
+                  WHERE id = $1
                     AND NOT EXISTS (SELECT "postId" 
                                       FROM public.banned_post 
                                      WHERE banned_post."postId" = posts.id)
-        `;
-    const postDB = await this.dataSource.query(query);
-
+    `;
+    const postDB = await this.dataSource.query(query, [id]);
     if (!postDB.length) {
       return null;
     }
-    return await this.addNewestLikes(postDB[0]);
+    const prePost = await this.addNewestLikes(postDB[0]);
+
+    return PostViewModel.relativeToAbsoluteUrl(prePost)
   }
 
   // async getPostsForBlog(
@@ -219,7 +225,9 @@ export class PgQueryPostsRepository {
         myStatus: myStatus,
         newestLikes,
       },
-      images: post.main
+      images: {
+        main: post.main
+      }
     };
   }
 
@@ -240,10 +248,9 @@ export class PgQueryPostsRepository {
   }
 
   private reactions(): string {
-    return `${this.reactionCount(
-      'likesCount',
-      ReactionModel.Like,
-    )}, ${this.reactionCount('dislikesCount', ReactionModel.Dislike)}`;
+    return `
+    ${this.reactionCount('likesCount', ReactionModel.Like)}, 
+    ${this.reactionCount('dislikesCount', ReactionModel.Dislike)}`;
   }
 
   private reactionCount(fieldName: string, reaction: ReactionModel): string {
