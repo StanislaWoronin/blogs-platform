@@ -10,7 +10,7 @@ import {
 import { JwtService } from '../../public/auth/application/jwt.service';
 import { ITestingRepository } from '../infrastructure/i-testing.repository';
 import { TokenPayloadModel } from '../../../global-model/token-payload.model';
-import {S3FileStorageAdapter} from "../../blogger/adapter/s3-file-storage.adapter";
+import { S3FileStorageAdapter } from '../../blogger/adapter/s3-file-storage.adapter';
 
 @Controller('testing')
 export class TestingController {
@@ -69,6 +69,6 @@ export class TestingController {
     await this.testingRepository.deleteAll();
     // await this.s3FileStorageAdapter.deleteImage('content');
 
-    return
+    return;
   }
 }

@@ -11,7 +11,7 @@ import { Blogs } from '../../../blogs/infrastructure/entity/blogs.entity';
 import { Comments } from '../../../comments/infrastructure/entity/comments.entity';
 import { PostReactions } from '../../../likes/infrastructure/entity/post-reactions.entity';
 import { BannedPost } from '../../../../super-admin/infrastructure/entity/banned-post.entity';
-import {PostImage} from "../../../../blogger/post-image.entity";
+import { PostImage } from '../../../../blogger/post-image.entity';
 
 @Entity()
 export class Posts {

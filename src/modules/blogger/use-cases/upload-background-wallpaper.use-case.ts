@@ -1,10 +1,10 @@
-import {Injectable} from '@nestjs/common';
-import {S3FileStorageAdapter} from '../adapter/s3-file-storage.adapter';
-import {ImageType} from '../imageType';
+import { Injectable } from '@nestjs/common';
+import { S3FileStorageAdapter } from '../adapter/s3-file-storage.adapter';
+import { ImageType } from '../imageType';
 import sharp from 'sharp';
-import {DataSource} from 'typeorm';
-import {BlogImagesInfo} from '../api/views';
-import {BlogImage} from "../blog-image.entity";
+import { DataSource } from 'typeorm';
+import { BlogImagesInfo } from '../api/views';
+import { BlogImage } from '../blog-image.entity';
 
 @Injectable()
 export class UploadBackgroundWallpaperUseCase {
@@ -18,18 +18,20 @@ export class UploadBackgroundWallpaperUseCase {
     imageBuffer: Buffer,
     originalName: string,
   ): Promise<BlogImagesInfo> {
-    const [wallpaper] = await this.dataSource.query(this.getWallpaperExistQuery(), [
-      blogId,
-      ImageType.Wallpaper,
-    ]);
+    const [wallpaper] = await this.dataSource.query(
+      this.getWallpaperExistQuery(),
+      [blogId, ImageType.Wallpaper],
+    );
 
     if (wallpaper) {
-      const deleteInCloud = this.s3FileStorageAdapter.deleteImage(wallpaper.url);
+      const deleteInCloud = this.s3FileStorageAdapter.deleteImage(
+        wallpaper.url,
+      );
       const deleteInBd = this.dataSource
         .getRepository(BlogImage)
         .delete({ imageId: wallpaper.imageId });
 
-      await Promise.all([deleteInCloud, deleteInBd])
+      await Promise.all([deleteInCloud, deleteInBd]);
     }
 
     const { url, imageId } = await this.s3FileStorageAdapter.saveImage(

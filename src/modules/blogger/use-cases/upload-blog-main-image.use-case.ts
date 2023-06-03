@@ -1,10 +1,10 @@
-import {Injectable} from '@nestjs/common';
-import {S3FileStorageAdapter} from '../adapter/s3-file-storage.adapter';
-import {ImageType} from '../imageType';
+import { Injectable } from '@nestjs/common';
+import { S3FileStorageAdapter } from '../adapter/s3-file-storage.adapter';
+import { ImageType } from '../imageType';
 import sharp from 'sharp';
-import {DataSource} from 'typeorm';
-import {BlogImage} from '../blog-image.entity';
-import {BlogImagesInfo} from '../api/views';
+import { DataSource } from 'typeorm';
+import { BlogImage } from '../blog-image.entity';
+import { BlogImagesInfo } from '../api/views';
 
 @Injectable()
 export class UploadBlogMainImageUseCase {

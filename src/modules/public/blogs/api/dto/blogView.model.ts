@@ -1,4 +1,4 @@
-import {BlogImagesInfo} from "../../../../blogger/api/views";
+import { BlogImagesInfo } from '../../../../blogger/api/views';
 
 export class BlogViewModel {
   constructor(
@@ -29,7 +29,7 @@ export class CreatedBlogModel {
     public websiteUrl: string,
     public createdAt: string,
     public isMembership: boolean,
-    public images: BlogImagesInfo
+    public images: BlogImagesInfo,
   ) {}
 
   static addImages(blog) {
@@ -42,21 +42,21 @@ export class CreatedBlogModel {
       isMembership: blog.isMembership,
       images: {
         wallpaper: null,
-        main: []
-      }
-    }
+        main: [],
+      },
+    };
   }
 }
 
 export class ViewBlogModel {
   constructor(
-      public id: string,
-      public name: string,
-      public description: string,
-      public websiteUrl: string,
-      public createdAt: string,
-      public isMembership: boolean,
-      public images: BlogImagesInfo
+    public id: string,
+    public name: string,
+    public description: string,
+    public websiteUrl: string,
+    public createdAt: string,
+    public isMembership: boolean,
+    public images: BlogImagesInfo,
   ) {}
 
   static relativeToAbsoluteUrl(blog) {
@@ -67,7 +67,7 @@ export class ViewBlogModel {
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt,
       isMembership: blog.isMembership,
-      images: BlogImagesInfo.relativeToAbsoluteUrl(blog.images)
-    }
+      images: BlogImagesInfo.relativeToAbsoluteUrl(blog.images),
+    };
   }
 }

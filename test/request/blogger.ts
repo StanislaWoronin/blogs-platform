@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { endpoints, getUrlForBanned } from '../helper/routing';
 import { faker } from '@faker-js/faker';
-import {preparedBlog, preparedPost} from '../helper/prepeared-data';
+import { preparedBlog, preparedPost } from '../helper/prepeared-data';
 import { images } from '../images/images';
 import { ImageStatus } from '../images/image-status.enum';
 import { join } from 'path';
@@ -23,7 +23,7 @@ export class Blogger {
     imageStatus: ImageStatus,
     accessToken?: string,
   ) {
-    const url = `/blogger/blogs/${blogId}/images/wallpaper`
+    const url = `/blogger/blogs/${blogId}/images/wallpaper`;
     if (!accessToken) {
       const response = await request(this.server)
         .post(url)
@@ -50,64 +50,64 @@ export class Blogger {
   }
 
   async uploadMainImageForBlog(
-      blogId: string,
-      imageStatus: ImageStatus,
-      accessToken?: string,
+    blogId: string,
+    imageStatus: ImageStatus,
+    accessToken?: string,
   ) {
-    const url = `/blogger/blogs/${blogId}/images/main`
+    const url = `/blogger/blogs/${blogId}/images/main`;
     if (!accessToken) {
       const response = await request(this.server)
-          .post(url)
-          .auth(accessToken, { type: 'bearer' })
-          .send();
+        .post(url)
+        .auth(accessToken, { type: 'bearer' })
+        .send();
 
       return { status: response.status, body: response.body };
     }
 
     const imagePath = join(
-        __dirname,
-        '..',
-        'images',
-        'blog',
-        images.blog.main[imageStatus],
+      __dirname,
+      '..',
+      'images',
+      'blog',
+      images.blog.main[imageStatus],
     );
 
     const response = await request(this.server)
-        .post(url)
-        .auth(accessToken, { type: 'bearer' })
-        .attach('file', imagePath);
+      .post(url)
+      .auth(accessToken, { type: 'bearer' })
+      .attach('file', imagePath);
 
     return { status: response.status, body: response.body };
   }
 
   async uploadMainImageForPost(
-      blogId: string,
-      postId: string,
-      imageStatus: ImageStatus,
-      accessToken?: string,
+    blogId: string,
+    postId: string,
+    imageStatus: ImageStatus,
+    accessToken?: string,
   ) {
-    const url = `/blogger/blogs/${blogId}/posts/${postId}/images/main`
+    const url = `/blogger/blogs/${blogId}/posts/${postId}/images/main`;
     if (!accessToken) {
       const response = await request(this.server)
-          .post(url)
-          .auth(accessToken, { type: 'bearer' })
-          .send();
+        .post(url)
+        .auth(accessToken, { type: 'bearer' })
+        .send();
 
       return { status: response.status, body: response.body };
     }
 
     const imagePath = join(
-        __dirname,
-        '..',
-        'images',
-        'post',
-        images.post.original[imageStatus],
+      __dirname,
+      '..',
+      'images',
+      'post',
+      images.post.original[imageStatus],
     );
 
     const response = await request(this.server)
-        .post(url)
-        .auth(accessToken, { type: 'bearer' })
-        .attach('file', imagePath);
+      .post(url)
+      .auth(accessToken, { type: 'bearer' })
+      .attach('file', imagePath);
 
     return { status: response.status, body: response.body };
   }

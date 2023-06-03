@@ -1,6 +1,9 @@
 import { ViewBanInfoModel } from '../modules/super-admin/api/dto/view-ban-info.model';
 import { UserViewModel } from '../modules/super-admin/api/dto/user.view.model';
-import {BlogViewModel, ViewBlogModel} from '../modules/public/blogs/api/dto/blogView.model';
+import {
+  BlogViewModel,
+  ViewBlogModel,
+} from '../modules/public/blogs/api/dto/blogView.model';
 import { BlogViewWithOwnerAndBanInfo } from '../modules/super-admin/api/dto/blog-view-with-owner-and-ban.info';
 import {
   PostForBlogViewModel,

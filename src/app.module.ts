@@ -69,9 +69,9 @@ import { UploadBackgroundWallpaperUseCase } from './modules/blogger/use-cases';
 import { S3FileStorageAdapter } from './modules/blogger/adapter/s3-file-storage.adapter';
 import { BlogImage } from './modules/blogger/blog-image.entity';
 import { WallpaperValidator } from './validation/wallpaper.validator';
-import {UploadBlogMainImageUseCase} from "./modules/blogger/use-cases/upload-blog-main-image.use-case";
-import {UploadPostMainImageUseCase} from "./modules/blogger/use-cases/upload-post-main-image.use-case";
-import {PostImage} from "./modules/blogger/post-image.entity";
+import { UploadBlogMainImageUseCase } from './modules/blogger/use-cases/upload-blog-main-image.use-case';
+import { UploadPostMainImageUseCase } from './modules/blogger/use-cases/upload-post-main-image.use-case';
+import { PostImage } from './modules/blogger/post-image.entity';
 
 const controllers = [
   AuthController,
@@ -252,7 +252,7 @@ const useCases = [
   CreateUserBySaUseCase,
   UploadBackgroundWallpaperUseCase,
   UploadBlogMainImageUseCase,
-  UploadPostMainImageUseCase
+  UploadPostMainImageUseCase,
 ];
 
 @Module({

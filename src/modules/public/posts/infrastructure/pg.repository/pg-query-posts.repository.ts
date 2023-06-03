@@ -11,8 +11,8 @@ import { DbPostModel } from '../entity/db-post.model';
 import { PostViewModel } from '../../api/dto/postsView.model';
 import { IQueryReactionRepository } from '../../../likes/infrastructure/i-query-reaction.repository';
 import { ReactionModel } from '../../../../../global-model/reaction.model';
-import {ImageType} from "../../../../blogger/imageType";
-import {toCreatedPostsViewModel} from "../../../../../data-mapper/to-posts-view.model";
+import { ImageType } from '../../../../blogger/imageType';
+import { toCreatedPostsViewModel } from '../../../../../data-mapper/to-posts-view.model';
 
 @Injectable()
 export class PgQueryPostsRepository {
@@ -37,7 +37,9 @@ export class PgQueryPostsRepository {
                        COALESCE((
                           SELECT JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize"))
                             FROM post_image 
-                           WHERE "imageType" = '${ImageType.Main}' AND "postId" = posts.id
+                           WHERE "imageType" = '${
+                             ImageType.Main
+                           }' AND "postId" = posts.id
                         ), '[]') AS main,
                        ${reactions}
                        ${statusFilter}
@@ -52,9 +54,9 @@ export class PgQueryPostsRepository {
     const postsDB = await this.dataSource.query(query);
 
     const prePosts = await Promise.all(
-        postsDB.map(async (p) => await this.addNewestLikes(p)),
+      postsDB.map(async (p) => await this.addNewestLikes(p)),
     );
-    const posts = prePosts.map(p => PostViewModel.relativeToAbsoluteUrl(p))
+    const posts = prePosts.map((p) => PostViewModel.relativeToAbsoluteUrl(p));
 
     const totalCountQuery = `
           SELECT COUNT(id)
@@ -64,10 +66,10 @@ export class PgQueryPostsRepository {
     const totalCount = await this.dataSource.query(totalCountQuery);
 
     return paginationContentPage(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-        posts,
-        Number(totalCount[0].count),
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      posts,
+      Number(totalCount[0].count),
     );
   }
 
@@ -100,7 +102,7 @@ export class PgQueryPostsRepository {
     }
     const prePost = await this.addNewestLikes(postDB[0]);
 
-    return PostViewModel.relativeToAbsoluteUrl(prePost)
+    return PostViewModel.relativeToAbsoluteUrl(prePost);
   }
 
   // async getPostsForBlog(
@@ -226,8 +228,8 @@ export class PgQueryPostsRepository {
         newestLikes,
       },
       images: {
-        main: post.main
-      }
+        main: post.main,
+      },
     };
   }
 

@@ -9,10 +9,10 @@ import {
 import { ContentPageModel } from '../../../../../global-model/contentPage.model';
 import { dbBlogWithAdditionalInfo } from '../entity/blog-db.model';
 import { toBlogWithAdditionalInfoModel } from '../../../../../data-mapper/to-blog-with-additional-info.model';
-import {CreatedBlogModel, ViewBlogModel} from '../../api/dto/blogView.model';
-import {IQueryBlogsRepository} from "../i-query-blogs.repository";
-import {ImageType} from "../../../../blogger/imageType";
-import {BlogImagesInfo} from "../../../../blogger/api/views";
+import { CreatedBlogModel, ViewBlogModel } from '../../api/dto/blogView.model';
+import { IQueryBlogsRepository } from '../i-query-blogs.repository';
+import { ImageType } from '../../../../blogger/imageType';
+import { BlogImagesInfo } from '../../../../blogger/api/views';
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -50,12 +50,14 @@ export class PgQueryBlogsRepository {
                                    WHERE user_ban_info."userId" = b."userId") != true
                    ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
                    LIMIT $1 OFFSET ${giveSkipNumber(
-                queryDto.pageNumber,
-                queryDto.pageSize,
-            )};
+                     queryDto.pageNumber,
+                     queryDto.pageSize,
+                   )};
         `;
       const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
-      const blogWithAbsoluteUrl = blogs.map(b => ViewBlogModel.relativeToAbsoluteUrl(b))
+      const blogWithAbsoluteUrl = blogs.map((b) =>
+        ViewBlogModel.relativeToAbsoluteUrl(b),
+      );
 
       const totalCountQuery = `
           SELECT COUNT(id)
@@ -65,13 +67,13 @@ export class PgQueryBlogsRepository {
       const totalCount = await this.dataSource.query(totalCountQuery);
 
       return paginationContentPage(
-          queryDto.pageNumber,
-          queryDto.pageSize,
-          blogWithAbsoluteUrl,
-          Number(totalCount[0].count),
+        queryDto.pageNumber,
+        queryDto.pageSize,
+        blogWithAbsoluteUrl,
+        Number(totalCount[0].count),
       );
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 

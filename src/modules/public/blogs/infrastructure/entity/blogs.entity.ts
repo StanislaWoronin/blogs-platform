@@ -1,9 +1,17 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn,} from 'typeorm';
-import {Users} from '../../../../super-admin/infrastructure/entity/users.entity';
-import {BannedUsersForBlog} from './banned-users-for-blog.entity';
-import {Posts} from '../../../posts/infrastructure/entity/posts.entity';
-import {BannedBlog} from '../../../../super-admin/infrastructure/entity/banned_blog.entity';
-import {BlogImage} from '../../../../blogger/blog-image.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
+import { BannedUsersForBlog } from './banned-users-for-blog.entity';
+import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
+import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned_blog.entity';
+import { BlogImage } from '../../../../blogger/blog-image.entity';
 
 @Entity()
 export class Blogs {

@@ -65,11 +65,11 @@ export class OrmTestingRepository {
     try {
       const entities = this.dataSource.entityMetadatas;
       const tableNames = entities
-          .map((entity) => `"${entity.tableName}"`)
-          .join(', ');
+        .map((entity) => `"${entity.tableName}"`)
+        .join(', ');
 
       const deleted = await this.dataSource.query(
-          `TRUNCATE ${tableNames} CASCADE;`,
+        `TRUNCATE ${tableNames} CASCADE;`,
       );
 
       return deleted;

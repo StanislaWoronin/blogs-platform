@@ -13,12 +13,18 @@ import { createApp } from '../src/helpers/create-app';
 import { Testing } from './request/testing';
 import { ImageStatus } from './images/image-status.enum';
 import { getErrorMessage } from './helper/helpers';
-import {join} from "path";
-import {settings} from "../src/settings";
-import {ImageType} from "../src/modules/blogger/imageType";
-import {images} from "./images/images";
+import { join } from 'path';
+import { settings } from '../src/settings';
+import { ImageType } from '../src/modules/blogger/imageType';
+import { images } from './images/images';
 import request from 'supertest';
-import {preparedBlog, preparedPost} from "./helper/prepeared-data";
+import { preparedBlog, preparedPost } from './helper/prepeared-data';
+import exp from 'constants';
+import * as http from 'http';
+import * as https from 'https';
+import { createReadStream, createWriteStream } from 'fs';
+import * as fs from 'fs';
+import { log } from 'util';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -68,8 +74,6 @@ describe('e2e tests', () => {
       const users = await factories.createAndLoginUsers(2);
       const fistUserBlog = await blogger.createBlog(users[0].accessToken);
       const secondUserBlog = await blogger.createBlog(users[1].accessToken);
-      // console.log('accessToken:', users[0].accessToken);
-      // console.log('fistUserBlogId:', fistUserBlog.body.id);
       expect.setState({
         accessToken: users[0].accessToken,
         userId: users[0].user.id,
@@ -128,7 +132,16 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save new wallpaper in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken } = expect.getState();
-      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Wallpaper, images.blog.wallpaper.valid)
+      const expectUrl = join(
+        settings.s3.baseUrl,
+        settings.s3.bucketsName,
+        'content',
+        'users',
+        userId,
+        fistUserBlogId,
+        ImageType.Wallpaper,
+        images.blog.wallpaper.valid,
+      );
       const result = await blogger.uploadBackgroundWallpaper(
         fistUserBlogId,
         ImageStatus.Valid,
@@ -140,21 +153,30 @@ describe('e2e tests', () => {
           url: expectUrl,
           width: 1028,
           height: 312,
-          fileSize: 6321
+          fileSize: 6321,
         },
-        main: []
-      })
+        main: [],
+      });
     });
 
     it(`Status: ${HttpStatus.CREATED}.
          Update wallpaper.`, async () => {
       const { userId, fistUserBlogId, accessToken } = expect.getState();
-      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Wallpaper, images.blog.wallpaper.copy)
+      const expectUrl = join(
+        settings.s3.baseUrl,
+        settings.s3.bucketsName,
+        'content',
+        'users',
+        userId,
+        fistUserBlogId,
+        ImageType.Wallpaper,
+        images.blog.wallpaper.copy,
+      );
 
       const result = await blogger.uploadBackgroundWallpaper(
-          fistUserBlogId,
-          ImageStatus.Copy,
-          accessToken,
+        fistUserBlogId,
+        ImageStatus.Copy,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
       expect(result.body).toStrictEqual({
@@ -162,10 +184,10 @@ describe('e2e tests', () => {
           url: expectUrl,
           width: 1028,
           height: 312,
-          fileSize: 6321
+          fileSize: 6321,
         },
-        main: []
-      })
+        main: [],
+      });
     });
   });
 
@@ -192,9 +214,9 @@ describe('e2e tests', () => {
       const { accessToken, secondUserBlogId } = expect.getState();
 
       const result = await blogger.uploadMainImageForBlog(
-          secondUserBlogId,
-          ImageStatus.Valid,
-          accessToken,
+        secondUserBlogId,
+        ImageStatus.Valid,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.FORBIDDEN);
     });
@@ -203,8 +225,8 @@ describe('e2e tests', () => {
          If user try to update without credentials.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadMainImageForBlog(
-          fistUserBlogId,
-          ImageStatus.Valid,
+        fistUserBlogId,
+        ImageStatus.Valid,
       );
       expect(result.status).toBe(HttpStatus.UNAUTHORIZED);
     });
@@ -214,9 +236,9 @@ describe('e2e tests', () => {
          Try send big image.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadMainImageForBlog(
-          fistUserBlogId,
-          ImageStatus.Big,
-          accessToken,
+        fistUserBlogId,
+        ImageStatus.Big,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.BAD_REQUEST);
       expect(result.body).toStrictEqual({ errorsMessages });
@@ -226,9 +248,9 @@ describe('e2e tests', () => {
          Try send small image.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadMainImageForBlog(
-          fistUserBlogId,
-          ImageStatus.Small,
-          accessToken,
+        fistUserBlogId,
+        ImageStatus.Small,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.BAD_REQUEST);
       expect(result.body).toStrictEqual({ errorsMessages });
@@ -237,22 +259,39 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save new wallpaper in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken } = expect.getState();
-      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, ImageType.Main, images.blog.main.valid)
+      const expectUrl = join(
+        settings.s3.baseUrl,
+        settings.s3.bucketsName,
+        'content',
+        'users',
+        userId,
+        fistUserBlogId,
+        ImageType.Main,
+        images.blog.main.valid,
+      );
       const result = await blogger.uploadMainImageForBlog(
-          fistUserBlogId,
-          ImageStatus.Valid,
-          accessToken,
+        fistUserBlogId,
+        ImageStatus.Valid,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
       expect(result.body).toStrictEqual({
         wallpaper: null,
-        main: [{
-          url: expectUrl,
-          width: 156,
-          height: 156,
-          fileSize: 774
-        }]
-      })
+        main: [
+          {
+            url: expect.any(String),
+            width: 156,
+            height: 156,
+            fileSize: 774,
+          },
+        ],
+      });
+
+      const url = result.body.main[0].url;
+      const _url = url.split('-');
+      _url.pop();
+      const receivedUrl = _url.join('-');
+      expect(receivedUrl).toBe(expectUrl);
     });
   });
 
@@ -265,14 +304,18 @@ describe('e2e tests', () => {
       const [firstUser, secondUser] = await factories.createAndLoginUsers(2);
       const fistUserBlog = await blogger.createBlog(firstUser.accessToken);
       const secondUserBlog = await blogger.createBlog(secondUser.accessToken);
-      const [post] = await factories.createPostsForBlog(firstUser.accessToken, fistUserBlog.body.id, 1)
+      const [post] = await factories.createPostsForBlog(
+        firstUser.accessToken,
+        fistUserBlog.body.id,
+        1,
+      );
 
       expect.setState({
         accessToken: firstUser.accessToken,
         userId: firstUser.user.id,
         fistUserBlogId: fistUserBlog.body.id,
         secondUserBlogId: secondUserBlog.body.id,
-        postId: post.id
+        postId: post.id,
       });
     });
 
@@ -281,10 +324,10 @@ describe('e2e tests', () => {
       const { accessToken, secondUserBlogId, postId } = expect.getState();
 
       const result = await blogger.uploadMainImageForPost(
-          secondUserBlogId,
-          postId,
-          ImageStatus.Valid,
-          accessToken,
+        secondUserBlogId,
+        postId,
+        ImageStatus.Valid,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.FORBIDDEN);
     });
@@ -293,9 +336,9 @@ describe('e2e tests', () => {
          If user try to update without credentials.`, async () => {
       const { fistUserBlogId, postId } = expect.getState();
       const result = await blogger.uploadMainImageForPost(
-          fistUserBlogId,
-          postId,
-          ImageStatus.Valid,
+        fistUserBlogId,
+        postId,
+        ImageStatus.Valid,
       );
       expect(result.status).toBe(HttpStatus.UNAUTHORIZED);
     });
@@ -305,10 +348,10 @@ describe('e2e tests', () => {
          Try send big image.`, async () => {
       const { fistUserBlogId, accessToken, postId } = expect.getState();
       const result = await blogger.uploadMainImageForPost(
-          fistUserBlogId,
-          postId,
-          ImageStatus.Big,
-          accessToken,
+        fistUserBlogId,
+        postId,
+        ImageStatus.Big,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.BAD_REQUEST);
       expect(result.body).toStrictEqual({ errorsMessages });
@@ -318,9 +361,9 @@ describe('e2e tests', () => {
          Try send small image.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadMainImageForBlog(
-          fistUserBlogId,
-          ImageStatus.Small,
-          accessToken,
+        fistUserBlogId,
+        ImageStatus.Small,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.BAD_REQUEST);
       expect(result.body).toStrictEqual({ errorsMessages });
@@ -329,12 +372,21 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save main image in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
-      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, postId, ImageType.Main)
+      const expectUrl = join(
+        settings.s3.baseUrl,
+        settings.s3.bucketsName,
+        'content',
+        'users',
+        userId,
+        fistUserBlogId,
+        postId,
+        ImageType.Main,
+      );
       const result = await blogger.uploadMainImageForPost(
-          fistUserBlogId,
-          postId,
-          ImageStatus.Valid,
-          accessToken,
+        fistUserBlogId,
+        postId,
+        ImageStatus.Valid,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
       expect(result.body).toStrictEqual({
@@ -349,27 +401,36 @@ describe('e2e tests', () => {
             url: join(expectUrl, 'middle'),
             width: 300,
             height: 180,
-            fileSize: 1462
+            fileSize: 1462,
           },
           {
             url: join(expectUrl, 'small'),
             width: 149,
             height: 96,
-            fileSize: 549
+            fileSize: 549,
           },
-        ]
-      })
+        ],
+      });
     });
 
     it(`Status: ${HttpStatus.CREATED}.
          Save new main image in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
-      const expectUrl = join(settings.s3.baseUrl, settings.s3.bucketsName, 'content', 'users', userId, fistUserBlogId, postId, ImageType.Main)
+      const expectUrl = join(
+        settings.s3.baseUrl,
+        settings.s3.bucketsName,
+        'content',
+        'users',
+        userId,
+        fistUserBlogId,
+        postId,
+        ImageType.Main,
+      );
       const result = await blogger.uploadMainImageForPost(
-          fistUserBlogId,
-          postId,
-          ImageStatus.Copy,
-          accessToken,
+        fistUserBlogId,
+        postId,
+        ImageStatus.Copy,
+        accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
       expect(result.body).toStrictEqual({
@@ -384,16 +445,16 @@ describe('e2e tests', () => {
             url: join(expectUrl, 'middle'),
             width: 300,
             height: 180,
-            fileSize: 1462
+            fileSize: 1462,
           },
           {
             url: join(expectUrl, 'small'),
             width: 149,
             height: 96,
-            fileSize: 549
+            fileSize: 549,
           },
-        ]
-      })
+        ],
+      });
     });
   });
 
@@ -405,7 +466,7 @@ describe('e2e tests', () => {
     it('Created blog and return with image info', async () => {
       const [user] = await factories.createAndLoginUsers(1);
       const blog = await blogger.createBlog(user.accessToken);
-      expect(blog.status).toBe(HttpStatus.CREATED)
+      expect(blog.status).toBe(HttpStatus.CREATED);
       expect(blog.body).toStrictEqual({
         id: blog.body.id,
         name: blog.body.name,
@@ -415,18 +476,17 @@ describe('e2e tests', () => {
         isMembership: blog.body.isMembership,
         images: {
           wallpaper: null,
-          main: []
-        }
-      })
+          main: [],
+        },
+      });
 
-      expect.setState({accessToken: user.accessToken, blogId: blog.body.id})
-    })
+      expect.setState({ accessToken: user.accessToken, blogId: blog.body.id });
+    });
 
     it('Created post and return with image info', async () => {
-      const {accessToken, blogId} = expect.getState()
+      const { accessToken, blogId } = expect.getState();
 
-      const [post] = await factories.createPostsForBlog(accessToken, blogId, 1)
-      console.dir(post, {depth: null})
+      const [post] = await factories.createPostsForBlog(accessToken, blogId, 1);
       expect(post).toStrictEqual({
         id: expect.any(String),
         title: 'title0',
@@ -442,11 +502,11 @@ describe('e2e tests', () => {
           newestLikes: [],
         },
         images: {
-          main: []
-        }
-      })
-    })
-  })
+          main: [],
+        },
+      });
+    });
+  });
 
   describe('Return blogs and posts with images info', () => {
     it('Clear data base', async () => {
@@ -456,34 +516,45 @@ describe('e2e tests', () => {
     it('Create data', async () => {
       const [user] = await factories.createAndLoginUsers(1);
       const blog = await blogger.createBlog(user.accessToken);
-      const [post] = await factories.createPostsForBlog(user.accessToken, blog.body.id, 1)
+      const [post] = await factories.createPostsForBlog(
+        user.accessToken,
+        blog.body.id,
+        1,
+      );
       const blogBackgroundWallpaper = await blogger.uploadBackgroundWallpaper(
-          blog.body.id,
-          ImageStatus.Valid,
-          user.accessToken,
+        blog.body.id,
+        ImageStatus.Valid,
+        user.accessToken,
       );
       const blogMainImages = await blogger.uploadMainImageForBlog(
-          blog.body.id,
-          ImageStatus.Valid,
-          user.accessToken,
+        blog.body.id,
+        ImageStatus.Valid,
+        user.accessToken,
       );
       const postMainImages = await blogger.uploadMainImageForPost(
-          blog.body.id,
-          post.id,
-          ImageStatus.Valid,
-          user.accessToken,
+        blog.body.id,
+        post.id,
+        ImageStatus.Valid,
+        user.accessToken,
       );
 
-      expect.setState({user, blog, post, blogBackgroundWallpaper, blogMainImages, postMainImages})
-    })
+      expect.setState({
+        user,
+        blog,
+        post,
+        blogBackgroundWallpaper,
+        blogMainImages,
+        postMainImages,
+      });
+    });
 
     it('Get blogs by blogger', async () => {
-      const {user, blog, blogMainImages} = expect.getState()
+      const { user, blog, blogMainImages } = expect.getState();
 
       const result = await request(server)
-          .get('/blogger/blogs')
-          .auth(user.accessToken, {type: 'bearer'})
-      expect(result.status).toBe(HttpStatus.OK)
+        .get('/blogger/blogs')
+        .auth(user.accessToken, { type: 'bearer' });
+      expect(result.status).toBe(HttpStatus.OK);
       expect(result.body).toStrictEqual({
         page: 1,
         pageSize: 10,
@@ -497,34 +568,51 @@ describe('e2e tests', () => {
             websiteUrl: blog.body.websiteUrl,
             createdAt: blog.body.createdAt,
             isMembership: blog.body.isMembership,
-            images: blogMainImages.body
-          }
-        ]
-      })
-      expect.setState({expectedBlog: result.body})
-    })
+            images: blogMainImages.body,
+          },
+        ],
+      });
+      expect.setState({ expectedBlog: result.body });
+    });
 
     it('Get blogs by simple user', async () => {
-      const {expectedBlog} = expect.getState()
-      const result = await request(server)
-          .get('/blogs')
-      expect(result.status).toBe(HttpStatus.OK)
-      expect(result.body).toStrictEqual(expectedBlog)
-    })
+      const { expectedBlog } = expect.getState();
+      const result = await request(server).get('/blogs');
+      expect(result.status).toBe(HttpStatus.OK);
+      expect(result.body).toStrictEqual(expectedBlog);
+    });
 
     it('Get blog via id by simple user', async () => {
-      const {expectedBlog} = expect.getState()
-      const result = await request(server)
-          .get(`/blogs/${expectedBlog.items[0].id}`)
-      expect(result.status).toBe(HttpStatus.OK)
-      expect(result.body).toStrictEqual(expectedBlog.items[0])
-    })
+      const { expectedBlog } = expect.getState();
+      const result = await request(server).get(
+        `/blogs/${expectedBlog.items[0].id}`,
+      );
+      expect(result.status).toBe(HttpStatus.OK);
+      expect(result.body).toStrictEqual(expectedBlog.items[0]);
+      // const imageUrl = result.body.images.wallpaper.url;
+      // console.log(result.body.images.wallpaper.url);
+      // expect(imageUrl).toBeDefined();
+      // expect(imageUrl).toStrictEqual(expect.any(String));
+      // const file = createWriteStream('file.png');
+      // const test = https.get(imageUrl, (res) => {
+      //   res.pipe(file);
+      //   file.on('finish', () => {
+      //     file.close();
+      //
+      //     console.log('download ok');
+      //   });
+      // });
+      // console.log(test);
+      // expect(test).toBeDefined();
+      // expect(test.status).toBe(200)
+    });
 
     it('Get posts via blogId by simple user', async () => {
-      const {expectedBlog, postMainImages} = expect.getState()
-      const result = await request(server)
-          .get(`/blogs/${expectedBlog.items[0].id}/posts`)
-      expect(result.status).toBe(HttpStatus.OK)
+      const { expectedBlog, postMainImages } = expect.getState();
+      const result = await request(server).get(
+        `/blogs/${expectedBlog.items[0].id}/posts`,
+      );
+      expect(result.status).toBe(HttpStatus.OK);
       expect(result.body).toStrictEqual({
         pagesCount: 1,
         page: 1,
@@ -543,19 +631,18 @@ describe('e2e tests', () => {
               likesCount: 0,
               dislikesCount: 0,
               myStatus: 'None',
-              newestLikes: []
+              newestLikes: [],
             },
-            images: postMainImages.body
-          }
-        ]
-      })
-    })
+            images: postMainImages.body,
+          },
+        ],
+      });
+    });
 
     it('Get posts by simple user', async () => {
-      const {expectedBlog, postMainImages} = expect.getState()
-      const result = await request(server)
-          .get(`/posts`)
-      expect(result.status).toBe(HttpStatus.OK)
+      const { expectedBlog, postMainImages } = expect.getState();
+      const result = await request(server).get(`/posts`);
+      expect(result.status).toBe(HttpStatus.OK);
       expect(result.body).toStrictEqual({
         pagesCount: 1,
         page: 1,
@@ -574,36 +661,34 @@ describe('e2e tests', () => {
               likesCount: 0,
               dislikesCount: 0,
               myStatus: 'None',
-              newestLikes: []
+              newestLikes: [],
             },
-            images: postMainImages.body
-          }
-        ]
-      })
-    })
+            images: postMainImages.body,
+          },
+        ],
+      });
+    });
 
     it('Get posts via id by simple user', async () => {
-      const {post, expectedBlog, postMainImages} = expect.getState()
-      const result = await request(server)
-          .get(`/posts/${post.id}`)
-      expect(result.status).toBe(HttpStatus.OK)
+      const { post, expectedBlog, postMainImages } = expect.getState();
+      const result = await request(server).get(`/posts/${post.id}`);
+      expect(result.status).toBe(HttpStatus.OK);
       expect(result.body).toStrictEqual({
-            id: expect.any(String),
-            title: 'title0',
-            shortDescription: 'shortDescription0',
-            content: 'content0',
-            blogId: expectedBlog.items[0].id,
-            blogName: preparedBlog.valid.name,
-            createdAt: expect.any(String),
-            extendedLikesInfo: {
-              likesCount: 0,
-              dislikesCount: 0,
-              myStatus: 'None',
-              newestLikes: []
-            },
-            images: postMainImages.body
-          }
-      )
-    })
-  })
+        id: expect.any(String),
+        title: 'title0',
+        shortDescription: 'shortDescription0',
+        content: 'content0',
+        blogId: expectedBlog.items[0].id,
+        blogName: preparedBlog.valid.name,
+        createdAt: expect.any(String),
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: 'None',
+          newestLikes: [],
+        },
+        images: postMainImages.body,
+      });
+    });
+  });
 });
