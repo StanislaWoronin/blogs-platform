@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Param,
   Post,
   UploadedFile,
@@ -12,16 +11,14 @@ import { AuthBearerGuard } from '../../../guards/auth.bearer.guard';
 import { UserDBModel } from '../../super-admin/infrastructure/entity/userDB.model';
 import { User } from '../../../decorator/user.decorator';
 import { ForbiddenGuard } from '../../../guards/forbidden.guard';
-import { join } from 'node:path';
-import { readTextFileAsync } from '../../../helpers/fs-utils';
 import { UploadBackgroundWallpaperUseCase } from '../use-cases';
 import { BlogImagesInfo } from './views';
-import { WallpaperValidator } from '../../../validation/wallpaper.validator';
-import { BlogMainValidator } from '../../../validation/blog-main.validator';
+import { WallpaperValidator } from '../../../validation/image-validators/wallpaper.validator';
 import { UploadBlogMainImageUseCase } from '../use-cases/upload-blog-main-image.use-case';
-import { PostMainValidator } from '../../../validation/post-main.validator';
+import { PostMainValidator } from '../../../validation/image-validators/post-main.validator';
 import { UploadPostMainImageUseCase } from '../use-cases/upload-post-main-image.use-case';
 import { PostImagesInfo } from './views/post-images-info.view';
+import { BlogMainValidator } from '../../../validation/image-validators/blog-main.validator';
 
 @Controller('blogger/blogs')
 @UseGuards(AuthBearerGuard, ForbiddenGuard)

@@ -7,7 +7,7 @@ export class PostImagesInfo {
 
   static relativeToAbsoluteUrl(obj: PostImagesInfo): PostImagesInfo {
     const images = obj.main.map((m) => ({
-      url: join(settings.s3.baseUrl, settings.s3.bucketsName, m.url),
+      url: `${settings.s3.baseUrl}/${settings.s3.bucketsName}/${m.url}`, // join(settings.s3.baseUrl, settings.s3.bucketsName, m.url), // "join" should be used to glue file paths, not links
       width: m.width,
       height: m.height,
       fileSize: m.fileSize,

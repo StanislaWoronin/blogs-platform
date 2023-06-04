@@ -12,11 +12,13 @@ export class BlogImagesInfo {
         BlogImagesInfo.relativeToAbsoluteUrl(obj[key]);
       } else if (key === 'url') {
         const relativeUrl = obj[key];
-        obj[key] = join(
-          settings.s3.baseUrl,
-          settings.s3.bucketsName,
-          relativeUrl,
-        );
+        obj[
+          key
+        ] = `${settings.s3.baseUrl}/${settings.s3.bucketsName}/${relativeUrl}`;
+        // join(
+        //   settings.s3.baseUrl,
+        //   settings.s3.bucketsName,
+        //   relativeUrl,); // "join" should be used to glue file paths, not links
       }
     }
     return obj;

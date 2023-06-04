@@ -42,4 +42,33 @@ export const settings = {
     accessKeyId: process.env.ACCESS_KEY_ID,
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
   },
+  images: {
+    wallpaper: {
+      size: 100000,
+      width: 1028,
+      height: 312,
+    },
+    main: {
+      blog: {
+        size: 100000,
+        width: 156,
+        height: 156,
+      },
+      post: {
+        original: {
+          size: 100000,
+          width: 940,
+          height: 432,
+        },
+        middle: {
+          width: 300,
+          height: 180,
+        },
+        small: {
+          width: 149,
+          height: 96,
+        },
+      },
+    },
+  },
 };

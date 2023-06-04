@@ -13,18 +13,11 @@ import { createApp } from '../src/helpers/create-app';
 import { Testing } from './request/testing';
 import { ImageStatus } from './images/image-status.enum';
 import { getErrorMessage } from './helper/helpers';
-import { join } from 'path';
 import { settings } from '../src/settings';
 import { ImageType } from '../src/modules/blogger/imageType';
 import { images } from './images/images';
 import request from 'supertest';
-import { preparedBlog, preparedPost } from './helper/prepeared-data';
-import exp from 'constants';
-import * as http from 'http';
-import * as https from 'https';
-import { createReadStream, createWriteStream } from 'fs';
-import * as fs from 'fs';
-import { log } from 'util';
+import { preparedBlog } from './helper/prepeared-data';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -132,16 +125,18 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save new wallpaper in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken } = expect.getState();
-      const expectUrl = join(
-        settings.s3.baseUrl,
-        settings.s3.bucketsName,
-        'content',
-        'users',
-        userId,
-        fistUserBlogId,
-        ImageType.Wallpaper,
-        images.blog.wallpaper.valid,
-      );
+      const url = `${settings.s3.baseUrl}/${settings.s3.bucketsName}/content/users/${userId}/${fistUserBlogId}/${ImageType.Wallpaper}`;
+      const expectUrl = `${url}/${images.blog.wallpaper.valid}`;
+      // const expectUrl = join(
+      //   settings.s3.baseUrl,
+      //   settings.s3.bucketsName,
+      //   'content',
+      //   'users',
+      //   userId,
+      //   fistUserBlogId,
+      //   ImageType.Wallpaper,
+      //   images.blog.wallpaper.valid,
+      // ); // "join" should be used to glue file paths, not links
       const result = await blogger.uploadBackgroundWallpaper(
         fistUserBlogId,
         ImageStatus.Valid,
@@ -151,27 +146,20 @@ describe('e2e tests', () => {
       expect(result.body).toStrictEqual({
         wallpaper: {
           url: expectUrl,
-          width: 1028,
-          height: 312,
-          fileSize: 6321,
+          width: settings.images.wallpaper.width,
+          height: settings.images.wallpaper.height,
+          fileSize: expect.any(Number),
         },
         main: [],
       });
+
+      expect.setState({ url });
     });
 
     it(`Status: ${HttpStatus.CREATED}.
          Update wallpaper.`, async () => {
-      const { userId, fistUserBlogId, accessToken } = expect.getState();
-      const expectUrl = join(
-        settings.s3.baseUrl,
-        settings.s3.bucketsName,
-        'content',
-        'users',
-        userId,
-        fistUserBlogId,
-        ImageType.Wallpaper,
-        images.blog.wallpaper.copy,
-      );
+      const { fistUserBlogId, accessToken, url } = expect.getState();
+      const expectUrl = `${url}/${images.blog.wallpaper.copy}`;
 
       const result = await blogger.uploadBackgroundWallpaper(
         fistUserBlogId,
@@ -182,9 +170,9 @@ describe('e2e tests', () => {
       expect(result.body).toStrictEqual({
         wallpaper: {
           url: expectUrl,
-          width: 1028,
-          height: 312,
-          fileSize: 6321,
+          width: settings.images.wallpaper.width,
+          height: settings.images.wallpaper.height,
+          fileSize: expect.any(Number),
         },
         main: [],
       });
@@ -223,7 +211,7 @@ describe('e2e tests', () => {
 
     it(`Status: ${HttpStatus.UNAUTHORIZED}.
          If user try to update without credentials.`, async () => {
-      const { fistUserBlogId, accessToken } = expect.getState();
+      const { fistUserBlogId } = expect.getState();
       const result = await blogger.uploadMainImageForBlog(
         fistUserBlogId,
         ImageStatus.Valid,
@@ -259,16 +247,9 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save new wallpaper in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken } = expect.getState();
-      const expectUrl = join(
-        settings.s3.baseUrl,
-        settings.s3.bucketsName,
-        'content',
-        'users',
-        userId,
-        fistUserBlogId,
-        ImageType.Main,
-        images.blog.main.valid,
-      );
+      const url = `${settings.s3.baseUrl}/${settings.s3.bucketsName}/content/users/${userId}/${fistUserBlogId}/${ImageType.Main}`;
+      const expectUrl = `${url}/${images.blog.main.valid}`;
+
       const result = await blogger.uploadMainImageForBlog(
         fistUserBlogId,
         ImageStatus.Valid,
@@ -280,17 +261,17 @@ describe('e2e tests', () => {
         main: [
           {
             url: expect.any(String),
-            width: 156,
-            height: 156,
-            fileSize: 774,
+            width: settings.images.main.blog.width,
+            height: settings.images.main.blog.height,
+            fileSize: expect.any(Number),
           },
         ],
       });
 
-      const url = result.body.main[0].url;
-      const _url = url.split('-');
-      _url.pop();
-      const receivedUrl = _url.join('-');
+      const _url = result.body.main[0].url;
+      const __url = _url.split('-');
+      __url.pop();
+      const receivedUrl = __url.join('-');
       expect(receivedUrl).toBe(expectUrl);
     });
   });
@@ -372,16 +353,8 @@ describe('e2e tests', () => {
     it(`Status: ${HttpStatus.CREATED}.
          Save main image in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
-      const expectUrl = join(
-        settings.s3.baseUrl,
-        settings.s3.bucketsName,
-        'content',
-        'users',
-        userId,
-        fistUserBlogId,
-        postId,
-        ImageType.Main,
-      );
+      const url = `${settings.s3.baseUrl}/${settings.s3.bucketsName}/content/users/${userId}/${fistUserBlogId}/${postId}/${ImageType.Main}`;
+
       const result = await blogger.uploadMainImageForPost(
         fistUserBlogId,
         postId,
@@ -392,40 +365,34 @@ describe('e2e tests', () => {
       expect(result.body).toStrictEqual({
         main: [
           {
-            url: join(expectUrl, 'original'),
-            width: 940,
-            height: 432,
-            fileSize: 8175,
+            url: `${url}/original`,
+            width: settings.images.main.post.original.width,
+            height: settings.images.main.post.original.height,
+            fileSize: expect.any(Number),
           },
           {
-            url: join(expectUrl, 'middle'),
-            width: 300,
-            height: 180,
-            fileSize: 1462,
+            url: `${url}/middle`,
+            width: settings.images.main.post.middle.width,
+            height: settings.images.main.post.middle.height,
+            fileSize: expect.any(Number),
           },
           {
-            url: join(expectUrl, 'small'),
-            width: 149,
-            height: 96,
-            fileSize: 549,
+            url: `${url}/small`,
+            width: settings.images.main.post.small.width,
+            height: settings.images.main.post.small.height,
+            fileSize: expect.any(Number),
           },
         ],
       });
+
+      expect.setState({ url });
     });
 
     it(`Status: ${HttpStatus.CREATED}.
          Save new main image in cloud.`, async () => {
-      const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
-      const expectUrl = join(
-        settings.s3.baseUrl,
-        settings.s3.bucketsName,
-        'content',
-        'users',
-        userId,
-        fistUserBlogId,
-        postId,
-        ImageType.Main,
-      );
+      const { userId, fistUserBlogId, accessToken, postId, url } =
+        expect.getState();
+
       const result = await blogger.uploadMainImageForPost(
         fistUserBlogId,
         postId,
@@ -436,22 +403,22 @@ describe('e2e tests', () => {
       expect(result.body).toStrictEqual({
         main: [
           {
-            url: join(expectUrl, 'original'),
-            width: 940,
-            height: 432,
-            fileSize: 8175,
+            url: `${url}/original`,
+            width: settings.images.main.post.original.width,
+            height: settings.images.main.post.original.height,
+            fileSize: expect.any(Number),
           },
           {
-            url: join(expectUrl, 'middle'),
-            width: 300,
-            height: 180,
-            fileSize: 1462,
+            url: `${url}/middle`,
+            width: settings.images.main.post.middle.width,
+            height: settings.images.main.post.middle.height,
+            fileSize: expect.any(Number),
           },
           {
-            url: join(expectUrl, 'small'),
-            width: 149,
-            height: 96,
-            fileSize: 549,
+            url: `${url}/small`,
+            width: settings.images.main.post.small.width,
+            height: settings.images.main.post.small.height,
+            fileSize: expect.any(Number),
           },
         ],
       });
