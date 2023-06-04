@@ -5,6 +5,7 @@ import { join } from 'path';
 import { settings } from '../../settings';
 import { BlogImagesInfo } from './api/views';
 import { Image } from './image.entity';
+import { randomUUID } from 'crypto';
 
 @Entity()
 export class BlogImage extends Image {
@@ -14,7 +15,6 @@ export class BlogImage extends Image {
   @Column() blogId: string;
 
   static create(
-    imageId: string,
     blogId: string,
     imageType: ImageType,
     url: string,
@@ -23,7 +23,7 @@ export class BlogImage extends Image {
     fileSize: number,
   ) {
     return {
-      imageId,
+      imageId: randomUUID(),
       blogId,
       imageType,
       url,

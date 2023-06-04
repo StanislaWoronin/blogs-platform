@@ -19,7 +19,7 @@ export class UploadBlogMainImageUseCase {
     imageBuffer: Buffer,
     originalName: string,
   ): Promise<BlogImagesInfo> {
-    const { url, imageId } = await this.s3FileStorageAdapter.saveImage(
+    const { url } = await this.s3FileStorageAdapter.saveImage(
       userId,
       blogId,
       imageBuffer,
@@ -29,7 +29,6 @@ export class UploadBlogMainImageUseCase {
 
     const { size, width, height } = await sharp(imageBuffer).metadata();
     const image = BlogImage.create(
-      imageId,
       blogId,
       ImageType.Main,
       url,

@@ -3,4 +3,5 @@ export enum ImageStatus {
   Copy = 'copy',
   Small = 'small',
   Big = 'big',
+  Txt = 'txt',
 }

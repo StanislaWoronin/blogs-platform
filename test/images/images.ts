@@ -10,6 +10,7 @@ export const images = {
       copy: 'blog-wallpaper-valid-copy-1028X312.png',
       small: 'blog-wallpaper-small-1027X311.png',
       big: 'blog-wallpaper-big-1029X313.png',
+      txt: 'not-supported-format.txt',
     },
   },
   post: {

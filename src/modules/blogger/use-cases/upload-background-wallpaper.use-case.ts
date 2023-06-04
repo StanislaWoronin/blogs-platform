@@ -34,7 +34,7 @@ export class UploadBackgroundWallpaperUseCase {
       await Promise.all([deleteInCloud, deleteInBd]);
     }
 
-    const { url, imageId } = await this.s3FileStorageAdapter.saveImage(
+    const { url } = await this.s3FileStorageAdapter.saveImage(
       userId,
       blogId,
       imageBuffer,
@@ -44,7 +44,6 @@ export class UploadBackgroundWallpaperUseCase {
 
     const { size, width, height } = await sharp(imageBuffer).metadata();
     const image = BlogImage.create(
-      imageId,
       blogId,
       ImageType.Wallpaper,
       url,
@@ -52,6 +51,7 @@ export class UploadBackgroundWallpaperUseCase {
       height,
       size,
     );
+
     await this.dataSource.getRepository(BlogImage).save(image);
     const [blogImagesInfo]: BlogImagesInfo[] = await this.dataSource.query(
       this.getBlogImagesInfoQuery(),

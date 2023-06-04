@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { S3FileStorageAdapter } from '../adapter/s3-file-storage.adapter';
 import { ImageType } from '../imageType';
 import sharp from 'sharp';
 import { DataSource } from 'typeorm';
 import { PostImage } from '../post-image.entity';
 import { PostImagesInfo } from '../api/views/post-images-info.view';
+import { IQueryBlogsRepository } from '../../public/blogs/infrastructure/i-query-blogs.repository';
+import { Blogs } from '../../public/blogs/infrastructure/entity/blogs.entity';
 
 @Injectable()
 export class UploadPostMainImageUseCase {
   constructor(
     private s3FileStorageAdapter: S3FileStorageAdapter,
-    private dataSource: DataSource,
+    private dataSource: DataSource, // private readonly blogsRepository: IQueryBlogsRepository, TODO
   ) {}
 
   async execute(
@@ -20,6 +22,12 @@ export class UploadPostMainImageUseCase {
     imageBuffer: Buffer,
   ): Promise<PostImagesInfo> {
     try {
+      const blogExist = await this.dataSource
+        .getRepository(Blogs)
+        .exist({ where: { id: blogId } });
+
+      if (!blogExist) throw NotFoundException;
+
       const images = await this.dataSource.query(
         this.getPostMainImagesQuery(),
         [postId],

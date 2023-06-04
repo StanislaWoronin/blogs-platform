@@ -17,9 +17,11 @@ import {
 } from './routing';
 import { CreatedComment } from '../../src/modules/public/comments/infrastructure/entity/db_comment.model';
 import { CommentDTO } from '../../src/modules/public/comments/api/dto/commentDTO';
+import { ImageStatus } from '../images/image-status.enum';
+import { Blogger } from '../request/blogger';
 
 export class Factories {
-  constructor(private readonly server: any) {}
+  constructor(private readonly server: any, private blogger: Blogger) {}
 
   async createUsers(usersCount: number): Promise<UserViewModelWithBanInfo[]> {
     const users = [];
@@ -124,6 +126,46 @@ export class Factories {
     }
 
     return blogs;
+  }
+
+  async createBlogsAndSendImages(accessToken: string, blogsCount: number) {
+    const blogs = [];
+    for (let i = 0; i < blogsCount; i++) {
+      const inputBlogData: BlogDto = {
+        name: `name${i}`,
+        description: `description${i}`,
+        websiteUrl: `websiteUrl${i}.com`,
+      };
+
+      const blog = await request(this.server)
+        .post(endpoints.bloggerController.blogs)
+        .auth(accessToken, { type: 'bearer' })
+        .send(inputBlogData);
+
+      await this.blogger.uploadBackgroundWallpaper(
+        blog.body.id,
+        ImageStatus.Valid,
+        accessToken,
+      );
+
+      const images = await this.blogger.uploadMainImageForBlog(
+        blog.body.id,
+        ImageStatus.Valid,
+        accessToken,
+      );
+
+      blogs.push({
+        id: blog.body.id,
+        name: blog.body.name,
+        description: blog.body.description,
+        websiteUrl: blog.body.websiteUrl,
+        createdAt: blog.body.createdAt,
+        isMembership: blog.body.isMembership,
+        images: images.body,
+      });
+    }
+
+    return blogs.reverse();
   }
 
   async createPostsForBlog(

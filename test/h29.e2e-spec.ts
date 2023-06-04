@@ -48,7 +48,7 @@ describe('e2e tests', () => {
     blogger = new Blogger(server);
     blogs = new Blogs(server);
     comments = new Comments(server);
-    factories = new Factories(server);
+    factories = new Factories(server, blogger);
     posts = new Posts(server);
     sa = new SA(server);
     testing = new Testing(server);
@@ -61,6 +61,8 @@ describe('e2e tests', () => {
   describe('Upload background wallpaper', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
+      const users = await factories.createAndLoginUsers(2);
+      const fistUserBlog = await blogger.createBlog(users[0].accessToken);
     });
 
     it('Create testing date', async () => {
@@ -658,4 +660,45 @@ describe('e2e tests', () => {
       });
     });
   });
+
+  describe('Try send text format fail', () => {
+    it('Clear data base', async () => {
+      await testing.clearDb();
+    });
+
+    it('Send text format fail.', async () => {
+      const [user] = await factories.createAndLoginUsers(1);
+      const blog = await blogger.createBlog(user.accessToken);
+
+      const response = await blogger.uploadBackgroundWallpaper(
+        blog.body.id,
+        ImageStatus.Txt,
+        user.accessToken,
+      );
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+    });
+  });
+
+  describe(
+    'Create five blogs and add. Add wallpaper and main images ' +
+      'for each blog. Get blogs. Should return blog list with added images.' +
+      'Status 200',
+    () => {
+      it('Clear data base', async () => {
+        await testing.clearDb();
+      });
+
+      it('Crate data and get blog.', async () => {
+        const [user] = await factories.createAndLoginUsers(1);
+        const expectItems = await factories.createBlogsAndSendImages(
+          user.accessToken,
+          5,
+        );
+
+        const response = await request(server).get('/blogs');
+        expect(response.status).toBe(HttpStatus.OK);
+        expect(response.body.items).toStrictEqual(expectItems);
+      });
+    },
+  );
 });
