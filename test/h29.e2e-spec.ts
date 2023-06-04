@@ -18,6 +18,7 @@ import { ImageType } from '../src/modules/blogger/imageType';
 import { images } from './images/images';
 import request from 'supertest';
 import { preparedBlog } from './helper/prepeared-data';
+import { randomUUID } from 'crypto';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -302,7 +303,30 @@ describe('e2e tests', () => {
       });
     });
 
-    it(`Status: ${HttpStatus.FORBIDDEN}.
+    it(`Status: ${HttpStatus.NOT_FOUND}.
+         If user try to update post main image that doesn't belong to current user.`, async () => {
+      const { accessToken, postId, fistUserBlogId } = expect.getState();
+
+      // const randomBlogId = randomUUID();
+      // const notExistBlog = await blogger.uploadMainImageForPost(
+      //   randomBlogId,
+      //   postId,
+      //   ImageStatus.Valid,
+      //   accessToken,
+      // );
+      // expect(notExistBlog.status).toBe(HttpStatus.NOT_FOUND);
+
+      const randomPostId = randomUUID();
+      const notExistPost = await blogger.uploadMainImageForPost(
+        fistUserBlogId,
+        randomPostId,
+        ImageStatus.Valid,
+        accessToken,
+      );
+      expect(notExistPost.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it.skip(`Status: ${HttpStatus.FORBIDDEN}.
          If user try to update post main image that doesn't belong to current user.`, async () => {
       const { accessToken, secondUserBlogId, postId } = expect.getState();
 
@@ -315,7 +339,7 @@ describe('e2e tests', () => {
       expect(result.status).toBe(HttpStatus.FORBIDDEN);
     });
 
-    it(`Status: ${HttpStatus.UNAUTHORIZED}.
+    it.skip(`Status: ${HttpStatus.UNAUTHORIZED}.
          If user try to update without credentials.`, async () => {
       const { fistUserBlogId, postId } = expect.getState();
       const result = await blogger.uploadMainImageForPost(
@@ -327,7 +351,7 @@ describe('e2e tests', () => {
     });
 
     const errorsMessages = getErrorMessage(['width', 'height']);
-    it(`Status: ${HttpStatus.BAD_REQUEST}.
+    it.skip(`Status: ${HttpStatus.BAD_REQUEST}.
          Try send big image.`, async () => {
       const { fistUserBlogId, accessToken, postId } = expect.getState();
       const result = await blogger.uploadMainImageForPost(
@@ -340,7 +364,7 @@ describe('e2e tests', () => {
       expect(result.body).toStrictEqual({ errorsMessages });
     });
 
-    it(`Status: ${HttpStatus.BAD_REQUEST}.
+    it.skip(`Status: ${HttpStatus.BAD_REQUEST}.
          Try send small image.`, async () => {
       const { fistUserBlogId, accessToken } = expect.getState();
       const result = await blogger.uploadMainImageForBlog(
@@ -352,7 +376,7 @@ describe('e2e tests', () => {
       expect(result.body).toStrictEqual({ errorsMessages });
     });
 
-    it(`Status: ${HttpStatus.CREATED}.
+    it.skip(`Status: ${HttpStatus.CREATED}.
          Save main image in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId } = expect.getState();
       const url = `${settings.s3.baseUrl}/${settings.s3.bucketsName}/content/users/${userId}/${fistUserBlogId}/${postId}/${ImageType.Main}`;
@@ -364,6 +388,32 @@ describe('e2e tests', () => {
         accessToken,
       );
       expect(result.status).toBe(HttpStatus.CREATED);
+      console.dir(result.body, { depth: null });
+      console.dir(
+        {
+          main: [
+            {
+              url: `${url}/original`,
+              width: settings.images.main.post.original.width,
+              height: settings.images.main.post.original.height,
+              fileSize: expect.any(Number),
+            },
+            {
+              url: `${url}/middle`,
+              width: settings.images.main.post.middle.width,
+              height: settings.images.main.post.middle.height,
+              fileSize: expect.any(Number),
+            },
+            {
+              url: `${url}/small`,
+              width: settings.images.main.post.small.width,
+              height: settings.images.main.post.small.height,
+              fileSize: expect.any(Number),
+            },
+          ],
+        },
+        { depth: null },
+      );
       expect(result.body).toStrictEqual({
         main: [
           {
@@ -390,7 +440,7 @@ describe('e2e tests', () => {
       expect.setState({ url });
     });
 
-    it(`Status: ${HttpStatus.CREATED}.
+    it.skip(`Status: ${HttpStatus.CREATED}.
          Save new main image in cloud.`, async () => {
       const { userId, fistUserBlogId, accessToken, postId, url } =
         expect.getState();

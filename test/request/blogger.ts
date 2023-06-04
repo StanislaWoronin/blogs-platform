@@ -87,6 +87,7 @@ export class Blogger {
     accessToken?: string,
   ) {
     const url = `/blogger/blogs/${blogId}/posts/${postId}/images/main`;
+
     if (!accessToken) {
       const response = await request(this.server)
         .post(url)

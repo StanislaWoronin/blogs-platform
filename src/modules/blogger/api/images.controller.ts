@@ -1,5 +1,6 @@
 import {
   Controller,
+  NotFoundException,
   Param,
   Post,
   UploadedFile,
@@ -19,6 +20,7 @@ import { PostMainValidator } from '../../../validation/image-validators/post-mai
 import { UploadPostMainImageUseCase } from '../use-cases/upload-post-main-image.use-case';
 import { PostImagesInfo } from './views/post-images-info.view';
 import { BlogMainValidator } from '../../../validation/image-validators/blog-main.validator';
+import { registerAs } from '@nestjs/config';
 
 @Controller('blogger/blogs')
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
@@ -89,11 +91,14 @@ export class ImagesController {
     const imageBuffer = content.buffer;
     const originalName = content.originalname;
 
-    return await this.uploadPostMainImageUseCase.execute(
+    const result = await this.uploadPostMainImageUseCase.execute(
       user.id,
       blogId,
       postId,
       imageBuffer,
     );
+
+    if (!result) throw new NotFoundException();
+    return result;
   }
 }

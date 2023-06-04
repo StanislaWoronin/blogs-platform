@@ -29,11 +29,7 @@ export class CreateUserUseCase {
       dto.email,
       emailConfirmation.confirmationCode,
     );
-    // console.log(
-    //   'confirmationCode:',
-    //   emailConfirmation.confirmationCode,
-    //   'from use-case for registration',
-    // );
+
     await this.usersService.createUser(dto, emailConfirmation, userId);
     return true;
   }
