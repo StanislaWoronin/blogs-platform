@@ -10,13 +10,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AuthBearerGuard } from '../../../guards/auth.bearer.guard';
-import { ForbiddenGuard } from '../../../guards/forbidden.guard';
-import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
-import { BanUserDto } from './dto/ban-user.dto';
-import { BloggerBlogService } from '../application/blogger-blogs.service';
-import { PgQueryUsersRepository } from '../../super-admin/infrastructure/pg.repository/pg-query-users.repository';
-import { IQueryUsersRepository } from '../../super-admin/infrastructure/i-query-users.repository';
+import {AuthBearerGuard} from '../../../guards/auth.bearer.guard';
+import {ForbiddenGuard} from '../../../guards/forbidden.guard';
+import {QueryParametersDto} from '../../../global-model/query-parameters.dto';
+import {BanUserDto} from './dto/ban-user.dto';
+import {BloggerBlogService} from '../application/blogger-blogs.service';
+import {IQueryUsersRepository} from '../../super-admin/infrastructure/i-query-users.repository';
 
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
 @Controller('blogger/users')

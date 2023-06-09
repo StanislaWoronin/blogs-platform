@@ -45,6 +45,8 @@ export class PostsService {
 
     const createdPost = await this.postsRepository.createPost(newPost);
 
+    // TODO send telegram message
+
     return toCreatedPostsViewModel(createdPost);
   }
 

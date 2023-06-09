@@ -1,9 +1,9 @@
 import {
-  Controller,
-  Get,
+  Controller, Delete,
+  Get, HttpCode, HttpStatus,
   Inject,
   NotFoundException,
-  Param,
+  Param, Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +13,8 @@ import { IQueryPostsRepository } from '../../posts/infrastructure/i-query-posts.
 import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
 import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
+import {SubscribeToBlogUseCase} from "../use-cases/subscribe-to-blog.use-case";
+import {UnsubscribeToBlogUseCase} from "../use-cases/unsubscribe-to-blog.use-case";
 
 @Controller('blogs')
 export class BlogsController {
@@ -21,6 +23,8 @@ export class BlogsController {
     protected queryBlogsRepository: IQueryBlogsRepository,
     @Inject(IQueryPostsRepository)
     protected queryPostsRepository: IQueryPostsRepository,
+    private subscribeToBlogUseCase: SubscribeToBlogUseCase,
+    private unsubscribeToBlogUseCase: UnsubscribeToBlogUseCase
   ) {}
 
   @Get()
@@ -65,5 +69,24 @@ export class BlogsController {
     }
 
     return this.queryPostsRepository.getPosts(query, blogId, userId);
+  }
+
+  @Post(':blogId/subscription')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AccessTokenValidationGuard)
+  async subscribeToBlog(
+      @Param('blogId') blogId: string,
+      @User() user: UserDBModel,
+  ) {
+    return await this.subscribeToBlogUseCase.execute(user.id, blogId)
+  }
+
+  @Delete(':blogId/subscription')
+  @UseGuards(AccessTokenValidationGuard)
+  async unsubscribeToBlog(
+      @Param('blogId') blogId: string,
+      @User() user: UserDBModel,
+  ) {
+    return await this.unsubscribeToBlogUseCase.execute(user.id, blogId)
   }
 }

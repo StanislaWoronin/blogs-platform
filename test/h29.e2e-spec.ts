@@ -22,7 +22,7 @@ import { randomUUID } from 'crypto';
 
 describe('e2e tests', () => {
   const second = 1000;
-  jest.setTimeout(10 * second);
+  jest.setTimeout(5 * second);
 
   let app: INestApplication;
   let server;
@@ -62,8 +62,6 @@ describe('e2e tests', () => {
   describe('Upload background wallpaper', () => {
     it('Clear data base', async () => {
       await testing.clearDb();
-      const users = await factories.createAndLoginUsers(2);
-      const fistUserBlog = await blogger.createBlog(users[0].accessToken);
     });
 
     it('Create testing date', async () => {

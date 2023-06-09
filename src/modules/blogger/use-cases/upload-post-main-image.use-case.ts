@@ -13,7 +13,7 @@ import { Posts } from '../../public/posts/infrastructure/entity/posts.entity';
 export class UploadPostMainImageUseCase {
   constructor(
     private s3FileStorageAdapter: S3FileStorageAdapter,
-    private dataSource: DataSource, // private readonly blogsRepository: IQueryBlogsRepository, TODO
+    private dataSource: DataSource,
   ) {}
 
   async execute(

@@ -61,9 +61,6 @@ import { settings } from './settings';
 import { BannedComment } from './modules/super-admin/infrastructure/entity/banned-comment.entity';
 import { ITestingRepository } from './modules/testing/infrastructure/i-testing.repository';
 import { TestingController } from './modules/testing/api/testingController';
-import { BlogModule } from './modules/public/blogs/blog.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { TypeOrmConfig } from './helpers/TypeOrmConfig';
 import { ImagesController } from './modules/blogger/api/images.controller';
 import { UploadBackgroundWallpaperUseCase } from './modules/blogger/use-cases';
 import { S3FileStorageAdapter } from './modules/blogger/adapter/s3-file-storage.adapter';
@@ -72,6 +69,10 @@ import { WallpaperValidator } from './validation/image-validators/wallpaper.vali
 import { UploadBlogMainImageUseCase } from './modules/blogger/use-cases/upload-blog-main-image.use-case';
 import { UploadPostMainImageUseCase } from './modules/blogger/use-cases/upload-post-main-image.use-case';
 import { PostImage } from './modules/blogger/post-image.entity';
+import {BlogSubscription} from "./modules/public/blogs/infrastructure/entity/blog-subscription.entity";
+import {SubscribeToBlogUseCase} from "./modules/public/blogs/use-cases/subscribe-to-blog.use-case";
+import {UnsubscribeToBlogUseCase} from "./modules/public/blogs/use-cases/unsubscribe-to-blog.use-case";
+import {TelegramController} from "./modules/integrations/api/telegram.controller";
 
 const controllers = [
   AuthController,
@@ -79,12 +80,13 @@ const controllers = [
   BloggerBlogsController,
   BloggerUsersController,
   CommentsController,
+  ImagesController,
   PostsController,
   SaBlogsController,
   SecurityController,
+  TelegramController,
   TestingController,
   UsersController,
-  ImagesController,
 ];
 
 const entity = [
@@ -93,6 +95,7 @@ const entity = [
   BannedComment,
   BannedPost,
   BannedUsersForBlog,
+  BlogSubscription,
   Comments,
   CommentReactions,
   EmailConfirmation,
@@ -250,6 +253,8 @@ const validators = [
 const useCases = [
   CreateUserUseCase,
   CreateUserBySaUseCase,
+  SubscribeToBlogUseCase,
+  UnsubscribeToBlogUseCase,
   UploadBackgroundWallpaperUseCase,
   UploadBlogMainImageUseCase,
   UploadPostMainImageUseCase,

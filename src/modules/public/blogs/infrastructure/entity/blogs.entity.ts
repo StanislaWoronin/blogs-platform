@@ -12,6 +12,7 @@ import { BannedUsersForBlog } from './banned-users-for-blog.entity';
 import { Posts } from '../../../posts/infrastructure/entity/posts.entity';
 import { BannedBlog } from '../../../../super-admin/infrastructure/entity/banned_blog.entity';
 import { BlogImage } from '../../../../blogger/blog-image.entity';
+import {BlogSubscription} from "./blog-subscription.entity";
 
 @Entity()
 export class Blogs {
@@ -49,4 +50,7 @@ export class Blogs {
 
   @OneToMany(() => BlogImage, (i) => i.blog)
   images: BlogImage[];
+
+  @OneToMany(() => BlogSubscription, (bs) => bs.blog)
+  subscriptions: BlogSubscription[];
 }
