@@ -8,11 +8,13 @@ import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity';
 import { toBannedUsersModel } from '../../../../data-mapper/to-banned-users.model';
 import {
-  giveSkipNumber,
+  giveSkipNumber, monthsBetweenDates,
   paginationContentPage,
 } from '../../../../helper.functions';
 import { toUserViewModel } from '../../../../data-mapper/to-create-user-view.model';
 import { BanStatusModel } from '../../../../global-model/ban-status.model';
+import {ViewMembership} from "../../../blogger/api/views/membership.view";
+import {Currency} from "../../../blogger/api/views/currency";
 
 @Injectable()
 export class OrmQueryUsersRepository {
@@ -137,6 +139,50 @@ export class OrmQueryUsersRepository {
       query.pageSize,
       users,
       Number(totalCount),
+    );
+  }
+
+  async getMembership(blogId: string, queryDto: QueryParametersDto): Promise<ContentPageModel> {
+    const query = `
+      SELECT id, "blogId", "userId", "createdAt",
+             (SELECT login AS "userLogin" FROM users WHERE id = "userId"),
+             (SELECT name AS "blogTitle" FROM blogs WHERE id = "blogId") 
+        FROM blog_subscription 
+       WHERE "blogId" = $1;
+       ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+       LIMIT $1 OFFSET ${giveSkipNumber(
+         queryDto.pageNumber,
+         queryDto.pageSize,
+       )};
+    `
+    const _membership = await this.dataSource.query(query, [blogId])
+    const membership = _membership.map(m => {
+      return {
+        userId: _membership.userId,
+        userLogin: _membership.userLogin,
+        blogId: _membership.blogId,
+        blogTitle: _membership.blogTitle,
+        membershipPlan: {
+          id: _membership.id,
+          monthsCount: monthsBetweenDates(_membership.createdAt),
+          price: 0,
+          currency: Currency.BYN
+        }
+      }
+    })
+
+    const totalCountQuery = `
+      SELECT COUNT(*)
+        FROM blog_subscription
+        WHERE "blogId" = $1;
+    `;
+    const totalCount = await this.dataSource.query(totalCountQuery, [blogId]);
+
+    return paginationContentPage(
+        queryDto.pageNumber,
+        queryDto.pageSize,
+        membership,
+        Number(totalCount[0].count),
     );
   }
 

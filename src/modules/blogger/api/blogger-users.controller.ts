@@ -43,6 +43,14 @@ export class BloggerUsersController {
     return result;
   }
 
+  @Get('blogs/:blogId/payments')
+  async getMembership(
+    @Query() query: QueryParametersDto,
+    @Param('blogId') blogId: string,
+  ) {
+    return await this.queryUsersRepository.getMembership(blogId, query)
+  }
+
   @UseGuards(ForbiddenGuard)
   @Put(':id/ban')
   @HttpCode(204)
