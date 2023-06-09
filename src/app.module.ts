@@ -73,6 +73,7 @@ import { BlogSubscription } from './modules/public/blogs/infrastructure/entity/b
 import { SubscribeToBlogUseCase } from './modules/public/blogs/use-cases/subscribe-to-blog.use-case';
 import { UnsubscribeToBlogUseCase } from './modules/public/blogs/use-cases/unsubscribe-to-blog.use-case';
 import { TelegramController } from './modules/integrations/api/telegram.controller';
+import {TelegramAdapter} from "./modules/integrations/adapters/telegram.adapter";
 
 const controllers = [
   AuthController,
@@ -224,7 +225,7 @@ const repositories = [
   },
 ];
 
-const adapters = [S3FileStorageAdapter, EmailAdapters];
+const adapters = [EmailAdapters, TelegramAdapter, S3FileStorageAdapter];
 
 const services = [
   AuthService,

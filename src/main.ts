@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { createApp } from './helpers/create-app';
 import { monthsBetweenDates } from './helper.functions';
+import {TelegramController} from "./modules/integrations/api/telegram.controller";
 
 const port = process.env.PORT || 5000;
 
@@ -11,6 +12,8 @@ async function bootstrap() {
   await app.listen(port, async () => {
     console.log(`Example app listening on port ${port}`);
   });
+  const telegramController = await app.resolve(TelegramController)
+  await telegramController.webhook()
 }
 
 bootstrap();

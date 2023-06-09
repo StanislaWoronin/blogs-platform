@@ -42,6 +42,10 @@ export const settings = {
     accessKeyId: process.env.ACCESS_KEY_ID,
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
   },
+  telegram: {
+    baseUrl: 'https://api.telegram.org/bot',
+    botToken: process.env.BOT_TOKEN,
+  },
   images: {
     wallpaper: {
       size: 100000,
