@@ -1,9 +1,13 @@
 import {
-  Controller, Delete,
-  Get, HttpCode, HttpStatus,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
   Inject,
   NotFoundException,
-  Param, Post,
+  Param,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -13,8 +17,8 @@ import { IQueryPostsRepository } from '../../posts/infrastructure/i-query-posts.
 import { AccessTokenValidationGuard } from '../../../../guards/access-token-validation.guard';
 import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
-import {SubscribeToBlogUseCase} from "../use-cases/subscribe-to-blog.use-case";
-import {UnsubscribeToBlogUseCase} from "../use-cases/unsubscribe-to-blog.use-case";
+import { SubscribeToBlogUseCase } from '../use-cases/subscribe-to-blog.use-case';
+import { UnsubscribeToBlogUseCase } from '../use-cases/unsubscribe-to-blog.use-case';
 
 @Controller('blogs')
 export class BlogsController {
@@ -24,7 +28,7 @@ export class BlogsController {
     @Inject(IQueryPostsRepository)
     protected queryPostsRepository: IQueryPostsRepository,
     private subscribeToBlogUseCase: SubscribeToBlogUseCase,
-    private unsubscribeToBlogUseCase: UnsubscribeToBlogUseCase
+    private unsubscribeToBlogUseCase: UnsubscribeToBlogUseCase,
   ) {}
 
   @Get()
@@ -75,18 +79,18 @@ export class BlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenValidationGuard)
   async subscribeToBlog(
-      @Param('blogId') blogId: string,
-      @User() user: UserDBModel,
+    @Param('blogId') blogId: string,
+    @User() user: UserDBModel,
   ) {
-    return await this.subscribeToBlogUseCase.execute(user.id, blogId)
+    return await this.subscribeToBlogUseCase.execute(user.id, blogId);
   }
 
   @Delete(':blogId/subscription')
   @UseGuards(AccessTokenValidationGuard)
   async unsubscribeToBlog(
-      @Param('blogId') blogId: string,
-      @User() user: UserDBModel,
+    @Param('blogId') blogId: string,
+    @User() user: UserDBModel,
   ) {
-    return await this.unsubscribeToBlogUseCase.execute(user.id, blogId)
+    return await this.unsubscribeToBlogUseCase.execute(user.id, blogId);
   }
 }

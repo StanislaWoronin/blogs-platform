@@ -12,7 +12,7 @@ import {
 import { ViewBannedUser } from '../modules/blogger/api/dto/view-banned-users.model';
 import { CommentViewModel } from '../modules/public/comments/api/dto/commentView.model';
 import { CommentWithAdditionalInfoModel } from '../modules/blogger/api/dto/comment-with-additional-info.model';
-import {ViewMembership} from "../modules/blogger/api/views/membership.view";
+import { ViewMembership } from '../modules/blogger/api/views/membership.view';
 
 export class ContentPageModel {
   constructor(

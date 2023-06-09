@@ -8,13 +8,14 @@ import { ContentPageModel } from '../../../../global-model/contentPage.model';
 import { BannedUsersForBlog } from '../../../public/blogs/infrastructure/entity/banned-users-for-blog.entity';
 import { toBannedUsersModel } from '../../../../data-mapper/to-banned-users.model';
 import {
-  giveSkipNumber, monthsBetweenDates,
+  giveSkipNumber,
+  monthsBetweenDates,
   paginationContentPage,
 } from '../../../../helper.functions';
 import { toUserViewModel } from '../../../../data-mapper/to-create-user-view.model';
 import { BanStatusModel } from '../../../../global-model/ban-status.model';
-import {ViewMembership} from "../../../blogger/api/views/membership.view";
-import {Currency} from "../../../blogger/api/views/currency";
+import { ViewMembership } from '../../../blogger/api/views/membership.view';
+import { Currency } from '../../../blogger/api/views/currency';
 
 @Injectable()
 export class OrmQueryUsersRepository {
@@ -142,7 +143,10 @@ export class OrmQueryUsersRepository {
     );
   }
 
-  async getMembership(blogId: string, queryDto: QueryParametersDto): Promise<ContentPageModel> {
+  async getMembership(
+    blogId: string,
+    queryDto: QueryParametersDto,
+  ): Promise<ContentPageModel> {
     const query = `
       SELECT id, "blogId", "userId", "createdAt",
              (SELECT login AS "userLogin" FROM users WHERE id = "userId"),
@@ -154,9 +158,9 @@ export class OrmQueryUsersRepository {
          queryDto.pageNumber,
          queryDto.pageSize,
        )};
-    `
-    const _membership = await this.dataSource.query(query, [blogId])
-    const membership = _membership.map(m => {
+    `;
+    const _membership = await this.dataSource.query(query, [blogId]);
+    const membership = _membership.map((m) => {
       return {
         userId: _membership.userId,
         userLogin: _membership.userLogin,
@@ -166,10 +170,10 @@ export class OrmQueryUsersRepository {
           id: _membership.id,
           monthsCount: monthsBetweenDates(_membership.createdAt),
           price: 0,
-          currency: Currency.BYN
-        }
-      }
-    })
+          currency: Currency.BYN,
+        },
+      };
+    });
 
     const totalCountQuery = `
       SELECT COUNT(*)
@@ -179,10 +183,10 @@ export class OrmQueryUsersRepository {
     const totalCount = await this.dataSource.query(totalCountQuery, [blogId]);
 
     return paginationContentPage(
-        queryDto.pageNumber,
-        queryDto.pageSize,
-        membership,
-        Number(totalCount[0].count),
+      queryDto.pageNumber,
+      queryDto.pageSize,
+      membership,
+      Number(totalCount[0].count),
     );
   }
 

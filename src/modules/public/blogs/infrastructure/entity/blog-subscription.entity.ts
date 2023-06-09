@@ -1,30 +1,36 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
-import {Blogs} from "./blogs.entity";
-import {Users} from "../../../../super-admin/infrastructure/entity/users.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Blogs } from './blogs.entity';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
 
 @Entity()
 export class BlogSubscription {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @ManyToOne(() => Blogs, (b) => b.subscriptions)
-    @JoinColumn()
-    blog: Blogs;
-    @Column() blogId: string;
+  @ManyToOne(() => Blogs, (b) => b.subscriptions)
+  @JoinColumn()
+  blog: Blogs;
+  @Column() blogId: string;
 
-    @ManyToOne(() => Users, (u) => u.subscriptions)
-    @JoinColumn()
-    user: Users;
-    @Column() userId: string;
+  @ManyToOne(() => Users, (u) => u.subscriptions)
+  @JoinColumn()
+  user: Users;
+  @Column() userId: string;
 
-    @Column()
-    createdAt: string = new Date().toISOString();
+  @Column()
+  createdAt: string = new Date().toISOString();
 
-    static create(userId: string, blogId: string) {
-        const blogSubscription = new BlogSubscription()
-        blogSubscription.userId = userId;
-        blogSubscription.blogId = blogId;
+  static create(userId: string, blogId: string) {
+    const blogSubscription = new BlogSubscription();
+    blogSubscription.userId = userId;
+    blogSubscription.blogId = blogId;
 
-        return blogSubscription;
-    }
+    return blogSubscription;
+  }
 }

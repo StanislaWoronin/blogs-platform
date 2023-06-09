@@ -69,10 +69,10 @@ import { WallpaperValidator } from './validation/image-validators/wallpaper.vali
 import { UploadBlogMainImageUseCase } from './modules/blogger/use-cases/upload-blog-main-image.use-case';
 import { UploadPostMainImageUseCase } from './modules/blogger/use-cases/upload-post-main-image.use-case';
 import { PostImage } from './modules/blogger/post-image.entity';
-import {BlogSubscription} from "./modules/public/blogs/infrastructure/entity/blog-subscription.entity";
-import {SubscribeToBlogUseCase} from "./modules/public/blogs/use-cases/subscribe-to-blog.use-case";
-import {UnsubscribeToBlogUseCase} from "./modules/public/blogs/use-cases/unsubscribe-to-blog.use-case";
-import {TelegramController} from "./modules/integrations/api/telegram.controller";
+import { BlogSubscription } from './modules/public/blogs/infrastructure/entity/blog-subscription.entity';
+import { SubscribeToBlogUseCase } from './modules/public/blogs/use-cases/subscribe-to-blog.use-case';
+import { UnsubscribeToBlogUseCase } from './modules/public/blogs/use-cases/unsubscribe-to-blog.use-case';
+import { TelegramController } from './modules/integrations/api/telegram.controller';
 
 const controllers = [
   AuthController,

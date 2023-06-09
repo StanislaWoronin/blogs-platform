@@ -10,12 +10,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {AuthBearerGuard} from '../../../guards/auth.bearer.guard';
-import {ForbiddenGuard} from '../../../guards/forbidden.guard';
-import {QueryParametersDto} from '../../../global-model/query-parameters.dto';
-import {BanUserDto} from './dto/ban-user.dto';
-import {BloggerBlogService} from '../application/blogger-blogs.service';
-import {IQueryUsersRepository} from '../../super-admin/infrastructure/i-query-users.repository';
+import { AuthBearerGuard } from '../../../guards/auth.bearer.guard';
+import { ForbiddenGuard } from '../../../guards/forbidden.guard';
+import { QueryParametersDto } from '../../../global-model/query-parameters.dto';
+import { BanUserDto } from './dto/ban-user.dto';
+import { BloggerBlogService } from '../application/blogger-blogs.service';
+import { IQueryUsersRepository } from '../../super-admin/infrastructure/i-query-users.repository';
 
 @UseGuards(AuthBearerGuard, ForbiddenGuard)
 @Controller('blogger/users')
@@ -48,7 +48,7 @@ export class BloggerUsersController {
     @Query() query: QueryParametersDto,
     @Param('blogId') blogId: string,
   ) {
-    return await this.queryUsersRepository.getMembership(blogId, query)
+    return await this.queryUsersRepository.getMembership(blogId, query);
   }
 
   @UseGuards(ForbiddenGuard)

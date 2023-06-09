@@ -15,7 +15,7 @@ import {
   CommentWithAdditionalInfo,
 } from './modules/public/comments/api/dto/commentView.model';
 import { CommentWithAdditionalInfoModel } from './modules/blogger/api/dto/comment-with-additional-info.model';
-import {ViewMembership} from "./modules/blogger/api/views/membership.view";
+import { ViewMembership } from './modules/blogger/api/views/membership.view';
 
 export const giveSkipNumber = (pageNumber: number, pageSize: number) => {
   return (pageNumber - 1) * pageSize;
@@ -35,14 +35,14 @@ export const _generateHash = async (password: string) => {
 };
 
 export const monthsBetweenDates = (createdAt: string) => {
-  const _date = new Date(createdAt).getTime()
-  const currentDate = new Date().getTime()
+  const _date = new Date(createdAt).getTime();
+  const currentDate = new Date().getTime();
 
   const diffMilliseconds = Math.abs(currentDate - _date);
   const months = Math.floor(diffMilliseconds / (1000 * 60 * 60 * 24 * 30));
 
-  return months
-}
+  return months;
+};
 
 export const paginationContentPage = (
   pageNumber: number,
