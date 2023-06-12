@@ -72,8 +72,10 @@ import { PostImage } from './modules/blogger/post-image.entity';
 import { BlogSubscription } from './modules/public/blogs/infrastructure/entity/blog-subscription.entity';
 import { SubscribeToBlogUseCase } from './modules/public/blogs/use-cases/subscribe-to-blog.use-case';
 import { UnsubscribeToBlogUseCase } from './modules/public/blogs/use-cases/unsubscribe-to-blog.use-case';
-import { TelegramController } from './modules/integrations/api/telegram.controller';
-import {TelegramAdapter} from "./modules/integrations/adapters/telegram.adapter";
+import { IntegrationController } from './modules/integrations/api/integration.controller';
+import { TelegramAdapter } from './modules/integrations/adapters/telegram.adapter';
+import { TelegrafModule } from 'nestjs-telegraf';
+import LocalSession = require('telegraf-session-local');
 
 const controllers = [
   AuthController,
@@ -85,7 +87,7 @@ const controllers = [
   PostsController,
   SaBlogsController,
   SecurityController,
-  TelegramController,
+  IntegrationController,
   TestingController,
   UsersController,
 ];
@@ -261,21 +263,25 @@ const useCases = [
   UploadPostMainImageUseCase,
 ];
 
+const sessions = new LocalSession({ database: 'session_db.json' });
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url:
-        process.env.ENV_TYPE === 'local'
-          ? process.env.POSTGRES_LOCAL_URI
-          : process.env.POSTGRES_URI,
+      url: process.env.LOCAL
+        ? process.env.POSTGRES_LOCAL_URI
+        : process.env.POSTGRES_URI,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: process.env.ENV_TYPE === 'local' ? false : true,
+      ssl: !process.env.LOCAL,
     }),
     TypeOrmModule.forFeature([...entity]),
-    //BlogModule,
+    // TelegrafModule.forRoot({
+    //   middlewares: [sessions.middleware()],
+    //   token: settings.telegram.botToken,
+    // }),
 
     // ThrottlerModule.forRoot({
     //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),

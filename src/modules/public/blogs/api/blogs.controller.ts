@@ -82,7 +82,9 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @User() user: UserDBModel,
   ) {
-    return await this.subscribeToBlogUseCase.execute(user.id, blogId);
+    await this.subscribeToBlogUseCase.execute(user.id, blogId);
+
+    return;
   }
 
   @Delete(':blogId/subscription')
@@ -91,6 +93,8 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @User() user: UserDBModel,
   ) {
-    return await this.unsubscribeToBlogUseCase.execute(user.id, blogId);
+    await this.unsubscribeToBlogUseCase.execute(user.id, blogId);
+
+    return;
   }
 }

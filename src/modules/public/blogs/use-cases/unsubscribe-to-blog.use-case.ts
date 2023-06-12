@@ -29,12 +29,14 @@ export class UnsubscribeToBlogUseCase {
     if (!!isExists.subscriptionExists) return true;
 
     const response = await this.dataSource
-      .getRepository(BlogSubscription)
-      .delete({
+      .createQueryBuilder()
+      .update(BlogSubscription)
+      .set({ isActive: false })
+      .where({
         userId,
         blogId,
       });
-
-    return response.affected !== 1;
+    // response.affected !== 1;
+    return;
   }
 }

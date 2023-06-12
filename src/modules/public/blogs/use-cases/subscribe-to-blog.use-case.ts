@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BlogSubscription } from '../infrastructure/entity/blog-subscription.entity';
+import { TelegramAdapter } from '../../../integrations/adapters/telegram.adapter';
 
 @Injectable()
 export class SubscribeToBlogUseCase {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private telegramAdapter: TelegramAdapter,
+  ) {}
 
   async execute(userId: string, blogId: string): Promise<boolean> {
     const isExists: { blogExists: 0 | 1; subscriptionExists: 0 | 1 } =

@@ -3,6 +3,9 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export const settings = {
+  PORT: Number(process.env.PORT),
+  LOCAL: Boolean(process.env.LOCAL),
+  environment: process.env.ENV_TYPE || Environment.Production,
   local: process.env.POSTGRES_LOCAL_URI,
   MONGO_URI:
     process.env.mongoURI ||
@@ -25,7 +28,6 @@ export const settings = {
     CONNECTION_TIME_LIMIT: '10000', // msec
     CONNECTION_COUNT_LIMIT: '5',
   },
-  environment: process.env.ENV_TYPE || Environment.Production,
   newestLikes: {
     limit: '3',
   },
@@ -42,6 +44,7 @@ export const settings = {
     accessKeyId: process.env.ACCESS_KEY_ID,
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
   },
+  ngrok: { authToken: process.env.NGROK_AUTH_TOKEN },
   telegram: {
     baseUrl: 'https://api.telegram.org/bot',
     botToken: process.env.BOT_TOKEN,
