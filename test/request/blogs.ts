@@ -13,8 +13,9 @@ export class Blogs {
   }
 
   async subscribeToBlog(blogId) {
-    const response = await request(this.server)
-        .post(`/blogs/${blogId}/subscription`)
+    const response = await request(this.server).post(
+      `/blogs/${blogId}/subscription`,
+    );
 
     return { status: response.status, body: response.body };
   }

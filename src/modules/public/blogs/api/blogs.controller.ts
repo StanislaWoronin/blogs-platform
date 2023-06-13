@@ -19,7 +19,7 @@ import { User } from '../../../../decorator/user.decorator';
 import { UserDBModel } from '../../../super-admin/infrastructure/entity/userDB.model';
 import { SubscribeToBlogUseCase } from '../use-cases/subscribe-to-blog.use-case';
 import { UnsubscribeToBlogUseCase } from '../use-cases/unsubscribe-to-blog.use-case';
-import {AuthBearerGuard} from "../../../../guards/auth.bearer.guard";
+import { AuthBearerGuard } from '../../../../guards/auth.bearer.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -83,7 +83,7 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @User() user: UserDBModel,
   ) {
-    console.log('controller')
+    console.log('controller');
     return await this.subscribeToBlogUseCase.execute(user.id, blogId);
   }
 

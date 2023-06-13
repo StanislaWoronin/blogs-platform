@@ -74,10 +74,10 @@ import { SubscribeToBlogUseCase } from './modules/public/blogs/use-cases/subscri
 import { UnsubscribeToBlogUseCase } from './modules/public/blogs/use-cases/unsubscribe-to-blog.use-case';
 import { IntegrationController } from './modules/integrations/api/integration.controller';
 import { TelegramAdapter } from './modules/integrations/adapters/telegram.adapter';
-import {IntegrationRepository} from "./modules/integrations/infrastructure/integration.repository";
-import {TelegramBotSubscriptions} from "./modules/integrations/infrastructure/entity/telegram-bot-subscriptions.entity";
-import {CreateNewBotSubscriptionUseCase} from "./modules/integrations/use-cases/create-new-bot-subscription.use-case";
-import {SetUserTelegramIdUseCase} from "./modules/integrations/use-cases/set-user-telegram-id.use-case";
+import { IntegrationRepository } from './modules/integrations/infrastructure/integration.repository';
+import { TelegramBotSubscriptions } from './modules/integrations/infrastructure/entity/telegram-bot-subscriptions.entity';
+import { CreateNewBotSubscriptionUseCase } from './modules/integrations/use-cases/create-new-bot-subscription.use-case';
+import { SetUserTelegramIdUseCase } from './modules/integrations/use-cases/set-user-telegram-id.use-case';
 
 const controllers = [
   AuthController,

@@ -11,9 +11,8 @@ export class SubscribeToBlogUseCase {
   ) {}
 
   async execute(userId: string, blogId: string): Promise<boolean> {
-    const isExists: isExists =
-      await this.dataSource.query(
-        `
+    const isExists: isExists = await this.dataSource.query(
+      `
             SELECT
                 CASE WHEN EXISTS (
                     SELECT 1
@@ -27,8 +26,8 @@ export class SubscribeToBlogUseCase {
                   FROM blogs
                  WHERE "blogId" = $2;
         `,
-        [userId, blogId],
-      );
+      [userId, blogId],
+    );
     // в квери выше нужна инверсия значений, если не сделать ее,
     // то в проверке ниже при существованиии блога мы получим 404
     if (!!isExists.blogName) throw NotFoundException;
@@ -42,14 +41,17 @@ export class SubscribeToBlogUseCase {
     if (!subscribe) throw new Error('Something went wrong');
 
     if (isExists.telegramId) {
-      this.telegramAdapter.sendMessage(isExists.telegramId, `Hi you subscribed to the ${isExists.blogName} blog!`)
+      this.telegramAdapter.sendMessage(
+        isExists.telegramId,
+        `Hi you subscribed to the ${isExists.blogName} blog!`,
+      );
     }
 
-    return
+    return;
   }
 }
 type isExists = {
-  subscriptionExists: 0 | 1,
-  telegramId: number,
-  blogName: string | null
-}
+  subscriptionExists: 0 | 1;
+  telegramId: number;
+  blogName: string | null;
+};

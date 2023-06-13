@@ -10,10 +10,10 @@ import { IReactionsRepository } from '../../likes/infrastructure/i-reactions.rep
 import { IQueryReactionRepository } from '../../likes/infrastructure/i-query-reaction.repository';
 import { IQueryPostsRepository } from '../infrastructure/i-query-posts.repository';
 import { IPostsRepository } from '../infrastructure/i-posts.repository';
-import {TelegramAdapter} from "../../../integrations/adapters/telegram.adapter";
-import {IntegrationRepository} from "../../../integrations/infrastructure/integration.repository";
-import {IBlogsRepository} from "../../blogs/infrastructure/i-blogs.repository";
-import {IQueryBlogsRepository} from "../../blogs/infrastructure/i-query-blogs.repository";
+import { TelegramAdapter } from '../../../integrations/adapters/telegram.adapter';
+import { IntegrationRepository } from '../../../integrations/infrastructure/integration.repository';
+import { IBlogsRepository } from '../../blogs/infrastructure/i-blogs.repository';
+import { IQueryBlogsRepository } from '../../blogs/infrastructure/i-query-blogs.repository';
 
 @Injectable()
 export class PostsService {
@@ -28,7 +28,8 @@ export class PostsService {
     protected queryPostsRepository: IQueryPostsRepository,
     protected telegramAdapter: TelegramAdapter,
     protected integrationRepository: IntegrationRepository,
-    @Inject(IQueryBlogsRepository) protected blogQueryRepository: IQueryBlogsRepository
+    @Inject(IQueryBlogsRepository)
+    protected blogQueryRepository: IQueryBlogsRepository,
   ) {}
 
   async checkUserBanStatus(userId: string, postId: string): Promise<boolean> {
@@ -53,10 +54,12 @@ export class PostsService {
     const blogExist = await this.blogQueryRepository.getBlogName(blogId);
     const createdPost = await this.postsRepository.createPost(newPost);
 
-    const telegramIds = await this.integrationRepository.getBlogSubscribers(blogId)
-    const text = `New post published for ${blogExist} blog!`
+    const telegramIds = await this.integrationRepository.getBlogSubscribers(
+      blogId,
+    );
+    const text = `New post published for ${blogExist} blog!`;
 
-    for (let id of telegramIds) {
+    for (const id of telegramIds) {
       this.telegramAdapter.sendMessage(id, text);
     }
 

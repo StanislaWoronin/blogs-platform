@@ -8,7 +8,7 @@ import { CommentReactions } from '../../../public/likes/infrastructure/entity/co
 import { PostReactions } from '../../../public/likes/infrastructure/entity/post-reactions.entity';
 import { UserBanInfo } from './user-ban-info.entity';
 import { BlogSubscription } from '../../../public/blogs/infrastructure/entity/blog-subscription.entity';
-import {TelegramBotSubscriptions} from "../../../integrations/infrastructure/entity/telegram-bot-subscriptions.entity";
+import { TelegramBotSubscriptions } from '../../../integrations/infrastructure/entity/telegram-bot-subscriptions.entity';
 
 @Entity()
 export class Users {
@@ -57,6 +57,6 @@ export class Users {
   @OneToMany(() => BlogSubscription, (bs) => bs.user)
   subscriptions: BlogSubscription[];
 
-  @OneToMany(() => TelegramBotSubscriptions, tb => tb.user)
+  @OneToMany(() => TelegramBotSubscriptions, (tb) => tb.user)
   telegramBots: TelegramBotSubscriptions[];
 }
