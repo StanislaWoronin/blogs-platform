@@ -43,10 +43,10 @@ export class TelegramAdapter implements OnModuleInit {
     });
   }
 
-  async sendMessage(recipientId: string, blogName: string) {
+  async sendMessage(recipientId: number, text: string) {
     await this.axiosInstance.post(`sendMessage`, {
       chat_id: recipientId,
-      text: `New post published for blog ${blogName}.`,
+      text: text,
     });
   }
 }

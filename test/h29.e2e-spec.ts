@@ -45,6 +45,7 @@ describe('e2e tests', () => {
     const rawApp = await moduleFixture.createNestApplication();
     app = createApp(rawApp);
     await app.init();
+
     server = await app.getHttpServer();
     blogger = new Blogger(server);
     blogs = new Blogs(server);

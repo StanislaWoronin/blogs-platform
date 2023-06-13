@@ -11,6 +11,7 @@ export interface IQueryBlogsRepository {
   getBlog(blogId: string): Promise<BlogViewModelWithBanStatus | null>;
   blogExist(blogId: string): Promise<string | null>;
   blogBanned(blogId: string): Promise<boolean | null>;
+  getBlogName(blogId: string): Promise<string | null>;
 }
 
 export const IQueryBlogsRepository = 'IQueryBlogsRepository';

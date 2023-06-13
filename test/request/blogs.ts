@@ -11,4 +11,11 @@ export class Blogs {
 
     return { status: response.status, body: response.body };
   }
+
+  async subscribeToBlog(blogId) {
+    const response = await request(this.server)
+        .post(`/blogs/${blogId}/subscription`)
+
+    return { status: response.status, body: response.body };
+  }
 }

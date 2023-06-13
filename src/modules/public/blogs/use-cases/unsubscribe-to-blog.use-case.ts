@@ -35,8 +35,9 @@ export class UnsubscribeToBlogUseCase {
       .where({
         userId,
         blogId,
-      });
-    // response.affected !== 1;
-    return;
+      })
+      .execute();
+
+    return response.affected !== 1;
   }
 }

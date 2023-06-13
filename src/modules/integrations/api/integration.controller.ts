@@ -1,12 +1,19 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { AccessTokenValidationGuard } from '../../../guards/access-token-validation.guard';
-import { User } from '../../../decorator/user.decorator';
-import { UserDBModel } from '../../super-admin/infrastructure/entity/userDB.model';
-import { TelegramAdapter } from '../adapters/telegram.adapter';
+import {Body, Controller, Get, Post, UseGuards} from '@nestjs/common';
+import {User} from '../../../decorator/user.decorator';
+import {UserDBModel} from '../../super-admin/infrastructure/entity/userDB.model';
+import {TelegramAdapter} from '../adapters/telegram.adapter';
+import {CreateNewBotSubscriptionUseCase} from "../use-cases/create-new-bot-subscription.use-case";
+import {AuthBearerGuard} from "../../../guards/auth.bearer.guard";
+import {TelegramMessageDto} from "./dto/telegram-message.dto";
+import {SetUserTelegramIdUseCase} from "../use-cases/set-user-telegram-id.use-case";
 
 @Controller('integrations/telegram')
 export class IntegrationController {
-  constructor(private telegramAdapter: TelegramAdapter) {}
+  constructor(
+      private telegramAdapter: TelegramAdapter,
+      private createNewBotSubscriptionUseCase: CreateNewBotSubscriptionUseCase,
+      private setUserTelegramIdUseCase: SetUserTelegramIdUseCase
+  ) {}
 
   @Post('webhook')
   async webhook() {
@@ -15,12 +22,16 @@ export class IntegrationController {
   }
 
   @Get('auth-bot-link')
-  @UseGuards(AccessTokenValidationGuard)
-  async getPersonalTelegramLink(@User() user: UserDBModel) {}
+  @UseGuards(AuthBearerGuard)
+  async getPersonalTelegramLink(@User() user: UserDBModel) {
+    const inviteLink = await this.createNewBotSubscriptionUseCase.execute(user.id)
+
+    return inviteLink
+  }
 
   @Post()
-  async forTelegramHook(@Body() payload: any) {
-    console.log(payload);
-    return this.telegramAdapter.sendMessage(payload.message.from.id, '123');
+  async forTelegramHook(@Body() payload: TelegramMessageDto) {
+    return await this.setUserTelegramIdUseCase.execute(payload);
   }
 }
+

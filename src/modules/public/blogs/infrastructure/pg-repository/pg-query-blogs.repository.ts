@@ -178,6 +178,16 @@ export class PgQueryBlogsRepository {
     return response[0].isBanned;
   }
 
+  async getBlogName(blogId: string): Promise<string> {
+    const query = `
+      SELECT name
+        FROM blogs
+       WHERE id = $1;
+    `;
+    const result = await this.dataSource.query(query, [blogId])
+    return result.name;
+  }
+
   private getFilter(userId: string | null, query: QueryParametersDto): string {
     const nameFilter = this.searchNameFilter(query);
 

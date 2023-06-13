@@ -10,8 +10,8 @@ import { Users } from '../../../../super-admin/infrastructure/entity/users.entit
 
 @Entity()
 export class BlogSubscription {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => Blogs, (b) => b.subscriptions)
   @JoinColumn()
@@ -23,8 +23,8 @@ export class BlogSubscription {
   user: Users;
   @Column() userId: string;
 
-  // @Column()
-  // isActive = true;
+  @Column()
+  isActive: boolean = true;
 
   @Column()
   createdAt: string = new Date().toISOString();

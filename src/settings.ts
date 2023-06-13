@@ -48,6 +48,7 @@ export const settings = {
   telegram: {
     baseUrl: 'https://api.telegram.org/bot',
     botToken: process.env.BOT_TOKEN,
+    botInviteLink: 'https://t.me/xcempleBot',
   },
   images: {
     wallpaper: {

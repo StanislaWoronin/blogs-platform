@@ -74,8 +74,10 @@ import { SubscribeToBlogUseCase } from './modules/public/blogs/use-cases/subscri
 import { UnsubscribeToBlogUseCase } from './modules/public/blogs/use-cases/unsubscribe-to-blog.use-case';
 import { IntegrationController } from './modules/integrations/api/integration.controller';
 import { TelegramAdapter } from './modules/integrations/adapters/telegram.adapter';
-import { TelegrafModule } from 'nestjs-telegraf';
-import LocalSession = require('telegraf-session-local');
+import {IntegrationRepository} from "./modules/integrations/infrastructure/integration.repository";
+import {TelegramBotSubscriptions} from "./modules/integrations/infrastructure/entity/telegram-bot-subscriptions.entity";
+import {CreateNewBotSubscriptionUseCase} from "./modules/integrations/use-cases/create-new-bot-subscription.use-case";
+import {SetUserTelegramIdUseCase} from "./modules/integrations/use-cases/set-user-telegram-id.use-case";
 
 const controllers = [
   AuthController,
@@ -106,6 +108,7 @@ const entity = [
   PostImage,
   Posts,
   PostReactions,
+  TelegramBotSubscriptions,
   TokenBlackList,
   Security,
   Users,
@@ -113,6 +116,7 @@ const entity = [
 ];
 
 const repositories = [
+  IntegrationRepository,
   {
     provide: IBanInfoRepository,
     useClass: repositorySwitcher(
@@ -254,16 +258,16 @@ const validators = [
 ];
 
 const useCases = [
+  CreateNewBotSubscriptionUseCase,
   CreateUserUseCase,
   CreateUserBySaUseCase,
+  SetUserTelegramIdUseCase,
   SubscribeToBlogUseCase,
   UnsubscribeToBlogUseCase,
   UploadBackgroundWallpaperUseCase,
   UploadBlogMainImageUseCase,
   UploadPostMainImageUseCase,
 ];
-
-const sessions = new LocalSession({ database: 'session_db.json' });
 
 @Module({
   imports: [
@@ -278,10 +282,6 @@ const sessions = new LocalSession({ database: 'session_db.json' });
       ssl: !process.env.LOCAL,
     }),
     TypeOrmModule.forFeature([...entity]),
-    // TelegrafModule.forRoot({
-    //   middlewares: [sessions.middleware()],
-    //   token: settings.telegram.botToken,
-    // }),
 
     // ThrottlerModule.forRoot({
     //   ttl: Number(settings.throttler.CONNECTION_TIME_LIMIT),
