@@ -184,7 +184,7 @@ export class PgQueryBlogsRepository {
         FROM blogs
        WHERE id = $1;
     `;
-    const result = await this.dataSource.query(query, [blogId]);
+    const [result] = await this.dataSource.query(query, [blogId]);
     return result.name;
   }
 

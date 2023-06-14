@@ -83,7 +83,6 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @User() user: UserDBModel,
   ) {
-    console.log('controller');
     return await this.subscribeToBlogUseCase.execute(user.id, blogId);
   }
 

@@ -4,6 +4,7 @@ export interface ITestingRepository {
   getUserPassword(userId: string): Promise<{ passwordHash: string }>;
   makeExpired(userId: string, expirationDate: string): Promise<boolean>;
   deleteAll(): Promise<boolean>;
+  setUserTelegramId(authorizationCode: string, telegramId: number)
 }
 
 export const ITestingRepository = 'ITestingRepository';

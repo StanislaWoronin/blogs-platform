@@ -12,10 +12,10 @@ export class Blogs {
     return { status: response.status, body: response.body };
   }
 
-  async subscribeToBlog(blogId) {
-    const response = await request(this.server).post(
-      `/blogs/${blogId}/subscription`,
-    );
+  async subscribeToBlog(blogId: string, accessToken?: string) {
+    const response = await request(this.server)
+        .post(`/blogs/${blogId}/subscription`)
+        .auth(accessToken, { type: 'bearer' });
 
     return { status: response.status, body: response.body };
   }

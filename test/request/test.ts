@@ -25,10 +25,6 @@ export class TEST {
     return new Comments(this.server);
   }
 
-  factories() {
-    return new Factories(this.server, this.blogger());
-  }
-
   posts() {
     return new Posts(this.server);
   }
@@ -43,5 +39,15 @@ export class TEST {
 
   integration() {
     return new Integration(this.server);
+  }
+
+  factories() {
+    return new Factories(
+        this.server,
+        this.blogger(),
+        this.integration(),
+        this.testing(),
+        this.blogs()
+    );
   }
 }

@@ -20,4 +20,13 @@ export class Testing {
 
     return response.body;
   }
+
+  async setUserTelegramId(link: string) {
+    const inviteLink = link.split('=')[1]
+    const telegramId = '313184077'
+
+    await request(this.server)
+        .put(`/testing/set-telegram-id/${inviteLink}/${telegramId}`)
+    return
+  }
 }

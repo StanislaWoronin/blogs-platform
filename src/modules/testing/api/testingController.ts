@@ -63,6 +63,11 @@ export class TestingController {
     return await this.testingRepository.makeExpired(userId, expirationDate);
   }
 
+  @Put('set-telegram-id/:code/:id')
+  async setUserTelegramId(@Param('code') code: string, @Param('id') telegramId: number) {
+    return await this.testingRepository.setUserTelegramId(code, telegramId)
+  }
+
   @Delete('all-data')
   @HttpCode(204)
   async deleteAll(): Promise<boolean> {

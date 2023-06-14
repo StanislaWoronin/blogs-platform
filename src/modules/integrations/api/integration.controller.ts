@@ -33,6 +33,7 @@ export class IntegrationController {
 
   @Post()
   async forTelegramHook(@Body() payload: TelegramMessageDto) {
+
     return await this.setUserTelegramIdUseCase.execute(payload);
   }
 }

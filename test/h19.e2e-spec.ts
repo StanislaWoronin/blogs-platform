@@ -460,7 +460,7 @@ describe('e2e tests', () => {
           post.id,
           1,
         );
-        console.log(justUser.user.id);
+
         expect.setState({
           commentOwner: commentOwner.user,
           ownerToken: commentOwner.accessToken,

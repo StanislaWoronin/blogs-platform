@@ -60,7 +60,7 @@ export class PostsService {
     const text = `New post published for ${blogExist} blog!`;
 
     for (const id of telegramIds) {
-      this.telegramAdapter.sendMessage(id, text);
+      this.telegramAdapter.sendMessage(id.telegramId, text);
     }
 
     return toCreatedPostsViewModel(createdPost);

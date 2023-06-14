@@ -19,18 +19,27 @@ import { CreatedComment } from '../../src/modules/public/comments/infrastructure
 import { CommentDTO } from '../../src/modules/public/comments/api/dto/commentDTO';
 import { ImageStatus } from '../images/image-status.enum';
 import { Blogger } from '../request/blogger';
+import {Integration} from "../request/integration";
+import {Testing} from "../request/testing";
+import {Blogs} from "../request/blogs";
 
 export class Factories {
-  constructor(private readonly server: any, private blogger: Blogger) {}
+  constructor(
+      private readonly server: any,
+      private blogger: Blogger,
+      private integration: Integration,
+      private testing: Testing,
+      private blogs: Blogs
+  ) {}
 
-  async createUsers(usersCount: number): Promise<UserViewModelWithBanInfo[]> {
+  async createUsers(usersCount: number, startFrom: number = 0): Promise<UserViewModelWithBanInfo[]> {
     const users = [];
 
-    for (let i = 0; i < usersCount; i++) {
+    for (let i = startFrom; i < usersCount + startFrom; i++) {
       const inputUserData: UserDto = {
         login: `user${i}`,
         email: `somemail${i}@email.com`,
-        password: `password${i}`,
+        password: `password`,
       };
 
       const response = await request(this.server)
@@ -46,34 +55,35 @@ export class Factories {
     return users;
   }
 
-  async createAndLoginUsers(userCount: number): Promise<
+  async createAndLoginUsers(userCount: number, startFrom: number = 0): Promise<
     {
       user: UserViewModelWithBanInfo;
       accessToken: string;
       refreshToken: string;
     }[]
   > {
-    const users = await this.createUsers(userCount);
+    const users = await this.createUsers(userCount, startFrom);
 
-    const tokens = [];
-    for (let i = 0; i < userCount; i++) {
+    const tokens = []
+    for (let user of users) {
       const userLoginData = {
-        loginOrEmail: users[i].login,
-        password: `password${i}`,
+        loginOrEmail: user.login,
+        password: `password`,
       };
 
       const response = await request(this.server)
-        .post(endpoints.authController.login)
-        .set('User-Agent', faker.internet.userAgent())
-        .send(userLoginData);
+          .post(endpoints.authController.login)
+          .set('User-Agent', faker.internet.userAgent())
+          .send(userLoginData);
 
       const accessToken = response.body.accessToken;
       const refreshToken = response.headers['set-cookie'][0]
-        .split(';')[0]
-        .split('=')[1];
+          .split(';')[0]
+          .split('=')[1];
 
-      tokens.push({ user: users[i], accessToken, refreshToken });
+      tokens.push({user: user, accessToken, refreshToken});
     }
+
     return tokens;
   }
 
@@ -87,7 +97,7 @@ export class Factories {
 
     const userLoginData = {
       loginOrEmail: user.login,
-      password: `password0`,
+      password: `password`,
     };
 
     for (let i = 0; i < loginCount; i++) {
@@ -107,10 +117,10 @@ export class Factories {
     return userWithTokens;
   }
 
-  async createBlogs(accessToken: string, blogsCount: number) {
+  async createBlogs(accessToken: string, blogsCount: number, startFrom: number = 0) {
     const blogs = [];
 
-    for (let i = 0; i < blogsCount; i++) {
+    for (let i = startFrom; i < blogsCount + startFrom; i++) {
       const inputBlogData: BlogDto = {
         name: `name${i}`,
         description: `description${i}`,
@@ -218,5 +228,19 @@ export class Factories {
     }
 
     return comment;
+  }
+
+  async createMembership(blogId, membershipCount: number, startFrom: number = 1): Promise<UserViewModelWithBanInfo[]> {
+    const membership = []
+    for (let i = 0; i < membershipCount; i++) {
+      const [subscriber] = await this.createAndLoginUsers(1, startFrom + i)
+
+      const inviteTelegramLink = await this.integration.getTelegramInviteLink(subscriber.accessToken);
+
+      await this.testing.setUserTelegramId(inviteTelegramLink.body.link)
+      await this.blogs.subscribeToBlog(blogId, subscriber.accessToken)
+      membership.push(subscriber)
+    }
+    return membership
   }
 }

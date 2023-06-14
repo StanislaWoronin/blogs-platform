@@ -140,4 +140,12 @@ export class Blogger {
 
     return { status: response.status, body: response.body };
   }
+
+  async getMembership(blogId: string, accessToken?: string) {
+    const response = await request(this.server)
+        .get(`/blogger/users/blogs/${blogId}/payments`)
+        .auth(accessToken, { type: 'bearer' });
+
+    return { status: response.status, errorsMessages: response.body };
+  }
 }

@@ -24,7 +24,7 @@ export class BlogSubscription {
   @Column() userId: string;
 
   @Column()
-  isActive = true;
+  isActive: boolean = true;
 
   @Column()
   createdAt: string = new Date().toISOString();

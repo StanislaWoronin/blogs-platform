@@ -43,7 +43,6 @@ export class OrmSecurityRepository {
     userId: string,
     deviceId: string,
   ): Promise<boolean> {
-    console.log(userId, deviceId);
     const builder = this.dataSource
       .createQueryBuilder()
       .delete()
@@ -63,7 +62,7 @@ export class OrmSecurityRepository {
       .where('deviceId = :id', { id: deviceId })
       .execute();
 
-    console.log(result);
+
     if (result.affected != 1) {
       return false;
     }
