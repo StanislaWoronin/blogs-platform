@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TelegramBotSubscriptions } from './entity/telegram-bot-subscriptions.entity';
-import {SubscribeToBlogUseCase} from "../../public/blogs/use-cases/subscribe-to-blog.use-case";
-import {BlogSubscription} from "../../public/blogs/infrastructure/entity/blog-subscription.entity";
+import { SubscribeToBlogUseCase } from '../../public/blogs/use-cases/subscribe-to-blog.use-case';
+import { BlogSubscription } from '../../public/blogs/infrastructure/entity/blog-subscription.entity';
 
 @Injectable()
 export class IntegrationRepository {
@@ -44,8 +44,11 @@ export class IntegrationRepository {
     return await this.dataSource.query(query, [blogId]);
   }
 
-  async blogAndSubscriptionExists(userId: string, blogId: string): Promise<isExists> {
-      const query = `
+  async blogAndSubscriptionExists(
+    userId: string,
+    blogId: string,
+  ): Promise<isExists> {
+    const query = `
         SELECT
              CASE
                WHEN EXISTS (
@@ -64,23 +67,20 @@ export class IntegrationRepository {
         `;
     // в квери выше нужна инверсия значений, если не сделать ее,
     // то при отсутствии подписки мы не завершим функцию
-      const result = await this.dataSource.query(
-          query,
-          [userId, blogId],
-      );
+    const result = await this.dataSource.query(query, [userId, blogId]);
 
-      return result[0]
+    return result[0];
   }
 
   async subscribeToBlog(blogSubscription: BlogSubscription) {
     const subscribe = await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(BlogSubscription)
-        .values(blogSubscription)
-        .execute();
+      .createQueryBuilder()
+      .insert()
+      .into(BlogSubscription)
+      .values(blogSubscription)
+      .execute();
 
-    return subscribe
+    return subscribe;
   }
 }
 

@@ -1,7 +1,7 @@
-import {Injectable} from '@nestjs/common';
-import {InjectDataSource} from '@nestjs/typeorm';
-import {DataSource} from 'typeorm';
-import {TelegramBotSubscriptions} from "../../../integrations/infrastructure/entity/telegram-bot-subscriptions.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { TelegramBotSubscriptions } from '../../../integrations/infrastructure/entity/telegram-bot-subscriptions.entity';
 
 @Injectable()
 export class OrmTestingRepository {
@@ -63,12 +63,12 @@ export class OrmTestingRepository {
 
   async setUserTelegramId(authorizationCode: string, telegramId: number) {
     return await this.dataSource
-        .getRepository(TelegramBotSubscriptions)
-        .createQueryBuilder()
-        .update()
-        .set({telegramId})
-        .where({authorizationCode})
-        .execute()
+      .getRepository(TelegramBotSubscriptions)
+      .createQueryBuilder()
+      .update()
+      .set({ telegramId })
+      .where({ authorizationCode })
+      .execute();
   }
 
   async deleteAll(): Promise<boolean> {

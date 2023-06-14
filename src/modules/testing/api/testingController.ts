@@ -64,8 +64,11 @@ export class TestingController {
   }
 
   @Put('set-telegram-id/:code/:id')
-  async setUserTelegramId(@Param('code') code: string, @Param('id') telegramId: number) {
-    return await this.testingRepository.setUserTelegramId(code, telegramId)
+  async setUserTelegramId(
+    @Param('code') code: string,
+    @Param('id') telegramId: number,
+  ) {
+    return await this.testingRepository.setUserTelegramId(code, telegramId);
   }
 
   @Delete('all-data')

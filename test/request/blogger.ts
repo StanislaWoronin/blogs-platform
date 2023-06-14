@@ -143,8 +143,8 @@ export class Blogger {
 
   async getMembership(blogId: string, accessToken?: string) {
     const response = await request(this.server)
-        .get(`/blogger/users/blogs/${blogId}/payments`)
-        .auth(accessToken, { type: 'bearer' });
+      .get(`/blogger/users/blogs/${blogId}/payments`)
+      .auth(accessToken, { type: 'bearer' });
 
     return { status: response.status, errorsMessages: response.body };
   }

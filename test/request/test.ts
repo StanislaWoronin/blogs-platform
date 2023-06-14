@@ -43,11 +43,11 @@ export class TEST {
 
   factories() {
     return new Factories(
-        this.server,
-        this.blogger(),
-        this.integration(),
-        this.testing(),
-        this.blogs()
+      this.server,
+      this.blogger(),
+      this.integration(),
+      this.testing(),
+      this.blogs(),
     );
   }
 }

@@ -74,39 +74,45 @@ describe('e2e tests', () => {
     });
 
     it('Create data', async () => {
-      const [blogger, subscriber] = await test.factories().createAndLoginUsers(2)
-      const [blog] = await test.factories().createBlogs(blogger.accessToken,1);
+      const [blogger, subscriber] = await test
+        .factories()
+        .createAndLoginUsers(2);
+      const [blog] = await test.factories().createBlogs(blogger.accessToken, 1);
       const inviteTelegramLink = await test
-          .integration()
-          .getTelegramInviteLink(subscriber.accessToken);
+        .integration()
+        .getTelegramInviteLink(subscriber.accessToken);
 
-      await test.testing().setUserTelegramId(inviteTelegramLink.body.link)
+      await test.testing().setUserTelegramId(inviteTelegramLink.body.link);
 
       expect.setState({
         blogger,
         subscriber,
-        blog
-      })
+        blog,
+      });
     });
 
     it('404', async () => {
-      const {subscriber} = expect.getState()
+      const { subscriber } = expect.getState();
       const randomBlogId = randomUUID();
-      const response = await test.blogs().subscribeToBlog(randomBlogId, subscriber.accessToken);
-      expect(response.status).toBe(HttpStatus.NOT_FOUND)
+      const response = await test
+        .blogs()
+        .subscribeToBlog(randomBlogId, subscriber.accessToken);
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
     });
 
     it('401', async () => {
       const randomBlogId = randomUUID();
       const response = await test.blogs().subscribeToBlog(randomBlogId);
-      expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
     });
 
     it('204', async () => {
-      const {subscriber, blog} = expect.getState()
+      const { subscriber, blog } = expect.getState();
 
-      const response = await test.blogs().subscribeToBlog(blog.id, subscriber.accessToken);
-      expect(response.status).toBe(HttpStatus.NO_CONTENT)
+      const response = await test
+        .blogs()
+        .subscribeToBlog(blog.id, subscriber.accessToken);
+      expect(response.status).toBe(HttpStatus.NO_CONTENT);
     });
   });
 
@@ -116,25 +122,27 @@ describe('e2e tests', () => {
     });
 
     it('Create data', async () => {
-      const [blogger, subscriber] = await test.factories().createAndLoginUsers(2)
-      const [blog] = await test.factories().createBlogs(blogger.accessToken,1);
+      const [blogger, subscriber] = await test
+        .factories()
+        .createAndLoginUsers(2);
+      const [blog] = await test.factories().createBlogs(blogger.accessToken, 1);
       const inviteTelegramLink = await test
-          .integration()
-          .getTelegramInviteLink(subscriber.accessToken);
-      await test.testing().setUserTelegramId(inviteTelegramLink.body.link)
+        .integration()
+        .getTelegramInviteLink(subscriber.accessToken);
+      await test.testing().setUserTelegramId(inviteTelegramLink.body.link);
       await test.blogs().subscribeToBlog(blog.id, subscriber.accessToken);
 
       expect.setState({
         bloggerToken: blogger.accessToken,
-        blogId: blog.id
-      })
+        blogId: blog.id,
+      });
     });
 
     it('Blogger create blog', async () => {
-      const {bloggerToken, blogId} = expect.getState()
-      await test.factories().createPostsForBlog(bloggerToken, blogId,1)
-    })
-  })
+      const { bloggerToken, blogId } = expect.getState();
+      await test.factories().createPostsForBlog(bloggerToken, blogId, 1);
+    });
+  });
 
   describe('Get membership', () => {
     it('Clear data base', async () => {
@@ -142,35 +150,49 @@ describe('e2e tests', () => {
     });
 
     it('Create data', async () => {
-      const [fistBlogger, secondBlogger] = await test.factories().createAndLoginUsers(2)
-      const [fistBlogFB, secondBlogFB] = await test.factories().createBlogs(fistBlogger.accessToken,2);
-      const [fistBlogSB, secondBlogSB] = await test.factories().createBlogs(secondBlogger.accessToken,2, 2);
-      const membershipCount = 5
-      const membership = await test.factories().createMembership(fistBlogFB.id, membershipCount, 2)
+      const [fistBlogger, secondBlogger] = await test
+        .factories()
+        .createAndLoginUsers(2);
+      const [fistBlogFB, secondBlogFB] = await test
+        .factories()
+        .createBlogs(fistBlogger.accessToken, 2);
+      const [fistBlogSB, secondBlogSB] = await test
+        .factories()
+        .createBlogs(secondBlogger.accessToken, 2, 2);
+      const membershipCount = 5;
+      const membership = await test
+        .factories()
+        .createMembership(fistBlogFB.id, membershipCount, 2);
       // наполняем таблицу "мусорными данными"
-      await test.factories().createMembership(secondBlogFB.id, 1, membershipCount + 2)
-      await test.factories().createMembership(fistBlogSB.id, 1, membershipCount + 3)
-      await test.factories().createMembership(secondBlogSB.id, 1, membershipCount + 4)
+      await test
+        .factories()
+        .createMembership(secondBlogFB.id, 1, membershipCount + 2);
+      await test
+        .factories()
+        .createMembership(fistBlogSB.id, 1, membershipCount + 3);
+      await test
+        .factories()
+        .createMembership(secondBlogSB.id, 1, membershipCount + 4);
 
       expect.setState({
         accessToken: fistBlogger.accessToken,
         blogId: fistBlogFB.id,
-        membership
-      })
-    })
+        membership,
+      });
+    });
 
     it('401', async () => {
-      const {blogId} = expect.getState()
+      const { blogId } = expect.getState();
 
-      const response = await test.blogger().getMembership(blogId)
-      expect(response.status).toBe(HttpStatus.UNAUTHORIZED)
-    })
+      const response = await test.blogger().getMembership(blogId);
+      expect(response.status).toBe(HttpStatus.UNAUTHORIZED);
+    });
 
     it('Blogger should get page with membership', async () => {
-      const {accessToken, blogId} = expect.getState()
+      const { accessToken, blogId } = expect.getState();
 
-      const response = await test.blogger().getMembership(blogId, accessToken)
-      expect(response.status).toBe(HttpStatus.OK)
-    })
-  })
+      const response = await test.blogger().getMembership(blogId, accessToken);
+      expect(response.status).toBe(HttpStatus.OK);
+    });
+  });
 });

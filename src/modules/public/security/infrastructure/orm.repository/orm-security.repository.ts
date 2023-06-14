@@ -62,7 +62,6 @@ export class OrmSecurityRepository {
       .where('deviceId = :id', { id: deviceId })
       .execute();
 
-
     if (result.affected != 1) {
       return false;
     }

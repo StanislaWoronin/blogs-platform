@@ -19,20 +19,23 @@ import { CreatedComment } from '../../src/modules/public/comments/infrastructure
 import { CommentDTO } from '../../src/modules/public/comments/api/dto/commentDTO';
 import { ImageStatus } from '../images/image-status.enum';
 import { Blogger } from '../request/blogger';
-import {Integration} from "../request/integration";
-import {Testing} from "../request/testing";
-import {Blogs} from "../request/blogs";
+import { Integration } from '../request/integration';
+import { Testing } from '../request/testing';
+import { Blogs } from '../request/blogs';
 
 export class Factories {
   constructor(
-      private readonly server: any,
-      private blogger: Blogger,
-      private integration: Integration,
-      private testing: Testing,
-      private blogs: Blogs
+    private readonly server: any,
+    private blogger: Blogger,
+    private integration: Integration,
+    private testing: Testing,
+    private blogs: Blogs,
   ) {}
 
-  async createUsers(usersCount: number, startFrom: number = 0): Promise<UserViewModelWithBanInfo[]> {
+  async createUsers(
+    usersCount: number,
+    startFrom = 0,
+  ): Promise<UserViewModelWithBanInfo[]> {
     const users = [];
 
     for (let i = startFrom; i < usersCount + startFrom; i++) {
@@ -55,7 +58,10 @@ export class Factories {
     return users;
   }
 
-  async createAndLoginUsers(userCount: number, startFrom: number = 0): Promise<
+  async createAndLoginUsers(
+    userCount: number,
+    startFrom = 0,
+  ): Promise<
     {
       user: UserViewModelWithBanInfo;
       accessToken: string;
@@ -64,24 +70,24 @@ export class Factories {
   > {
     const users = await this.createUsers(userCount, startFrom);
 
-    const tokens = []
-    for (let user of users) {
+    const tokens = [];
+    for (const user of users) {
       const userLoginData = {
         loginOrEmail: user.login,
         password: `password`,
       };
 
       const response = await request(this.server)
-          .post(endpoints.authController.login)
-          .set('User-Agent', faker.internet.userAgent())
-          .send(userLoginData);
+        .post(endpoints.authController.login)
+        .set('User-Agent', faker.internet.userAgent())
+        .send(userLoginData);
 
       const accessToken = response.body.accessToken;
       const refreshToken = response.headers['set-cookie'][0]
-          .split(';')[0]
-          .split('=')[1];
+        .split(';')[0]
+        .split('=')[1];
 
-      tokens.push({user: user, accessToken, refreshToken});
+      tokens.push({ user: user, accessToken, refreshToken });
     }
 
     return tokens;
@@ -117,7 +123,7 @@ export class Factories {
     return userWithTokens;
   }
 
-  async createBlogs(accessToken: string, blogsCount: number, startFrom: number = 0) {
+  async createBlogs(accessToken: string, blogsCount: number, startFrom = 0) {
     const blogs = [];
 
     for (let i = startFrom; i < blogsCount + startFrom; i++) {
@@ -230,17 +236,23 @@ export class Factories {
     return comment;
   }
 
-  async createMembership(blogId, membershipCount: number, startFrom: number = 1): Promise<UserViewModelWithBanInfo[]> {
-    const membership = []
+  async createMembership(
+    blogId,
+    membershipCount: number,
+    startFrom = 1,
+  ): Promise<UserViewModelWithBanInfo[]> {
+    const membership = [];
     for (let i = 0; i < membershipCount; i++) {
-      const [subscriber] = await this.createAndLoginUsers(1, startFrom + i)
+      const [subscriber] = await this.createAndLoginUsers(1, startFrom + i);
 
-      const inviteTelegramLink = await this.integration.getTelegramInviteLink(subscriber.accessToken);
+      const inviteTelegramLink = await this.integration.getTelegramInviteLink(
+        subscriber.accessToken,
+      );
 
-      await this.testing.setUserTelegramId(inviteTelegramLink.body.link)
-      await this.blogs.subscribeToBlog(blogId, subscriber.accessToken)
-      membership.push(subscriber)
+      await this.testing.setUserTelegramId(inviteTelegramLink.body.link);
+      await this.blogs.subscribeToBlog(blogId, subscriber.accessToken);
+      membership.push(subscriber);
     }
-    return membership
+    return membership;
   }
 }
