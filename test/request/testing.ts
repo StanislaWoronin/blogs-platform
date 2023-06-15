@@ -5,7 +5,7 @@ import { endpoints } from '../helper/routing';
 export class Testing {
   constructor(private readonly server: any) {}
 
-  async clearDb() {
+  async clearDb(): Promise<number> {
     const response = await request(this.server).delete(
       endpoints.testingController.allData,
     );

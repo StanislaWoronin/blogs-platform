@@ -33,7 +33,7 @@ export class TelegramAdapter implements OnModuleInit {
 
     const res = await this.setWebhook(`${baseUrl}/integrations/telegram`);
     if (res.status === HttpStatus.OK) {
-      this.logger.verbose(`Ngrok connection is success. App url: ${baseUrl}.`);
+      this.logger.verbose(`Ngrok connection is success. App url: ${baseUrl}`);
     }
   }
 

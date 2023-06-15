@@ -66,7 +66,8 @@ export class ViewBlogModel {
       description: blog.description,
       websiteUrl: blog.websiteUrl,
       createdAt: blog.createdAt,
-      isMembership: blog.isMembership,
+      currentUserSubscriptionStatus: blog.currentUserSubscriptionStatus,
+      subscribersCount: blog.subscribersCount,
       images: BlogImagesInfo.relativeToAbsoluteUrl(blog.images),
     };
   }

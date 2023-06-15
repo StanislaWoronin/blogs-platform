@@ -7,6 +7,9 @@ import { createApp } from '../src/helpers/create-app';
 import { TEST } from './request/test';
 import { settings } from '../src/settings';
 import { randomUUID } from 'crypto';
+import { monthsBetweenDates } from '../src/helper.functions';
+import { Currency } from '../src/modules/blogger/api/views/currency';
+import {SubscriptionStatus} from "../src/modules/integrations/subscription-status.enum";
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -146,7 +149,7 @@ describe('e2e tests', () => {
 
   describe('Get membership', () => {
     it('Clear data base', async () => {
-      await test.testing().clearDb();
+      const res = await test.testing().clearDb();
     });
 
     it('Create data', async () => {
@@ -176,6 +179,7 @@ describe('e2e tests', () => {
 
       expect.setState({
         accessToken: fistBlogger.accessToken,
+        blog: fistBlogFB,
         blogId: fistBlogFB.id,
         membership,
       });
@@ -189,10 +193,111 @@ describe('e2e tests', () => {
     });
 
     it('Blogger should get page with membership', async () => {
-      const { accessToken, blogId } = expect.getState();
-
+      const { accessToken, blog, blogId, membership } = expect.getState();
       const response = await test.blogger().getMembership(blogId, accessToken);
       expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toStrictEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 5,
+        items: [
+          {
+            userId: membership[4].user.id,
+            userLogin: membership[4].user.login,
+            blogId: blog.id,
+            blogTitle: blog.name,
+            membershipPlan: {
+              id: expect.any(String),
+              monthsCount: 0,
+              price: 0,
+              currency: Currency.BYN,
+            },
+          },
+          {
+            userId: membership[3].user.id,
+            userLogin: membership[3].user.login,
+            blogId: blog.id,
+            blogTitle: blog.name,
+            membershipPlan: {
+              id: expect.any(String),
+              monthsCount: 0,
+              price: 0,
+              currency: Currency.BYN,
+            },
+          },
+          {
+            userId: membership[2].user.id,
+            userLogin: membership[2].user.login,
+            blogId: blog.id,
+            blogTitle: blog.name,
+            membershipPlan: {
+              id: expect.any(String),
+              monthsCount: 0,
+              price: 0,
+              currency: Currency.BYN,
+            },
+          },
+          {
+            userId: membership[1].user.id,
+            userLogin: membership[1].user.login,
+            blogId: blog.id,
+            blogTitle: blog.name,
+            membershipPlan: {
+              id: expect.any(String),
+              monthsCount: 0,
+              price: 0,
+              currency: Currency.BYN,
+            },
+          },
+          {
+            userId: membership[0].user.id,
+            userLogin: membership[0].user.login,
+            blogId: blog.id,
+            blogTitle: blog.name,
+            membershipPlan: {
+              id: expect.any(String),
+              monthsCount: 0,
+              price: 0,
+              currency: Currency.BYN,
+            },
+          },
+        ],
+      });
     });
+
+    it('Public get blog by id by subscriber', async () => {
+      const { blog, blogId, membership } = expect.getState();
+
+      const response = await test.blogs().getBlogById(blogId, membership[0].accessToken)
+      expect(response.status).toBe(HttpStatus.OK)
+      expect(response.body).toStrictEqual({
+        id: blog.id,
+        name: blog.name,
+        description: blog.description,
+        websiteUrl: blog.websiteUrl,
+        createdAt: blog.createdAt,
+        images: blog.images,
+        currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
+        subscribersCount: 5,
+      })
+    })
+
+    it('Public get blog by id unauthorized user', async () => {
+      const { blog, blogId } = expect.getState();
+
+      const response = await test.blogs().getBlogById(blogId)
+      expect(response.status).toBe(HttpStatus.OK)
+      expect(response.body).toStrictEqual({
+        id: blog.id,
+        name: blog.name,
+        description: blog.description,
+        websiteUrl: blog.websiteUrl,
+        createdAt: blog.createdAt,
+        images: blog.images,
+        currentUserSubscriptionStatus: SubscriptionStatus.None,
+        subscribersCount: 5,
+      })
+    })
   });
 });

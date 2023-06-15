@@ -9,6 +9,9 @@ export enum SortParametersModel {
   BlogName = 'blogName',
   Login = 'login',
   Email = 'email',
+  UserId = 'userId',
+  UserLogin = 'userLogin',
+  BlogTitle = 'blogTitle',
 }
 
 export enum SortDirections {

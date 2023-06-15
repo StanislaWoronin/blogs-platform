@@ -45,8 +45,10 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getBlogById(@Param('id') blogId: string) {
-    const blog = await this.queryBlogsRepository.getBlog(blogId);
+  @UseGuards(AccessTokenValidationGuard)
+  async getBlogById(@Param('id') blogId: string,  @User() user: UserDBModel) {
+    console.log('controller')
+    const blog = await this.queryBlogsRepository.getBlog(blogId, user.id);
 
     if (!blog) {
       throw new NotFoundException();

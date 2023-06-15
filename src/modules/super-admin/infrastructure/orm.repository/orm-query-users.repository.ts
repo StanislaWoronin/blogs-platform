@@ -152,23 +152,24 @@ export class OrmQueryUsersRepository {
              (SELECT login AS "userLogin" FROM users WHERE id = "userId"),
              (SELECT name AS "blogTitle" FROM blogs WHERE id = "blogId") 
         FROM blog_subscription 
-       WHERE "blogId" = $1;
+       WHERE "blogId" = $1
        ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-       LIMIT $1 OFFSET ${giveSkipNumber(
-         queryDto.pageNumber,
-         queryDto.pageSize,
-       )};
+       LIMIT ${queryDto.pageSize} OFFSET ${giveSkipNumber(
+      queryDto.pageNumber,
+      queryDto.pageSize,
+    )};
     `;
     const _membership = await this.dataSource.query(query, [blogId]);
+
     const membership = _membership.map((m) => {
       return {
-        userId: _membership.userId,
-        userLogin: _membership.userLogin,
-        blogId: _membership.blogId,
-        blogTitle: _membership.blogTitle,
+        userId: m.userId,
+        userLogin: m.userLogin,
+        blogId: m.blogId,
+        blogTitle: m.blogTitle,
         membershipPlan: {
-          id: _membership.id,
-          monthsCount: monthsBetweenDates(_membership.createdAt),
+          id: m.id,
+          monthsCount: 0, //monthsBetweenDates(_membership.createdAt),
           price: 0,
           currency: Currency.BYN,
         },

@@ -8,7 +8,7 @@ export interface IQueryBlogsRepository {
     userId?: string,
   ): Promise<ContentPageModel>;
   saGetBlogs(queryDto: QueryParametersDto): Promise<ContentPageModel>;
-  getBlog(blogId: string): Promise<BlogViewModelWithBanStatus | null>;
+  getBlog(blogId: string, userId?: string);
   blogExist(blogId: string): Promise<string | null>;
   blogBanned(blogId: string): Promise<boolean | null>;
   getBlogName(blogId: string): Promise<string | null>;

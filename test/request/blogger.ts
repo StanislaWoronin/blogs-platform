@@ -146,6 +146,6 @@ export class Blogger {
       .get(`/blogger/users/blogs/${blogId}/payments`)
       .auth(accessToken, { type: 'bearer' });
 
-    return { status: response.status, errorsMessages: response.body };
+    return { status: response.status, body: response.body };
   }
 }

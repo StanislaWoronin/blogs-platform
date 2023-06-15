@@ -4,10 +4,17 @@ import { endpoints, getUrlWithId } from '../helper/routing';
 export class Blogs {
   constructor(private readonly server: any) {}
 
-  async getBlogById(blogId: string) {
+  async getBlogById(blogId: string, accessToken?: string) {
     const url = getUrlWithId(endpoints.blogController, blogId);
-
-    const response = await request(this.server).get(url);
+    let response
+    if (!accessToken) {
+      response = await request(this.server)
+          .get(url)
+    } else {
+      response = await request(this.server)
+          .get(url)
+          .auth(accessToken, { type: 'bearer' });
+    }
 
     return { status: response.status, body: response.body };
   }

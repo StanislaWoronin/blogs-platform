@@ -1,12 +1,7 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Blogs } from './blogs.entity';
-import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
+import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,} from 'typeorm';
+import {Blogs} from './blogs.entity';
+import {Users} from '../../../../super-admin/infrastructure/entity/users.entity';
+import {SubscriptionStatus} from "../../../../integrations/subscription-status.enum";
 
 @Entity()
 export class BlogSubscription {
@@ -24,7 +19,7 @@ export class BlogSubscription {
   @Column() userId: string;
 
   @Column()
-  isActive = true;
+  isActive: SubscriptionStatus = SubscriptionStatus.Subscribed;
 
   @Column()
   createdAt: string = new Date().toISOString();
