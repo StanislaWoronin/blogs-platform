@@ -121,7 +121,6 @@ export class PgQueryBlogsRepository {
   }
 
   async getBlog(blogId: string, userId?: string) {
-    console.log({blogId}, {userId})
     let filter = `SELECT '${SubscriptionStatus.None}'`
     if (userId) {
       filter = `
@@ -139,7 +138,7 @@ export class PgQueryBlogsRepository {
       `
     }
     const query = `
-      SELECT id, name, description, "websiteUrl", "createdAt",
+      SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
             (
               SELECT JSON_BUILD_OBJECT(
                 'wallpaper', (

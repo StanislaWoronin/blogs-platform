@@ -65,6 +65,7 @@ export class ViewBlogModel {
       name: blog.name,
       description: blog.description,
       websiteUrl: blog.websiteUrl,
+      isMembership: blog.isMembership,
       createdAt: blog.createdAt,
       currentUserSubscriptionStatus: blog.currentUserSubscriptionStatus,
       subscribersCount: blog.subscribersCount,
