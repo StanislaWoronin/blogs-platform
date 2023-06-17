@@ -9,6 +9,7 @@ import { settings } from '../src/settings';
 import { randomUUID } from 'crypto';
 import { Currency } from '../src/modules/blogger/api/views/currency';
 import { SubscriptionStatus } from '../src/modules/integrations/subscription-status.enum';
+import { sleep } from './helper/helpers';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -524,8 +525,11 @@ describe('e2e tests', () => {
         .createAndLoginUsers(3);
       const [blog] = await test.factories().createBlogs(blogger.accessToken, 1);
       await test.blogs().subscribeToBlog(blog.id, firstUser.accessToken);
-
+      console.log({ blogger: blogger.accessToken });
+      console.log({ firstUser: firstUser.accessToken });
+      console.log({ blogId: blog.id });
       expect.setState({
+        blogger,
         firstUser,
         secondUser,
         blog: blog,
@@ -539,6 +543,26 @@ describe('e2e tests', () => {
         .getTelegramInviteLink(firstUser.accessToken);
       expect(response.status).toBe(HttpStatus.OK);
       console.log(response.body);
+    });
+  });
+
+  describe('De', () => {
+    it('it', async () => {
+      const AT =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NDM0NDliNi0xNzE5LTQwOTAtOGI3Ni05YjJjNjg2NWZjMGYiLCJkZXZpY2VJZCI6ImE4NmIwN2ZjLWY4MzMtNGU0YS04NTI1LWE0NzEwNzc4Y2I0NCIsImlhdCI6MTY4NzAzNzU4MiwiZXhwIjoxMTY4NzAzNzU4Mn0.ymf9tVGTAYtxghribFwysEqtYZiFl9J1MdFF_aom-O8';
+      const blogId = 'a9baf639-5a37-4c42-8ee9-5a65677dd4d6';
+      const [blog] = await test.factories().createPostsForBlog(AT, blogId, 1);
+      console.log(blog);
+    });
+  });
+
+  describe('dsa', () => {
+    it('wqe', async () => {
+      const AT =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MWM2Y2VkOS1lMDU2LTRjMjctYTExNC0wNGFiMjg5YWRkYWYiLCJkZXZpY2VJZCI6ImZjYjI3ZGY0LWQwY2YtNDc5Ny1hMTM4LTIwYjQ5OGNjNGM1YSIsImlhdCI6MTY4NzAzNzU4MiwiZXhwIjoxMTY4NzAzNzU4Mn0.I5S1pCC2eAOH1M5T1xkJlGHighNKq33WiJJOWBFT0Ao';
+      const blogId = 'a9baf639-5a37-4c42-8ee9-5a65677dd4d6';
+      const res = await test.blogs().updateSubscribeStatus(blogId, AT);
+      console.log(res);
     });
   });
 });

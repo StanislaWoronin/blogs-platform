@@ -25,25 +25,33 @@ export class IntegrationRepository {
   }
 
   async saveUserTelegramId(telegramId: number, authorizationCode: string) {
-    const result = await this.dataSource
-      .createQueryBuilder()
-      .update(TelegramBotSubscriptions)
-      .set({ telegramId })
-      .where({ authorizationCode })
-      .execute();
+    try {
+      const result = await this.dataSource
+        .createQueryBuilder()
+        .update(TelegramBotSubscriptions)
+        .set({ telegramId })
+        .where({ authorizationCode })
+        .execute();
 
-    return result.affected !== 1;
+      return result.affected !== 1;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async getBlogSubscribers(blogId: string) {
-    const query = `
+    try {
+      const query = `
             SELECT ts."telegramId"
-              FROM blog_subscription bs
-              JOIN telegram_bot_subscriptions ts
+              FROM telegram_bot_subscriptions ts
+              JOIN blog_subscription bs
                 ON ts."userId" = bs."userId"
-             WHERE bs."blogId" = $1 AND bs."isActive" = true; 
+             WHERE bs."blogId" = $1 AND bs."isActive" = '${SubscriptionStatus.Subscribed}'; 
         `;
-    return await this.dataSource.query(query, [blogId]);
+      return await this.dataSource.query(query, [blogId]);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async blogAndTelegramSubscriptionExists(

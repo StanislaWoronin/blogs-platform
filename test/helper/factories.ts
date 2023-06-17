@@ -138,7 +138,7 @@ export class Factories {
         .auth(accessToken, { type: 'bearer' })
         .send(inputBlogData);
 
-      blogs.push(response.body);
+      blogs.push(response.body, response.status);
     }
 
     return blogs;
