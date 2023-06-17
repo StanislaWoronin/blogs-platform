@@ -13,7 +13,7 @@ import { CreatedBlogModel, ViewBlogModel } from '../../api/dto/blogView.model';
 import { IQueryBlogsRepository } from '../i-query-blogs.repository';
 import { ImageType } from '../../../../blogger/imageType';
 import { BlogImagesInfo } from '../../../../blogger/api/views';
-import {SubscriptionStatus} from "../../../../integrations/subscription-status.enum";
+import { SubscriptionStatus } from '../../../../integrations/subscription-status.enum';
 
 @Injectable()
 export class PgQueryBlogsRepository {
@@ -24,37 +24,78 @@ export class PgQueryBlogsRepository {
     userId?: string,
   ): Promise<ContentPageModel> {
     try {
-      const filter = this.getFilter(userId, queryDto);
+      const filter = `
+        ${this.searchNameFilter(queryDto)} 
+        AND NOT EXISTS (SELECT 1
+                          FROM public.banned_blog)
+        AND NOT EXISTS (SELECT 1
+                          FROM user_ban_info
+                         WHERE "userId" = b."userId" AND "banStatus" = true)
+      `;
+
+      const subscriptionStatusFilter = this.subscriptionStatusFilter(userId);
+      //  const query = `
+      //        SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
+      // (
+      //      SELECT JSON_BUILD_OBJECT(
+      //        'wallpaper', (
+      //          SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+      //          FROM blog_image
+      //          WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
+      //        ),
+      //        'main', (
+      //          SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+      //          FROM blog_image
+      //          WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
+      //        )
+      //      )
+      //    ) AS images
+      //    FROM public.blogs b
+      //   WHERE  NOT EXISTS (SELECT "blogId"
+      //                        FROM public.banned_blog
+      //                       WHERE banned_blog."blogId" = b.id)
+      //                         AND (SELECT "banStatus"
+      //                                FROM user_ban_info
+      //                               WHERE user_ban_info."userId" = b."userId") != true
+      //               ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+      //               LIMIT $1 OFFSET ${giveSkipNumber(
+      //                 queryDto.pageNumber,
+      //                 queryDto.pageSize,
+      //               )};
+      //    `;
 
       const query = `
-            SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
-	   (
-          SELECT JSON_BUILD_OBJECT(
-            'wallpaper', (
-              SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
-              FROM blog_image
-              WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
-            ),
-            'main', (
-              SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
-              FROM blog_image
-              WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
-            )
-          )
-        ) AS images
-        FROM public.blogs b	 
-       WHERE  NOT EXISTS (SELECT "blogId" 
-                            FROM public.banned_blog
-                           WHERE banned_blog."blogId" = b.id)
-                             AND (SELECT "banStatus"
-                                    FROM user_ban_info 
-                                   WHERE user_ban_info."userId" = b."userId") != true
-                   ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
-                   LIMIT $1 OFFSET ${giveSkipNumber(
-                     queryDto.pageNumber,
-                     queryDto.pageSize,
-                   )};
-        `;
+        SELECT b.id, b.name, b.description, b."websiteUrl", b."createdAt", b."isMembership", 
+               (SELECT JSON_BUILD_OBJECT('wallpaper', (
+                       SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+                         FROM blog_image
+                        WHERE "imageType" = '${
+                          ImageType.Wallpaper
+                        }' AND "blogId" = b.id
+               ),
+               'main', (
+                       SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+                         FROM blog_image
+                        WHERE "imageType" = '${
+                          ImageType.Main
+                        }' AND "blogId" = b.id
+               ))) AS images,
+               (${subscriptionStatusFilter}) AS "currentUserSubscriptionStatus",
+               (SELECT COUNT(*)::integer AS count
+                  FROM blog_subscription
+                 WHERE "blogId" = b.id AND "isActive" = 'Subscribed'
+               ) AS "subscribersCount"
+          FROM blogs b
+          LEFT JOIN blog_subscription bs ON b.id = bs."blogId"
+         WHERE ${filter} 
+         GROUP BY b.id
+         ORDER BY "${queryDto.sortBy}" ${queryDto.sortDirection}
+         LIMIT $1 OFFSET ${giveSkipNumber(
+           queryDto.pageNumber,
+           queryDto.pageSize,
+         )};
+      `;
+
       const blogs = await this.dataSource.query(query, [queryDto.pageSize]);
       const blogWithAbsoluteUrl = blogs.map((b) =>
         ViewBlogModel.relativeToAbsoluteUrl(b),
@@ -62,8 +103,8 @@ export class PgQueryBlogsRepository {
 
       const totalCountQuery = `
           SELECT COUNT(id)
-            FROM public.blogs
-           WHERE ${filter}
+            FROM blogs b
+           WHERE ${filter} 
         `;
       const totalCount = await this.dataSource.query(totalCountQuery);
 
@@ -121,62 +162,76 @@ export class PgQueryBlogsRepository {
   }
 
   async getBlog(blogId: string, userId?: string) {
-    let filter = `SELECT '${SubscriptionStatus.None}'`
-    if (userId) {
-      filter = `
-		CASE
-          WHEN EXISTS (
-            SELECT 1
-              FROM blog_subscription
-             WHERE "userId" = '${userId}' AND "blogId" = $1
-          ) THEN (
-            SELECT "isActive" 
-		      FROM blog_subscription
-		     WHERE "userId" = '${userId}' AND "blogId" = $1        
-          ) ELSE 'None' 
-        END  
-      `
-    }
-    const query = `
-      SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
-            (
-              SELECT JSON_BUILD_OBJECT(
-                'wallpaper', (
-                  SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
-                   FROM blog_image
-                  WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
-                ),
-                'main', (
-                  SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
-                   FROM blog_image
-                  WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
-                )
-              )
-            ) AS images,
-			(
-			  ${filter}
-			) AS "currentUserSubscriptionStatus",
-			(
-			  SELECT COUNT(*)::integer AS count
-				FROM blog_subscription
-			   WHERE "blogId" = $1
-			) AS "subscribersCount"
-              FROM public.blogs b
-             WHERE id = $1 
-               AND NOT EXISTS (SELECT "blogId"
-              FROM public.banned_blog
-             WHERE "blogId" = $1)
-               AND (SELECT "banStatus"
-              FROM user_ban_info 
-             WHERE user_ban_info."userId" = b."userId") != true;
-        `;
-    const result = await this.dataSource.query(query, [blogId]);
+    const filter = this.subscriptionStatusFilter(userId);
+    // const query = `
+    //   SELECT id, name, description, "websiteUrl", "createdAt", "isMembership",
+    //         (
+    //           SELECT JSON_BUILD_OBJECT(
+    //             'wallpaper', (
+    //               SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+    //                FROM blog_image
+    //               WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
+    //             ),
+    //             'main', (
+    //               SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+    //                FROM blog_image
+    //               WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
+    //             )
+    //           )
+    //         ) AS images,
+    // 	(
+    // 	  ${filter}
+    // 	) AS "currentUserSubscriptionStatus",
+    // 	(
+    // 	  SELECT COUNT(*)::integer AS count
+    // 		FROM blog_subscription
+    // 	   WHERE "blogId" = $1 AND "currentUserSubscriptionStatus" = '${SubscriptionStatus.Subscribed}'
+    // 	) AS "subscribersCount"
+    //           FROM public.blogs b
+    //          WHERE id = $1
+    //            AND NOT EXISTS (SELECT "blogId"
+    //           FROM public.banned_blog
+    //          WHERE "blogId" = $1)
+    //            AND (SELECT "banStatus"
+    //           FROM user_ban_info
+    //          WHERE user_ban_info."userId" = b."userId") != true;
+    //     `;
 
-    if (!result.length) {
+    const query = `
+      SELECT b.id, b.name, b.description, b."websiteUrl", b."createdAt", b."isMembership",
+             (SELECT JSON_BUILD_OBJECT('wallpaper', 
+                     (SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
+                        FROM blog_image
+                       WHERE "imageType" = '${ImageType.Wallpaper}' AND "blogId" = b.id
+                     ),
+                     'main',
+                    (SELECT COALESCE(JSON_AGG(JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")), '[]')
+                       FROM blog_image
+                      WHERE "imageType" = '${ImageType.Main}' AND "blogId" = b.id
+             ))) AS images,
+             (${filter}) AS "currentUserSubscriptionStatus",
+             (SELECT COUNT(*)::integer AS count
+                FROM blog_subscription
+               WHERE "blogId" = $1 AND "isActive" = 'Subscribed'
+             ) AS "subscribersCount"
+        FROM public.blogs b
+        LEFT JOIN blog_subscription bs ON b.id = bs."blogId"
+       WHERE b.id = $1
+         AND NOT EXISTS (SELECT 1
+                           FROM public.banned_blog
+                          WHERE "blogId" = b.id
+         ) AND NOT EXISTS (SELECT 1
+                             FROM user_ban_info
+                            WHERE "userId" = b."userId" AND "banStatus" = true
+         )
+     	 GROUP BY b.id;
+    `;
+    const [result] = await this.dataSource.query(query, [blogId]);
+    if (!result) {
       return null;
     }
 
-    return ViewBlogModel.relativeToAbsoluteUrl(result[0]);
+    return ViewBlogModel.relativeToAbsoluteUrl(result);
   }
 
   async blogExist(blogId: string): Promise<string | null> {
@@ -230,5 +285,25 @@ export class PgQueryBlogsRepository {
 
     if (name) return name;
     return '';
+  }
+
+  private subscriptionStatusFilter(userId?: string) {
+    let filter = `SELECT '${SubscriptionStatus.UnSubscribed}'`;
+    if (userId) {
+      filter = `
+		    CASE
+          WHEN EXISTS (
+            SELECT 1
+              FROM blog_subscription 
+             WHERE "userId" = '${userId}' AND "blogId" = b.id
+          ) THEN (
+            SELECT "isActive" 
+		      FROM blog_subscription 
+		     WHERE "userId" = '${userId}' AND "blogId" = b.id        
+          ) ELSE '${SubscriptionStatus.UnSubscribed}' 
+        END  
+      `;
+    }
+    return filter;
   }
 }

@@ -6,15 +6,22 @@ export class Blogs {
 
   async getBlogById(blogId: string, accessToken?: string) {
     const url = getUrlWithId(endpoints.blogController, blogId);
-    let response
+    let response;
     if (!accessToken) {
-      response = await request(this.server)
-          .get(url)
+      response = await request(this.server).get(url);
     } else {
       response = await request(this.server)
-          .get(url)
-          .auth(accessToken, { type: 'bearer' });
+        .get(url)
+        .auth(accessToken, { type: 'bearer' });
     }
+
+    return { status: response.status, body: response.body };
+  }
+
+  async getBlogs(accessToken?: string) {
+    const response = await request(this.server)
+      .get(endpoints.blogController)
+      .auth(accessToken, { type: 'bearer' });
 
     return { status: response.status, body: response.body };
   }
@@ -25,5 +32,16 @@ export class Blogs {
       .auth(accessToken, { type: 'bearer' });
 
     return { status: response.status, body: response.body };
+  }
+
+  async updateSubscribeStatus(
+    blogId: string,
+    accessToken?: string,
+  ): Promise<number> {
+    const response = await request(this.server)
+      .delete(`/blogs/${blogId}/subscription`)
+      .auth(accessToken, { type: 'bearer' });
+
+    return response.status;
   }
 }

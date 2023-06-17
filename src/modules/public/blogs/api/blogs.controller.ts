@@ -33,12 +33,14 @@ export class BlogsController {
   ) {}
 
   @Get()
+  @UseGuards(AccessTokenValidationGuard)
   async getBlogs(
     @Query()
     query: QueryParametersDto,
+    @User() user: UserDBModel,
   ) {
     try {
-      return await this.queryBlogsRepository.getBlogs(query);
+      return await this.queryBlogsRepository.getBlogs(query, user?.id);
     } catch (e) {
       console.log(e);
     }
@@ -46,8 +48,7 @@ export class BlogsController {
 
   @Get(':id')
   @UseGuards(AccessTokenValidationGuard)
-  async getBlogById(@Param('id') blogId: string,  @User() user: UserDBModel) {
-
+  async getBlogById(@Param('id') blogId: string, @User() user: UserDBModel) {
     const blog = await this.queryBlogsRepository.getBlog(blogId, user?.id);
 
     if (!blog) {
@@ -89,6 +90,7 @@ export class BlogsController {
   }
 
   @Delete(':blogId/subscription')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthBearerGuard)
   async unsubscribeToBlog(
     @Param('blogId') blogId: string,

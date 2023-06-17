@@ -1,7 +1,13 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn,} from 'typeorm';
-import {Blogs} from './blogs.entity';
-import {Users} from '../../../../super-admin/infrastructure/entity/users.entity';
-import {SubscriptionStatus} from "../../../../integrations/subscription-status.enum";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Blogs } from './blogs.entity';
+import { Users } from '../../../../super-admin/infrastructure/entity/users.entity';
+import { SubscriptionStatus } from '../../../../integrations/subscription-status.enum';
 
 @Entity()
 export class BlogSubscription {

@@ -7,9 +7,8 @@ import { createApp } from '../src/helpers/create-app';
 import { TEST } from './request/test';
 import { settings } from '../src/settings';
 import { randomUUID } from 'crypto';
-import { monthsBetweenDates } from '../src/helper.functions';
 import { Currency } from '../src/modules/blogger/api/views/currency';
-import {SubscriptionStatus} from "../src/modules/integrations/subscription-status.enum";
+import { SubscriptionStatus } from '../src/modules/integrations/subscription-status.enum';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -18,6 +17,7 @@ describe('e2e tests', () => {
   let app: INestApplication;
   let server;
   let test: TEST;
+  //let testRepo: ITestingRepository
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -32,6 +32,7 @@ describe('e2e tests', () => {
     await app.init();
     server = await app.getHttpServer();
     test = new TEST(server);
+    //testRepo = app.get(ITestingRepository)
   });
 
   afterAll(async () => {
@@ -40,7 +41,8 @@ describe('e2e tests', () => {
 
   describe('Subscribe to telegram', () => {
     it('Clear data base', async () => {
-      await test.testing().clearDb();
+      const res = await test.testing().clearDb();
+      expect(res).toBe(204);
     });
 
     it('Create data', async () => {
@@ -173,15 +175,16 @@ describe('e2e tests', () => {
       await test
         .factories()
         .createMembership(fistBlogSB.id, 1, membershipCount + 3);
-      await test
+      const [subscriber] = await test
         .factories()
         .createMembership(secondBlogSB.id, 1, membershipCount + 4);
-
+      console.log(subscriber);
       expect.setState({
         accessToken: fistBlogger.accessToken,
         blog: fistBlogFB,
         blogId: fistBlogFB.id,
         membership,
+        subscriber,
       });
     });
 
@@ -269,8 +272,10 @@ describe('e2e tests', () => {
     it('Public get blog by id by subscriber', async () => {
       const { blog, blogId, membership } = expect.getState();
 
-      const response = await test.blogs().getBlogById(blogId, membership[0].accessToken)
-      expect(response.status).toBe(HttpStatus.OK)
+      const response = await test
+        .blogs()
+        .getBlogById(blogId, membership[0].accessToken);
+      expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toStrictEqual({
         id: blog.id,
         name: blog.name,
@@ -281,14 +286,14 @@ describe('e2e tests', () => {
         images: blog.images,
         currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
         subscribersCount: 5,
-      })
-    })
+      });
+    });
 
     it('Public get blog by id unauthorized user', async () => {
       const { blog, blogId } = expect.getState();
 
-      const response = await test.blogs().getBlogById(blogId)
-      expect(response.status).toBe(HttpStatus.OK)
+      const response = await test.blogs().getBlogById(blogId);
+      expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toStrictEqual({
         id: blog.id,
         name: blog.name,
@@ -297,9 +302,214 @@ describe('e2e tests', () => {
         isMembership: blog.isMembership,
         createdAt: blog.createdAt,
         images: blog.images,
-        currentUserSubscriptionStatus: SubscriptionStatus.None,
+        currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
         subscribersCount: 5,
-      })
-    })
+      });
+    });
+
+    it(`Get blogs`, async () => {
+      const response = await test.blogs().getBlogs();
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toStrictEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 4,
+        items: [
+          {
+            id: expect.any(String),
+            name: 'name3',
+            description: 'description3',
+            websiteUrl: 'websiteUrl3.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 1,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+          {
+            id: expect.any(String),
+            name: 'name2',
+            description: 'description2',
+            websiteUrl: 'websiteUrl2.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 1,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+          {
+            id: expect.any(String),
+            name: 'name1',
+            description: 'description1',
+            websiteUrl: 'websiteUrl1.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 1,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+          {
+            id: expect.any(String),
+            name: 'name0',
+            description: 'description0',
+            websiteUrl: 'websiteUrl0.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 5,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+        ],
+      });
+    });
+
+    it(`Get blogs by authorisation user`, async () => {
+      const { subscriber } = expect.getState();
+
+      const response = await test.blogs().getBlogs(subscriber.accessToken);
+      console.log(response.body);
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toStrictEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 4,
+        items: [
+          {
+            id: expect.any(String),
+            name: 'name3',
+            description: 'description3',
+            websiteUrl: 'websiteUrl3.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
+            subscribersCount: 1,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+          {
+            id: expect.any(String),
+            name: 'name2',
+            description: 'description2',
+            websiteUrl: 'websiteUrl2.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 1,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+          {
+            id: expect.any(String),
+            name: 'name1',
+            description: 'description1',
+            websiteUrl: 'websiteUrl1.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 1,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+          {
+            id: expect.any(String),
+            name: 'name0',
+            description: 'description0',
+            websiteUrl: 'websiteUrl0.com',
+            isMembership: false,
+            createdAt: expect.any(String),
+            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            subscribersCount: 5,
+            images: {
+              wallpaper: null,
+              main: [],
+            },
+          },
+        ],
+      });
+    });
+  });
+
+  describe('Update subscribe status', () => {
+    it('Clear data base', async () => {
+      const res = await test.testing().clearDb();
+    });
+
+    it('Create data', async () => {
+      const [blogger, user] = await test.factories().createAndLoginUsers(2);
+      const [blog] = await test.factories().createBlogs(blogger.accessToken, 1);
+      await test.blogs().subscribeToBlog(blog.id, user.accessToken);
+
+      expect.setState({
+        user,
+        accessToken: user.accessToken,
+        blog: blog,
+        blogId: blog.id,
+      });
+    });
+
+    it('User try unsubscribe, 404', async () => {
+      const { accessToken } = expect.getState();
+      const randomBlogId = randomUUID();
+
+      const response = await test
+        .blogs()
+        .updateSubscribeStatus(randomBlogId, accessToken);
+      expect(response).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it('User try unsubscribe, 401', async () => {
+      const { blogId } = expect.getState();
+
+      const response = await test.blogs().updateSubscribeStatus(blogId);
+      expect(response).toBe(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('User should unsubscribe, 204', async () => {
+      const { accessToken, blogId } = expect.getState();
+
+      const response = await test
+        .blogs()
+        .updateSubscribeStatus(blogId, accessToken);
+      expect(response).toBe(HttpStatus.NO_CONTENT);
+    });
+
+    it('Get blog authoritative user after unsubscribe', async () => {
+      const { accessToken, blog, blogId } = expect.getState();
+
+      const response = await test.blogs().getBlogById(blogId, accessToken);
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toStrictEqual({
+        id: blog.id,
+        name: blog.name,
+        description: blog.description,
+        websiteUrl: blog.websiteUrl,
+        isMembership: blog.isMembership,
+        createdAt: blog.createdAt,
+        images: blog.images,
+        currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+        subscribersCount: 0,
+      });
+    });
   });
 });

@@ -13,10 +13,11 @@ export class SubscribeToBlogUseCase {
   ) {}
 
   async execute(userId: string, blogId: string): Promise<boolean> {
-    const isExists = await this.integrationRepository.blogAndSubscriptionExists(
-      userId,
-      blogId,
-    );
+    const isExists =
+      await this.integrationRepository.blogAndTelegramSubscriptionExists(
+        userId,
+        blogId,
+      );
 
     if (!isExists.blogName) throw new NotFoundException();
     if (!!isExists.subscriptionExists) return true;

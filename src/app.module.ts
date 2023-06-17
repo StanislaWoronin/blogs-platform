@@ -78,8 +78,8 @@ import { IntegrationRepository } from './modules/integrations/infrastructure/int
 import { TelegramBotSubscriptions } from './modules/integrations/infrastructure/entity/telegram-bot-subscriptions.entity';
 import { CreateNewBotSubscriptionUseCase } from './modules/integrations/use-cases/create-new-bot-subscription.use-case';
 import { SetUserTelegramIdUseCase } from './modules/integrations/use-cases/set-user-telegram-id.use-case';
-import {APP_INTERCEPTOR} from "@nestjs/core";
-import {LoggingInterceptor} from "./helpers/logging.interceptor";
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './helpers/logging.interceptor';
 
 const controllers = [
   AuthController,

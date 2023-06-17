@@ -1,43 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BlogSubscription } from '../infrastructure/entity/blog-subscription.entity';
+import { IntegrationRepository } from '../../../integrations/infrastructure/integration.repository';
 
 @Injectable()
 export class UnsubscribeToBlogUseCase {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private integrationRepository: IntegrationRepository,
+  ) {}
 
   async execute(userId: string, blogId: string): Promise<boolean> {
-    const isExists = await this.dataSource.query(
-      `
-            SELECT
-                CASE WHEN EXISTS (
-                    SELECT 1
-                      FROM blogs
-                     WHERE "blogId" = $2
-                ) THEN 0 ELSE 1 END AS "blogExists",
-                CASE WHEN EXISTS (
-                    SELECT 1
-                      FROM blog_subscription
-                     WHERE "userId" = $1 AND "blogId" = $2
-                ) THEN 0 ELSE 1 END AS "subscriptionExists"
-        `,
-      [userId, blogId],
-    );
-    // в квери выше нужна инверсия значений, если не сделать ее,
-    // то в проверке ниже при существованиии блога мы получим 404
-    if (!!isExists.blogExists) throw NotFoundException;
-    if (!!isExists.subscriptionExists) return true;
-
-    const response = await this.dataSource
-      .createQueryBuilder()
-      .update(BlogSubscription)
-      .set({ isActive: false })
-      .where({
+    const isExists =
+      await this.integrationRepository.blogAndBlogSubscriptionExists(
         userId,
         blogId,
-      })
-      .execute();
+      );
 
-    return response.affected !== 1;
+    if (!!isExists.blogExists) throw new NotFoundException();
+    if (!!isExists.subscriptionExists) return true;
+
+    return await this.integrationRepository.updateSubscribeStatus(
+      userId,
+      blogId,
+    );
   }
 }
