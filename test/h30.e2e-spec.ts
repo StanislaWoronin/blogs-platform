@@ -302,7 +302,7 @@ describe('e2e tests', () => {
         isMembership: blog.isMembership,
         createdAt: blog.createdAt,
         images: blog.images,
-        currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+        currentUserSubscriptionStatus: SubscriptionStatus.None,
         subscribersCount: 5,
       });
     });
@@ -324,7 +324,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl3.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 1,
             images: {
               wallpaper: null,
@@ -338,7 +338,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl2.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 1,
             images: {
               wallpaper: null,
@@ -352,7 +352,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl1.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 1,
             images: {
               wallpaper: null,
@@ -366,7 +366,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl0.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 5,
             images: {
               wallpaper: null,
@@ -410,7 +410,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl2.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 1,
             images: {
               wallpaper: null,
@@ -424,7 +424,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl1.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 1,
             images: {
               wallpaper: null,
@@ -438,7 +438,7 @@ describe('e2e tests', () => {
             websiteUrl: 'websiteUrl0.com',
             isMembership: false,
             createdAt: expect.any(String),
-            currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
+            currentUserSubscriptionStatus: SubscriptionStatus.None,
             subscribersCount: 5,
             images: {
               wallpaper: null,
@@ -510,6 +510,35 @@ describe('e2e tests', () => {
         currentUserSubscriptionStatus: SubscriptionStatus.UnSubscribed,
         subscribersCount: 0,
       });
+    });
+  });
+
+  describe('Try get telegram link after subscribe to blog', () => {
+    it('Clear data base', async () => {
+      const res = await test.testing().clearDb();
+    });
+
+    it('Create data', async () => {
+      const [blogger, firstUser, secondUser] = await test
+        .factories()
+        .createAndLoginUsers(3);
+      const [blog] = await test.factories().createBlogs(blogger.accessToken, 1);
+      await test.blogs().subscribeToBlog(blog.id, firstUser.accessToken);
+
+      expect.setState({
+        firstUser,
+        secondUser,
+        blog: blog,
+      });
+    });
+
+    it('Try get telegram link after subscribe to blog', async () => {
+      const { firstUser } = expect.getState();
+      const response = await test
+        .integration()
+        .getTelegramInviteLink(firstUser.accessToken);
+      expect(response.status).toBe(HttpStatus.OK);
+      console.log(response.body);
     });
   });
 });

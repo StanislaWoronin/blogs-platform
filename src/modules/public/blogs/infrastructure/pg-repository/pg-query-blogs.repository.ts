@@ -288,7 +288,7 @@ export class PgQueryBlogsRepository {
   }
 
   private subscriptionStatusFilter(userId?: string) {
-    let filter = `SELECT '${SubscriptionStatus.UnSubscribed}'`;
+    let filter = `SELECT '${SubscriptionStatus.None}'`;
     if (userId) {
       filter = `
 		    CASE
@@ -300,7 +300,7 @@ export class PgQueryBlogsRepository {
             SELECT "isActive" 
 		      FROM blog_subscription 
 		     WHERE "userId" = '${userId}' AND "blogId" = b.id        
-          ) ELSE '${SubscriptionStatus.UnSubscribed}' 
+          ) ELSE '${SubscriptionStatus.None}' 
         END  
       `;
     }
