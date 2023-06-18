@@ -59,6 +59,7 @@
     "sharp": "^0.32.1",
     "telegraf": "^4.12.2",
     "telegraf-session-local": "^2.1.1",
+    "telegram-test-api": "^4.2.1",
     "typeorm": "^0.3.11",
     "user-agents": "^1.0.1209",
     "uuid": "^9.0.0"

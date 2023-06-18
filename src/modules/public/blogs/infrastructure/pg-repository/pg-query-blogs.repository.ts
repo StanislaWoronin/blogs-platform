@@ -65,7 +65,7 @@ export class PgQueryBlogsRepository {
       //    `;
 
       const query = `
-        SELECT b.id, b.name, b.description, b."websiteUrl", b."createdAt", b."isMembership", 
+        SELECT b.id, b.name, b."websiteUrl", b."createdAt", b."isMembership", 
                (SELECT JSON_BUILD_OBJECT('wallpaper', (
                        SELECT JSON_BUILD_OBJECT('url', url, 'width', width, 'height', height, 'fileSize', "fileSize")
                          FROM blog_image

@@ -10,6 +10,10 @@ import { randomUUID } from 'crypto';
 import { Currency } from '../src/modules/blogger/api/views/currency';
 import { SubscriptionStatus } from '../src/modules/integrations/subscription-status.enum';
 import { sleep } from './helper/helpers';
+// import TelegramServer from 'telegram-test-api';
+//
+// import TelegramBot from 'node-telegram-bot-api';
+// import { TestBot } from './bot/test-bot';
 
 describe('e2e tests', () => {
   const second = 1000;
@@ -19,6 +23,10 @@ describe('e2e tests', () => {
   let server;
   let test: TEST;
   //let testRepo: ITestingRepository
+  let serverConfig;
+  const token = settings.telegram.botToken;
+  let telegramServer;
+  let client;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -34,6 +42,12 @@ describe('e2e tests', () => {
     server = await app.getHttpServer();
     test = new TEST(server);
     //testRepo = app.get(ITestingRepository)
+
+    // serverConfig = { port: settings.PORT };
+    // telegramServer = new TelegramServer(serverConfig);
+    // return telegramServer.start().then(() => {
+    //   client = telegramServer.getClient(token);
+    // });
   });
 
   afterAll(async () => {
@@ -179,7 +193,7 @@ describe('e2e tests', () => {
       const [subscriber] = await test
         .factories()
         .createMembership(secondBlogSB.id, 1, membershipCount + 4);
-      console.log(subscriber);
+
       expect.setState({
         accessToken: fistBlogger.accessToken,
         blog: fistBlogFB,
@@ -382,7 +396,6 @@ describe('e2e tests', () => {
       const { subscriber } = expect.getState();
 
       const response = await test.blogs().getBlogs(subscriber.accessToken);
-      console.log(response.body);
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body).toStrictEqual({
         pagesCount: 1,
@@ -543,26 +556,46 @@ describe('e2e tests', () => {
         .getTelegramInviteLink(firstUser.accessToken);
       expect(response.status).toBe(HttpStatus.OK);
       console.log(response.body);
+      const [code] = response.body.link.split('?')[1];
+
+      // const message = client.makeMessage(`/start ${code}`);
+      // await client.sendMessage(message);
+      // console.log(server.config.apiURL);
+      // const botOptions = { polling: true, baseApiUrl: server.config.apiURL };
+      // const telegramBot = new TelegramBot(token, botOptions);
+      // const testBot = new TestBot(telegramBot);
+      // const updates = await client.getUpdates();
+      // console.log(updates);
     });
   });
 
-  describe('De', () => {
+  describe('Create post', () => {
     it('it', async () => {
       const AT =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3NDM0NDliNi0xNzE5LTQwOTAtOGI3Ni05YjJjNjg2NWZjMGYiLCJkZXZpY2VJZCI6ImE4NmIwN2ZjLWY4MzMtNGU0YS04NTI1LWE0NzEwNzc4Y2I0NCIsImlhdCI6MTY4NzAzNzU4MiwiZXhwIjoxMTY4NzAzNzU4Mn0.ymf9tVGTAYtxghribFwysEqtYZiFl9J1MdFF_aom-O8';
-      const blogId = 'a9baf639-5a37-4c42-8ee9-5a65677dd4d6';
-      const [blog] = await test.factories().createPostsForBlog(AT, blogId, 1);
-      console.log(blog);
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3Mzc4NzMxYS0yYjU4LTQxYWQtOGYyYS0wODliNmI1YzczODMiLCJkZXZpY2VJZCI6ImI4MDk1NDA1LThjNmEtNDhjMy1hYTU3LWFiYjg1NjM2YjQwZSIsImlhdCI6MTY4NzEwNjYzMiwiZXhwIjoxMTY4NzEwNjYzMn0.Nr-ip8nh9GBA874jBgrjSd83LS3ayH25AH-YvZVFbbo';
+      const blogId = '58162b1c-ec95-4792-b741-ab9095851187';
+      const [post] = await test.factories().createPostsForBlog(AT, blogId, 1);
+      console.log(post);
     });
   });
 
-  describe('dsa', () => {
+  describe('Unsabscribe', () => {
     it('wqe', async () => {
       const AT =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MWM2Y2VkOS1lMDU2LTRjMjctYTExNC0wNGFiMjg5YWRkYWYiLCJkZXZpY2VJZCI6ImZjYjI3ZGY0LWQwY2YtNDc5Ny1hMTM4LTIwYjQ5OGNjNGM1YSIsImlhdCI6MTY4NzAzNzU4MiwiZXhwIjoxMTY4NzAzNzU4Mn0.I5S1pCC2eAOH1M5T1xkJlGHighNKq33WiJJOWBFT0Ao';
-      const blogId = 'a9baf639-5a37-4c42-8ee9-5a65677dd4d6';
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MDNmMDQzYy1mMDhhLTQxODQtOGViMS0yZjNkNjIxM2E0NTkiLCJkZXZpY2VJZCI6ImY0ZTAyY2Q2LTg5ZjEtNDdiYi1iOWY5LTY4MzcyOTk3MTY2ZiIsImlhdCI6MTY4NzEwNjYzMiwiZXhwIjoxMTY4NzEwNjYzMn0.WtDBg-60O7WOGno9_-m3e4ZKetPSEGqmdEIfXfapo9Q';
+      const blogId = '58162b1c-ec95-4792-b741-ab9095851187';
       const res = await test.blogs().updateSubscribeStatus(blogId, AT);
       console.log(res);
+    });
+  });
+
+  describe('Create new post', () => {
+    it('it', async () => {
+      const AT =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3Mzc4NzMxYS0yYjU4LTQxYWQtOGYyYS0wODliNmI1YzczODMiLCJkZXZpY2VJZCI6ImI4MDk1NDA1LThjNmEtNDhjMy1hYTU3LWFiYjg1NjM2YjQwZSIsImlhdCI6MTY4NzEwNjYzMiwiZXhwIjoxMTY4NzEwNjYzMn0.Nr-ip8nh9GBA874jBgrjSd83LS3ayH25AH-YvZVFbbo';
+      const blogId = '58162b1c-ec95-4792-b741-ab9095851187';
+      const [post] = await test.factories().createPostsForBlog(AT, blogId, 1);
+      console.log(post);
     });
   });
 });

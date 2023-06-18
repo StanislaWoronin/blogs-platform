@@ -208,6 +208,7 @@ export class Factories {
         .post(url)
         .auth(accessToken, { type: 'bearer' })
         .send(inputPostData);
+
       posts.push(response.body);
     }
 

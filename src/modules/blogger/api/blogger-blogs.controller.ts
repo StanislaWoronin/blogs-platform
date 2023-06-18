@@ -54,10 +54,7 @@ export class BloggerBlogsController {
 
   @Post()
   @HttpCode(201)
-  async createBlog(
-    @Body() dto: BlogDto,
-    @User() user: UserDBModel,
-  ): Promise<BlogViewModel> {
+  async createBlog(@Body() dto: BlogDto, @User() user: UserDBModel) {
     const createdBlog = await this.blogsService.createBlog(user.id, dto);
 
     if (!createdBlog) {

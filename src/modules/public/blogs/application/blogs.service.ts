@@ -4,6 +4,7 @@ import { BlogDto } from '../../../blogger/api/dto/blog.dto';
 import { BlogDBModel } from '../infrastructure/entity/blog-db.model';
 import { v4 as uuidv4 } from 'uuid';
 import { IBlogsRepository } from '../infrastructure/i-blogs.repository';
+import { SubscriptionStatus } from '../../../integrations/subscription-status.enum';
 
 @Injectable()
 export class BlogsService {
@@ -11,10 +12,7 @@ export class BlogsService {
     @Inject(IBlogsRepository) protected blogsRepository: IBlogsRepository,
   ) {}
 
-  async createBlog(
-    userId: string,
-    inputModel: BlogDto,
-  ): Promise<BlogViewModel | null> {
+  async createBlog(userId: string, inputModel: BlogDto) {
     const newBlog = new BlogDBModel(
       uuidv4(),
       inputModel.name,
@@ -24,8 +22,17 @@ export class BlogsService {
       userId,
       false,
     );
-
-    return await this.blogsRepository.createBlog(newBlog);
+    const blog = await this.blogsRepository.createBlog(newBlog);
+    return {
+      id: blog.id,
+      name: blog.name,
+      websiteUrl: blog.websiteUrl,
+      createdAt: blog.createdAt,
+      isMembership: blog.isMembership,
+      images: blog.images,
+      currentUserSubscriptionStatus: SubscriptionStatus.None,
+      subscribersCount: 0,
+    };
   }
 
   async updateBlog(blogId: string, dto: BlogDto): Promise<boolean> {
